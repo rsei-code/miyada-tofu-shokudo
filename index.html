@@ -590,18 +590,37 @@ async function ensureEmployeeMasterSeeded(){
     const existing = await getEmployeeMaster();
     const existingIds = new Set(existing.map(e=>String(e.id)));
     const toAdd = SEED_EMPLOYEE_MASTER.filter(e=>!existingIds.has(String(e.id)));
-    if(toAdd.length>0){
-      const merged = existing.concat(toAdd);
-      await setSetting('employeeMaster', JSON.stringify(merged));
+    for(const e of toAdd){
+      await kvRequest('kvSet', {key:'master:'+e.id, value: JSON.stringify(e)});
     }
   }catch(e){ /* best-effort seeding only */ }
 }
 
 async function getEmployeeMaster(){
   try{
-    const raw = await getSetting('employeeMaster');
-    return raw ? JSON.parse(raw) : [];
+    const r = await kvRequest('kvGetByPrefix', {prefix:'master:'});
+    const items = (r && r.items) || [];
+    const out = [];
+    for(const item of items){
+      try{ out.push(JSON.parse(item.value)); }catch(e){}
+    }
+    return out;
   }catch(e){ return []; }
+}
+// 従業員マスタを1人分ずつ小さいキーで保存し直す（大きな1つの値だとURLが長くなりすぎて通信が失敗するため）
+async function setEmployeeMaster(list){
+  const existing = await getEmployeeMaster();
+  const existingIds = new Set(existing.map(e=>String(e.id)));
+  const newIds = new Set(list.map(e=>String(e.id)));
+  // 削除された人を消す
+  for(const id of existingIds){
+    if(!newIds.has(id)) await kvRequest('kvDelete', {key:'master:'+id});
+  }
+  // 追加・更新
+  for(const e of list){
+    await kvRequest('kvSet', {key:'master:'+e.id, value: JSON.stringify(e)});
+  }
+  return true;
 }
 async function getSpecialPriceDays(){
   try{
@@ -1476,7 +1495,7 @@ async function renderAdminSettings(vp){
           }
           parsed.push({id, name, mealType});
         }
-        await setSetting('employeeMaster', JSON.stringify(parsed));
+        await setEmployeeMaster(parsed);
         state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', parsed.length), ok:true};
         draw();
         setTimeout(()=>{ state.employeeMasterMsg=null; draw(); },3000);
@@ -1490,7 +1509,8 @@ function escapeHtml(s){
   return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-Promise.all([loadEmpProfile(), ensureEmployeeMasterSeeded()]).then(render);
+loadEmpProfile().then(render);
+ensureEmployeeMasterSeeded(); // バックグラウンドで実行（表示をブロックしない）
 </script>
 </body>
 </html>
