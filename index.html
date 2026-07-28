@@ -699,15 +699,15 @@ function render(){
         <h1>${t.title}</h1>
       </div>
       <div class="masthead-right">
-        <button class="admin-corner-btn" id="admin-entry-link">⚙ ${state.lang==='ja'?'管理者はこちら':'Staff'}</button>
-        <div class="langtoggle" id="langtoggle" style="${(state.view==='admin'||state.view==='adminLogin'||state.view==='adminSettings') ? 'display:none' : ''}">
+        <button class="admin-corner-btn" id="admin-entry-link" style="${(state.view==='admin'||state.view==='adminLogin') ? 'display:none' : ''}">⚙ ${state.lang==='ja'?'管理者はこちら':'Staff'}</button>
+        <div class="langtoggle" id="langtoggle" style="${(state.view==='admin'||state.view==='adminLogin') ? 'display:none' : ''}">
           <button data-lang="ja" class="${state.lang==='ja'?'active':''}">日本語</button>
           <button data-lang="en" class="${state.lang==='en'?'active':''}">English</button>
         </div>
       </div>
     </div>
 
-    ${(state.view==='admin'||state.view==='adminLogin'||state.view==='adminSettings') ? `
+    ${(state.view==='admin'||state.view==='adminLogin') ? `
       <button class="backlink" id="back-to-main">← ${state.lang==='ja'?'フォームに戻る':'Back to form'}</button>
     ` : ''}
 
@@ -725,7 +725,6 @@ function render(){
   if(state.view==='main') vp.innerHTML = '', renderMain(vp);
   else if(state.view==='adminLogin') vp.innerHTML='', renderAdminLogin(vp);
   else if(state.view==='admin') vp.innerHTML='', renderAdmin(vp);
-  else if(state.view==='adminSettings') vp.innerHTML='', renderAdminSettings(vp);
 }
 
 /* ---------- MAIN VIEW (form + my records together) ---------- */
@@ -1135,6 +1134,10 @@ async function renderAdmin(vp){
   vp.innerHTML = `<div class="card"><p class="small">読み込み中…</p></div>`;
   const records = await listAllEmpRecords();
   state.adminAllRecords = records;
+  if(!state.employeeMasterText){
+    const masterForText = await getEmployeeMaster();
+    state.employeeMasterText = masterForText.map(e=>`${e.id},${e.name},${e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':''}`).join('\n');
+  }
   drawAdmin();
 
   function occurrencesForDate(dateStr){
@@ -1190,7 +1193,6 @@ async function renderAdmin(vp){
 
     vp.innerHTML = `
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
-        <button class="btn btn-ghost" id="admin-settings-btn">${t.settingsBtn}</button>
         <button class="btn btn-ghost" id="admin-logout">${t.logout}</button>
       </div>
 
@@ -1271,9 +1273,37 @@ async function renderAdmin(vp){
         </div>
         ${state.csvWarning ? `<p class="small" style="color:var(--danger);margin-top:8px;">${state.csvWarning}</p>` : ''}
       </div>
+
+      <div class="card">
+        <h2>${t.sheetSettings}</h2>
+        <p class="footnote">${t.sheetHelp}</p>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="adm-test-url">${t.testConn}</button>
+          ${state.urlSavedMsg? `<span class="small" style="align-self:center;color:${state.urlSavedMsg.startsWith('❌')?'var(--danger)':'var(--good)'}">${state.urlSavedMsg}</span>`:''}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>${t.adminPasswordChangeTitle}</h2>
+        <div class="field-row">
+          <input type="password" id="adm-new-pw" placeholder="${t.newAdminPasswordPh}">
+          <button class="btn btn-ghost" id="adm-pw-save">${t.save}</button>
+        </div>
+        <div class="status-msg">${state.pwMsg ? `<span style="color:${state.pwMsg.ok?'var(--good)':'var(--danger)'}">${state.pwMsg.text}</span>` : ''}</div>
+      </div>
+
+      <div class="card">
+        <h2>${t.employeeMasterTitle}</h2>
+        <p class="footnote">${t.employeeMasterHelp}</p>
+        <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
+        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:160px;">${escapeHtml(state.employeeMasterText)}</textarea>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="adm-master-save">${t.employeeMasterSave}</button>
+        </div>
+        <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
+      </div>
     `;
 
-    vp.querySelector('#admin-settings-btn').onclick = ()=>{ state.view='adminSettings'; render(); };
     vp.querySelector('#admin-logout').onclick = ()=>{
       state.adminUnlocked=false; state.adminPw=''; state.view='main'; render();
     };
@@ -1319,6 +1349,48 @@ async function renderAdmin(vp){
         drawAdmin();
         setTimeout(()=>{ state.csvWarning=''; drawAdmin(); }, 8000);
       }
+    };
+
+    vp.querySelector('#adm-test-url').onclick = async ()=>{
+      const r = await kvRequest('kvSet', {key:'settings:__connectionTest', value:new Date().toISOString()});
+      state.urlSavedMsg = (r && r.ok) ? '✅ 接続に成功しました' : '❌ 接続できませんでした。BACKEND_URLの設定を確認してください。';
+      drawAdmin();
+      setTimeout(()=>{ state.urlSavedMsg=''; drawAdmin(); },4000);
+    };
+
+    vp.querySelector('#adm-pw-save').onclick = async ()=>{
+      const pwInput = document.getElementById('adm-new-pw');
+      const newPw = pwInput.value;
+      if(newPw.trim().length < 4){
+        state.pwMsg = {text:t.passwordTooShort, ok:false}; drawAdmin(); return;
+      }
+      await setSetting('adminPassword', newPw.trim());
+      state.pwMsg = {text:t.passwordChanged, ok:true};
+      drawAdmin();
+      setTimeout(()=>{ state.pwMsg=null; drawAdmin(); },4000);
+    };
+
+    vp.querySelector('#adm-master-text').oninput = e=>{ state.employeeMasterText = e.target.value; };
+    vp.querySelector('#adm-master-save').onclick = async ()=>{
+      const lines = state.employeeMasterText.split('\n').map(l=>l.trim()).filter(Boolean);
+      const parsed = [];
+      for(const line of lines){
+        const parts = line.split(',').map(p=>p.trim());
+        if(parts.length<2 || !parts[0] || !parts[1]){
+          state.employeeMasterMsg = {text:t.employeeMasterInvalid, ok:false}; drawAdmin(); return;
+        }
+        const [id, name, typeRaw] = parts;
+        let mealType;
+        if(typeRaw){
+          if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
+          else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
+        }
+        parsed.push({id, name, mealType});
+      }
+      await setEmployeeMaster(parsed);
+      state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', parsed.length), ok:true};
+      drawAdmin();
+      setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },3000);
     };
     }); // end Promise.all(...).then
   }
@@ -1421,97 +1493,6 @@ async function exportMonthlyCsv(records, yyyyMm){
 }
 
 /* ---------- ADMIN SETTINGS (backend status / password / employee master) ---------- */
-async function renderAdminSettings(vp){
-  const t = T.ja;
-  vp.innerHTML = `<div class="card"><p class="small">読み込み中…</p></div>`;
-  if(!state.employeeMasterText){
-    const master = await getEmployeeMaster();
-    state.employeeMasterText = master.map(e=>`${e.id},${e.name},${e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':''}`).join('\n');
-  }
-  draw();
-
-  function draw(){
-    getEmployeeMaster().then(master=>{
-      vp.innerHTML = `
-        <button class="backlink" id="back-to-admin" style="margin-bottom:14px;">${t.backToDashboard}</button>
-
-        <div class="card">
-          <h2>${t.sheetSettings}</h2>
-          <p class="footnote">${t.sheetHelp}</p>
-          <div class="btnrow">
-            <button class="btn btn-primary" id="adm-test-url">${t.testConn}</button>
-            ${state.urlSavedMsg? `<span class="small" style="align-self:center;color:${state.urlSavedMsg.startsWith('❌')?'var(--danger)':'var(--good)'}">${state.urlSavedMsg}</span>`:''}
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>${t.adminPasswordChangeTitle}</h2>
-          <div class="field-row">
-            <input type="password" id="adm-new-pw" placeholder="${t.newAdminPasswordPh}">
-            <button class="btn btn-ghost" id="adm-pw-save">${t.save}</button>
-          </div>
-          <div class="status-msg">${state.pwMsg ? `<span style="color:${state.pwMsg.ok?'var(--good)':'var(--danger)'}">${state.pwMsg.text}</span>` : ''}</div>
-        </div>
-
-        <div class="card">
-          <h2>${t.employeeMasterTitle}</h2>
-          <p class="footnote">${t.employeeMasterHelp}</p>
-          <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
-          <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:160px;">${escapeHtml(state.employeeMasterText)}</textarea>
-          <div class="btnrow">
-            <button class="btn btn-primary" id="adm-master-save">${t.employeeMasterSave}</button>
-          </div>
-          <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
-        </div>
-      `;
-
-      vp.querySelector('#back-to-admin').onclick = ()=>{ state.view='admin'; render(); };
-
-      vp.querySelector('#adm-test-url').onclick = async ()=>{
-        const r = await kvRequest('kvSet', {key:'settings:__connectionTest', value:new Date().toISOString()});
-        state.urlSavedMsg = (r && r.ok) ? '✅ 接続に成功しました' : '❌ 接続できませんでした。BACKEND_URLの設定を確認してください。';
-        draw();
-        setTimeout(()=>{ state.urlSavedMsg=''; draw(); },4000);
-      };
-
-      vp.querySelector('#adm-pw-save').onclick = async ()=>{
-        const pwInput = document.getElementById('adm-new-pw');
-        const newPw = pwInput.value;
-        if(newPw.trim().length < 4){
-          state.pwMsg = {text:t.passwordTooShort, ok:false}; draw(); return;
-        }
-        await setSetting('adminPassword', newPw.trim());
-        state.pwMsg = {text:t.passwordChanged, ok:true};
-        draw();
-        setTimeout(()=>{ state.pwMsg=null; draw(); },4000);
-      };
-
-      vp.querySelector('#adm-master-text').oninput = e=>{ state.employeeMasterText = e.target.value; };
-      vp.querySelector('#adm-master-save').onclick = async ()=>{
-        const lines = state.employeeMasterText.split('\n').map(l=>l.trim()).filter(Boolean);
-        const parsed = [];
-        for(const line of lines){
-          const parts = line.split(',').map(p=>p.trim());
-          if(parts.length<2 || !parts[0] || !parts[1]){
-            state.employeeMasterMsg = {text:t.employeeMasterInvalid, ok:false}; draw(); return;
-          }
-          const [id, name, typeRaw] = parts;
-          let mealType;
-          if(typeRaw){
-            if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
-            else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
-          }
-          parsed.push({id, name, mealType});
-        }
-        await setEmployeeMaster(parsed);
-        state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', parsed.length), ok:true};
-        draw();
-        setTimeout(()=>{ state.employeeMasterMsg=null; draw(); },3000);
-      };
-    });
-  }
-}
-
 /* ===================== utils ===================== */
 function escapeHtml(s){
   return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
