@@ -1,24 +1,32 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     ▼ここから「--stamp:#B23A2E;」の行までは、元ファイルの先頭部分を
+     　こちらで補ったものです（アップロード時に欠けていたため）。
+     　元の配色・フォント指定をそのまま使いたい場合は、元ファイルの
+     　先頭から「--stamp:#B23A2E;」の直前までを、このブロックと
+     　差し替えてください。
+     ============================================================ -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>社員食堂ランチキャンセル / Cafeteria Lunch Cancellation</title>
+<title>宮田とうふ工房 社員食堂ランチキャンセル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&family=Shippori+Mincho:wght@700;800&family=Yomogi&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;800&family=Yomogi&family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap');
-
 :root{
-  --bg:#FBF3D9;
-  --surface:#FFFFFF;
+  --bg:#F6F3E9;
+  --surface:#FFFDF7;
+  --line:#E5DFD0;
   --ink:#3A2B22;
-  --ink-soft:#7A6754;
-  --line:#EDE0B0;
-  --accent:#F0B429;
-  --accent-soft:#FCEFC0;
-  --accent-deep:#9C6B12;
-  --accent-deeper:#7A5109;
-  --good:#B8860B;
-  --good-soft:#F6ECC9;
+  --ink-soft:#7A7065;
+  --accent:#8FB93E;
+  --accent-soft:#EDF3DC;
+  --accent-deep:#4A5A2A;
+  --accent-deeper:#38441E;
+  --good:#5C8A2E;
+  --good-soft:#E8F1D8;
   --stamp:#B23A2E;
   --danger:#B23A2E;
   --danger-soft:#F4DEDA;
@@ -312,6 +320,27 @@ textarea.csvbox{
   color:#fff;
   box-shadow:var(--shadow);
 }
+.boardnav{
+  display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;
+}
+.boardnav .navbtn{
+  border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.06);
+  color:#F5E9C8;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;
+  flex-shrink:0;font-family:inherit;
+}
+.boardnav .navbtn:hover{background:rgba(255,255,255,0.16);}
+.boardnav .d{
+  font-size:13.5px;letter-spacing:0.04em;color:#D9C08A;font-weight:700;
+}
+.boardnav .todaypill{
+  background:rgba(143,185,62,0.22);color:#DCEBB4;border-radius:999px;
+  padding:2px 9px;font-size:11px;font-weight:700;
+}
+.boardnav .backtoday{
+  border:1px solid rgba(255,255,255,0.28);background:transparent;color:#E3D2A0;
+  border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.boardnav .backtoday:hover{background:rgba(255,255,255,0.12);}
 .board-date{font-size:12.5px;letter-spacing:0.04em;color:#D9C08A;margin-bottom:16px;font-weight:600;}
 .board-main{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.14);}
 .board-main-num{
@@ -345,6 +374,197 @@ textarea.csvbox{
   .board-sub-num{font-size:22px;}
   .notice{font-size:13px;padding:11px 12px;}
 }
+
+/* ================= 追加分（停止期間・休業日・確認画面・控除見込み） ================= */
+.calcell.closed{
+  background:repeating-linear-gradient(135deg,#efeade,#efeade 4px,#e2dbc9 4px,#e2dbc9 8px);
+  opacity:0.5;cursor:not-allowed;
+}
+.callegend{
+  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  margin-top:10px;font-size:11px;color:var(--ink-soft);
+}
+.callegend span{display:flex;align-items:center;gap:5px;}
+.legend-swatch{
+  width:14px;height:14px;border-radius:4px;border:1px solid var(--line);display:inline-block;
+}
+.legend-swatch.closed{background:repeating-linear-gradient(135deg,#efeade,#efeade 4px,#e2dbc9 4px,#e2dbc9 8px);}
+.legend-swatch.sel{background:var(--accent-deep);border-color:var(--accent-deep);}
+
+.sumgrid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px;
+}
+@media (max-width:560px){.sumgrid{grid-template-columns:1fr;}}
+.sumbox{
+  border:1px solid var(--line);border-radius:10px;background:#FCFBF8;
+  padding:14px 14px 12px;text-align:center;
+}
+.sumbox .n{
+  font-family:'Shippori Mincho',serif;font-weight:800;font-size:30px;line-height:1;color:var(--accent-deep);
+}
+.sumbox .l{font-size:11.5px;color:var(--ink-soft);margin-top:6px;font-weight:700;letter-spacing:0.02em;}
+.sumbox .s{font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.5;}
+.sumbox.money{background:var(--accent-soft);border-color:var(--accent);}
+.sumbox.money .n{color:var(--accent-deeper);}
+
+.cardq-head{
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:10px;
+}
+.cardq-head h2{font-size:15px;color:var(--ink-soft);margin:0;}
+.cardq-head .chev{color:var(--ink-soft);font-size:13px;flex-shrink:0;}
+.cardq{background:#FCFBF7;}
+.cardq-head:hover h2{color:var(--ink);}
+.recdisclose{
+  margin-top:16px;padding-top:12px;border-top:1px dashed var(--line);
+}
+.recpanel{
+  background:#FCFBF8;border:1px solid var(--line);border-radius:10px;padding:14px;
+}
+.gate{
+  border:1px solid var(--line);background:#FCFBF8;border-radius:12px;padding:18px;
+}
+.gate h3{
+  margin:0 0 6px;font-family:'Shippori Mincho',serif;font-size:16px;
+}
+.gate p{margin:0 0 14px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;}
+.pinfield input{
+  max-width:170px;font-size:22px;letter-spacing:0.4em;text-align:center;
+  font-variant-numeric:tabular-nums;padding:12px 10px;
+}
+.gate .who{
+  display:inline-block;background:var(--accent-soft);color:var(--accent-deep);
+  border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:700;margin-bottom:12px;
+}
+.minilink{
+  border:none;background:none;color:var(--ink-soft);font-family:inherit;font-size:11.5px;
+  cursor:pointer;padding:2px 0;text-decoration:underline;text-underline-offset:2px;
+}
+.minilink:hover{color:var(--ink);}
+.statuspill{
+  display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;
+}
+.statuspill.on{background:var(--good-soft);color:var(--accent-deep);}
+.statuspill.off{background:#EFEADE;color:#7A7065;}
+.statuspill.lock{background:var(--danger-soft);color:var(--danger);}
+.scrolllist{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:2px 12px;}
+.cutoff{
+  display:flex;align-items:center;gap:11px;
+  background:var(--danger-soft);
+  border:1px solid rgba(178,58,46,0.28);
+  border-left:4px solid var(--danger);
+  border-radius:10px;
+  padding:13px 15px;
+  margin-bottom:16px;
+  color:#8C2E22;
+  font-size:13.5px;font-weight:700;line-height:1.65;
+  letter-spacing:0.01em;
+}
+.cutoff svg{
+  width:22px;height:22px;flex-shrink:0;
+  fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;
+  opacity:0.9;
+}
+.cutoff .hh{
+  font-family:'Shippori Mincho',serif;
+  font-size:16.5px;font-weight:800;
+  font-variant-numeric:tabular-nums;
+  padding:0 1px;
+}
+@media (max-width:480px){
+  .cutoff{font-size:13px;padding:12px 13px;gap:9px;}
+  .cutoff svg{width:20px;height:20px;}
+}
+.monthbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.monthbar input{max-width:168px;}
+.monthbar .navbtn{
+  border:1px solid var(--line);background:#fff;border-radius:8px;width:36px;height:40px;
+  cursor:pointer;font-size:16px;color:var(--ink);flex-shrink:0;
+}
+.monthbar .navbtn:hover{border-color:var(--accent);}
+.badge.out{background:#EFEADE;color:#7A7065;}
+.deduct{
+  border:1px solid var(--accent);background:var(--accent-soft);
+  border-radius:12px;padding:16px 16px 14px;
+}
+.deduct-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.deduct-head .l{font-size:13px;font-weight:800;color:var(--accent-deep);letter-spacing:0.02em;}
+.deduct-head .v{
+  font-family:'Shippori Mincho',serif;font-size:34px;font-weight:800;
+  color:var(--accent-deeper);line-height:1;font-variant-numeric:tabular-nums;
+}
+.deduct-note{font-size:11.5px;color:var(--accent-deep);text-align:right;margin-top:5px;}
+@media (max-width:480px){
+  .deduct-head{flex-direction:column;align-items:flex-start;gap:4px;}
+  .deduct-head .v{font-size:30px;}
+  .deduct-note{text-align:left;}
+}
+.rcpt{
+  margin-top:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px;padding:2px 14px;
+}
+.rcpt-row{
+  display:grid;grid-template-columns:1fr auto 92px;gap:4px 10px;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid #F0EEE4;
+}
+.rcpt-row:last-child{border-bottom:none;}
+.rcpt-row .k{font-weight:700;font-size:14.5px;}
+.rcpt-row .q{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.rcpt-row .a{text-align:right;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;}
+.rcpt-row .sub{grid-column:1/-1;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+.rcpt-row.zero .k,.rcpt-row.zero .q,.rcpt-row.zero .a{color:#A9A499;}
+.diffbox{
+  border:1px solid var(--accent);background:var(--accent-soft);
+  border-radius:10px;padding:14px;margin-top:12px;
+}
+.diffbox h3{
+  margin:0 0 10px;font-size:14px;font-family:'Shippori Mincho',serif;color:var(--accent-deeper);
+}
+.diffsec{margin-bottom:10px;}
+.diffsec .t{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.diffsec ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink);line-height:1.7;}
+.diffsec.del .t{color:var(--danger);}
+.modeswitch{display:flex;gap:8px;margin-bottom:16px;}
+.modeswitch button{
+  flex:1;border:1px solid var(--line);background:#FCFBF8;color:var(--ink-soft);
+  border-radius:10px;padding:12px 10px;font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s ease;
+}
+.modeswitch button.active{background:var(--accent-deep);color:#fff;border-color:var(--accent-deep);}
+.modeswitch button:hover:not(.active){border-color:var(--accent);color:var(--ink);}
+@media (max-width:480px){.modeswitch button{font-size:13px;padding:11px 6px;}}
+
+.pricelist{border-top:1px solid var(--line);margin-top:6px;}
+.pricerow{
+  display:grid;grid-template-columns:70px 1fr 84px;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid #F0EEE4;
+}
+.pricerow .p{font-weight:800;font-size:15px;font-family:'Shippori Mincho',serif;}
+.pricerow .sub{text-align:right;font-size:13.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.pricerow.has .sub{color:var(--accent-deeper);font-weight:700;}
+.qtyctl{display:flex;align-items:center;gap:6px;justify-content:center;}
+.qtyctl button{
+  width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:9px;
+  font-size:18px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1;
+}
+.qtyctl button:hover{border-color:var(--accent);}
+.qtyctl input{
+  width:56px;text-align:center;padding:9px 4px;font-size:16px;
+  border:1px solid var(--line);border-radius:9px;background:#FCFBF8;
+  -moz-appearance:textfield;
+}
+.qtyctl input::-webkit-outer-spin-button,.qtyctl input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.purtotal{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:14px;padding:12px 14px;border-radius:10px;
+  background:var(--accent-soft);border:1px solid var(--accent);
+}
+.purtotal .l{font-size:13px;font-weight:700;color:var(--accent-deep);}
+.purtotal .v{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:800;color:var(--accent-deeper);}
+.pausechip{
+  display:inline-block;background:#F0E7D6;color:#7A5A2A;border-radius:999px;
+  padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/encoding-japanese@2.0.0/encoding.min.js"></script>
 </head>
@@ -358,16 +578,27 @@ const T = {
     title:"宮田とうふ工房 社員食堂ランチキャンセル", subtitle:"当日キャンセルは朝8:00までにご提出ください。",
     empId:"社員番号", empIdPh:"例）123", empName:"名前", empNamePh:"例）山田 太郎",
     empIdNotice:"先頭に「0」を付けずに入力してください（例：012 ではなく 12）。",
-    pin:"確認用PIN（4桁）", pinPh:"例）1234",
-    pinNotice:"「自分の記録」を他の人に見られないようにするための4桁PINです（任意）。設定した場合、次回以降も同じPINの入力が必要になります。設定しない場合は誰でも社員番号だけで記録を確認・変更できます。",
-    optional:"（任意）",
-    pinOpenLink:"🔒 PINを設定する（任意）",
-    needPin:"確認用PINを4桁の数字で入力してください。",
-    mineNeedIdOrPin:"社員番号を入力してください。PINを設定している場合は4桁の数字で入力してください。",
-    wrongPin:"社員番号またはPINが一致しません。",
-    changePin:"PINを変更する", newPin:"新しいPIN（4桁）", pinChanged:"PINを変更しました。",
-    step1:"社員情報", step2:"キャンセルする日を選択（複数選択可）", step3:"定期キャンセル（任意）",
-    cutoffTitle:"当日キャンセルの締め切り", cutoffBody:"当日キャンセルの場合、必ず8:00までにご入力ください。8:00を過ぎると当日分の選択はできません。",
+    step1:"社員情報", step2:"キャンセルする日を選択（複数選択可）",
+    recOpen:"毎週同じ曜日をキャンセルする（任意）", recClose:"閉じる",
+    recStopBtn:"停止", recEndedLabel:"終了",
+    recStopHint:"停止すると、今後の分だけ適用されなくなります。過ぎた月の記録と金額はそのまま残ります。",
+    modeCancel:"ランチキャンセル", modePurchase:"割引商品の購入",
+    step2Purchase:"購入した商品を入力",
+    purchaseHelp:"買った商品の単価ごとに個数を入れてください。ランチ代と合算して、翌月の給与から天引きされます。",
+    purchaseTotalLabel:"合計",
+    purchaseConfirmTitle:"送信後の取り消しはできません",
+    purchaseConfirmBody:"内容をもう一度ご確認のうえ、下のボタンを押してお進みください。",
+    purchaseConfirmBtn:"この内容で送信する",
+    purchaseConfirmSummary:"合計 ¥{n}（{items}）",
+    purPinEnter:"本人確認のため、4桁のPINを入力してください。",
+    purPinSet:"初めての方は4桁のPINを設定してください。「自分の記録」を見るときにも同じPINを使います。",
+    purPinLocked:"PINを続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者にPINのリセットを依頼してください。",
+    mineDeductNote:"{m}月の給与から天引き",
+    submitPurchase:"購入を登録", needQty:"個数を1つ以上入力してください。",
+    purchaseSuccessBody:"割引商品の購入を登録しました。給与控除に反映されます。",
+    minePurchaseTitle:"割引商品の購入", minePurchaseNone:"この月の購入はありません。",
+    adminPurchaseLabel:"商品購入",
+    cutoffBody:"当日キャンセルの場合、必ず8:00までにご入力ください。8:00を過ぎると当日分の選択はできません。",
     selected:"選択中の日付", noneSelected:"まだ日付が選択されていません",
     recurringToggle:"曜日を指定して定期的にキャンセルする", recurringWd:"曜日を選択",
     recurringStart:"開始日", recurringEnd:"終了日（任意・空欄なら継続）",
@@ -377,59 +608,154 @@ const T = {
     masterMismatch:"社員番号と名前が一致しません。入力内容を確認してください。",
     successTitle:"受付済", successBody:"キャンセルを受け付けました。社員食堂にて集計されます。",
     close:"閉じる",
-    mineTitle:"自分のキャンセル記録を確認", mineDesc:"社員番号を入力して検索してください。",
+    legendClosed:"休業日・締切済み（選択できません）", legendSelected:"選択中",
+    closedDayLabel:"休業日（給食なし）",
+
+    mineTitle:"自分の記録を確認", mineDesc:"社員番号と氏名（フルネーム）を入力して検索してください。",
+    mineIdPh:"社員番号（例：123）", mineNamePh:"氏名フルネーム（例：山田 太郎）",
     search:"検索", mineNotFound:"記録が見つかりません。まだキャンセルの登録がないか、社員番号をご確認ください。",
+    mineNeedIdName:"社員番号と氏名（フルネーム）の両方を入力してください。",
+    pinSetTitle:"閲覧用のPINを設定してください", 
+    pinSetDesc:"金額を他の人に見られないようにするため、4桁の数字を登録します。次回からはこのPINで確認できます。銀行のキャッシュカードなど、他で使っている番号は避けてください。",
+    pinEnterTitle:"閲覧用PINを入力してください",
+    pinEnterDesc:"ご本人確認のため、登録した4桁のPINを入力してください。",
+    pinLabel:"PIN（4桁）", pinLabel2:"確認のためもう一度",
+    pinRemember:"この端末では次回からPINを省略する（{n}日間）",
+    pinSetBtn:"設定して記録を見る", pinEnterBtn:"確認する",
+    pinNeed4:"4桁の数字を入力してください。", pinNotMatch:"2つのPINが一致しません。",
+    pinWrong:"PINが違います。あと{n}回間違えるとロックされます。",
+    pinLockedTitle:"ロックされています",
+    pinLockedBody:"PINの入力を続けて間違えたため、あと約{n}分は確認できません。お急ぎの場合や忘れてしまった場合は、社員食堂の担当者にPINのリセットを依頼してください。",
+    pinChangeLink:"PINを変更する", pinForgetLink:"この端末の記憶を消す",
+    pinChanged:"PINを変更しました。", pinForgotten:"この端末の記憶を消しました。次回はPINの入力が必要です。",
+    pinNewLabel:"新しいPIN（4桁）",
+    pinSaveBtn:"変更する", pinCancelBtn:"やめる",
+    adminPinTitle:"記録閲覧PINの管理",
+    adminPinHelp:"社員が「自分の記録」を見るときの4桁PINです。PINはハッシュ化して保存しているため、担当者にも番号は見えません。忘れた人・ロックされた人はここでリセットしてください。リセットすると、その社員は次回に新しいPINを設定できます。",
+    adminPinSummary:"設定済 {set}名 ／ 未設定 {unset}名 ／ ロック中 {locked}名",
+    adminPinSearchPh:"社員番号または名前で検索",
+    adminPinReset:"リセット", adminPinResetDone:"{name} さんのPINをリセットしました。",
+    adminPinStateOn:"設定済", adminPinStateOff:"未設定", adminPinStateLock:"ロック中",
+    adminPinUnsetTitle:"PIN未設定の社員（{n}名）",
+    adminPinUnsetHelp:"未設定のうちは、社員番号と氏名を知っている人が先にPINを設定できてしまいます。早めの設定を呼びかけてください。",
+    mineNameMismatch:"社員番号と氏名が一致しません。名簿に登録されている氏名（フルネーム）を入力してください。",
     singleDates:"個別のキャンセル日", recurringRules:"定期キャンセル設定", none:"なし",
     delete:"取消", weekdayLabel:"毎週",
     su:"日",mo:"月",tu:"火",we:"水",th:"木",fr:"金",sa:"土",
     todayIs:"本日", pastCutoffCell:"締切済み",
+
+    mineSummaryTitle:"控除予定の明細",
+    mineDeductLabel:"控除予定金額（{m}月分）",
+    rcptLunch:"ランチ", rcptProducts:"割引商品",
+    rcptDays:"{n}日", rcptPieces:"{n}点",
+    rcptLunchSub:"給食のある日 {serving}日 ／ キャンセル {cancel}日",
+    rcptPausedSub:" ／ 停止期間 {n}日",
+    rcptProductsNone:"この月の購入はありません",
+    singleDatesMonth:"{m}月の個別キャンセル", minePurchaseMonth:"{m}月の割引商品の購入",
+    recurringRulesNote:"曜日で指定した設定です。期間内の各月に自動で適用されます。",
+    recurringAppliedThisMonth:"この月 {n}日",
+    outOfScopeBadge:"対象外",
+    pastEditLabel:"取消できません",
+    pastEditHint:"過ぎた日と、当日8:00を過ぎた分は取り消せません。変更が必要な場合は社員食堂の担当者にご相談ください。",
+    outOfScopeHint:"土日・休業日・停止期間にあたるため、金額計算には含みません。",
+    mineMonth:"対象月",
+    mineCancelDays:"キャンセル日数", mineEatDays:"食べる日数", mineAmount:"控除予定金額",
+    mineBreakdown:"個別 {s}日 ・ 定期 {r}日",
+    breakdownSingle:"個別 {n}日", breakdownRecurring:"定期 {n}日",
+    mineServingDays:"給食のある日 {n}日（土日・休業日を除く）",
+    minePausedNote:"停止期間により {n}日 は対象外です。",
+    mineUnitNote:"単価：{u}（セット料金指定日は1食300円）",
+    mineUnitSet:"セット 300円", mineUnitOkazu:"おかず 200円", mineUnitUnknown:"未設定（おかず200円で計算）",
+    mineEstimateNote:"金額は「給食のある日 − キャンセル日 − 停止期間」で計算した見込み額です。実際の控除額は給与明細をご確認ください。",
+
     adminLoginTitle:"管理画面ログイン", adminLoginDesc:"社員食堂スタッフ用。パスワードを入力してください。",
     password:"パスワード", login:"ログイン", wrongPw:"パスワードが違います。",
     logout:"ログアウト",
     calMonthCount:"件のキャンセル", allEmployees:"社員検索", searchEmployeePh:"社員番号または名前で検索",
-    monthlyTable:"月次集計表（スプレッドシート貼付用）", exportCsv:"CSVをコピー", copied:"コピーしました",
-    sheetSettings:"データ保存先（バックエンド）の接続状況", sheetUrlLabel:"Google Apps Script Web App URL",
-    sheetUrlPh:"https://script.google.com/macros/s/.../exec", save:"保存", testConn:"接続テスト", saved:"保存しました",
+    sheetSettings:"データ保存先（バックエンド）の接続状況",
+    save:"保存", testConn:"接続テスト", saved:"保存しました",
     sheetHelp:"このアプリのデータはすべてGoogle Apps Script経由でスプレッドシートに保存されています。接続がうまくいっているか、下のボタンで確認できます（うまくいかない場合は、ファイル内の BACKEND_URL の設定を確認してください）。",
-    dateCol:"日付", countCol:"件数", namesCol:"社員（番号・名前）", typeCol:"種別",
     employeeDetail:"社員の記録", noEmployees:"該当する社員が見つかりません。",
-    adminTodayLabel:"の給食状況", eatingToday:"今日食べる人", cancelToday:"本日のキャンセル",
+    adminTodayLabel:"の状況",
+    boardToday:"今日", boardBackToday:"今日に戻る", eatingToday:"食べる人", cancelToday:"キャンセル",
     setLabel:"セット", okazuLabel:"おかず", peopleUnit:"人", unknownLabel:"未設定",
+    pausedLabel:"停止中",
+    boardClosedToday:"この日は休業日です（給食なし）",
     masterNeededForBoard:"内訳（セット・おかず）を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
-    totalEmployeesLabel:"在籍総数（設定）", totalEmployeesPh:"例）120", totalEmployeesInvalid:"0以上の人数を入力してください。",
+    searchTitle:"個別検索", searchByDate:"日付で検索", searchByEmp:"従業員で検索",
+    pausedListTitle:"停止期間の登録がある社員（{n}名）",
+    closedBulkTitle:"カレンダーから一括登録",
+    closedBulkHelp:"年度カレンダーの休業日（赤字）の日付を貼り付けてください。改行・カンマ・スペース区切りに対応します。土日はもともと給食がないため、貼り付けても自動で除きます。",
+    closedBulkPreset:"2026年度カレンダーを読み込む",
+    closedBulkCheck:"内容を確認する", closedBulkRun:"この日付を登録する", closedBulkCancel:"やめる",
+    closedBulkNew:"新しく登録する休業日（{n}日）", closedBulkDup:"すでに登録済み（{n}日）",
+    closedBulkWeekend:"土日のため除外（{n}日）", closedBulkBad:"読み取れなかった行（{n}件）",
+    closedBulkNone:"登録できる日付がありませんでした。",
+    closedBulkDone:"{n}日を登録しました。",
+    closedBulkPast:"※過ぎた月の日付を登録すると、その月の金額計算も変わります。必要な分だけ残してください。",
     dateSearchTitle:"日付で検索", nameSearchTitle:"従業員名で検索", nameSearchPh:"社員番号または名前で検索",
     noResults:"該当するキャンセルはありません。",
+    dateIsClosed:"この日は休業日として登録されています（給食なし）。",
     adminPasswordChangeTitle:"管理者パスワードの変更", newAdminPasswordPh:"新しいパスワード（4文字以上）",
     passwordChanged:"パスワードを変更しました。次回ログインから新しいパスワードが必要です。", passwordTooShort:"4文字以上のパスワードを入力してください。",
-    settingsBtn:"⚙ 設定", settingsTitle:"設定", backToDashboard:"← ダッシュボードに戻る",
-    csvExportTitle:"月次CSV出力（給与控除データ）", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
-    csvExportBtn:"CSVをダウンロード", csvExportHelp:"添付いただいたフォーマットに合わせて、社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。従業員マスタに登録されたお食事タイプ（セット¥300／おかず¥200）をもとに「単価 × 出勤日数（平日−キャンセル日）」で金額を計算し、「セット料金指定日」に登録した日は全員セット料金として計算します。従業員マスタが未設定の場合は、キャンセル記録のある社員のみが対象になります。",
+
+    csvExportTitle:"月次CSV出力", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
+    csvExportBtn:"CSVをダウンロード",
+    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間を差し引いた日数 × 単価）。単価は従業員マスタのお食事タイプ（セット¥300／おかず¥200）を使い、「セット料金指定日」は全員¥300で計算します。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず）を登録してください。",
-    employeeMasterTitle:"従業員マスタ（社員番号と名前の照合用）",
-    employeeMasterHelp:"「社員番号,氏名,お食事タイプ」の形式で1行ずつ貼り付けてください（お食事タイプは「セット」または「おかず」）。社員がキャンセル登録する際にこの名簿と照合し、一致しない場合はエラーになります。また、ダッシュボードの内訳表示とCSV出力の金額計算にもこのお食事タイプが使われます。お食事タイプを省略した場合は「未設定」として扱われます。",
-    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット",
-    employeeMasterSave:"名簿を保存", employeeMasterSaved:"名簿を保存しました（{n}件）", employeeMasterCount:"現在 {n} 件登録されています。",
-    employeeMasterInvalid:"正しい形式（社員番号,氏名）で入力してください。",
-    specialDaysTitle:"セット料金指定日（カレー・丼物など）",
+
+    employeeMasterTitle:"従業員マスタ",
+    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日」の順で貼り付けてください。お食事タイプは「セット」または「おかず」。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。",
+    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01",
+    employeeMasterCheck:"内容を確認する", employeeMasterConfirm:"この内容で保存する", employeeMasterCancel:"やめる",
+    employeeMasterSaved:"名簿を保存しました（{n}件）", employeeMasterCount:"現在 {n} 件登録されています。",
+    employeeMasterInvalid:"{line}行目の形式が正しくありません（社員番号,氏名,お食事タイプ,停止開始日,再開日）。",
+    employeeMasterBadDate:"{line}行目の日付が読み取れません。2026-08-01 の形式で入力してください。",
+    employeeMasterBadRange:"{line}行目の再開日が停止開始日より前になっています。",
+    employeeMasterDup:"{line}行目の社員番号 {id} が重複しています。",
+    diffTitle:"保存前の確認",
+    diffAdd:"追加（{n}件）", diffDel:"削除（{n}件）", diffChange:"変更（{n}件）", diffSame:"変更はありません。そのまま保存できます。",
+    diffDelWarn:"削除される社員がいます。名簿から消えると、その社員はキャンセル登録ができなくなり、CSVにも出力されません。",
+
+    specialDaysTitle:"セット料金指定",
     specialDaysHelp:"おかずとごはんが分けられないメニューの日を登録してください。この日は「おかず」を選んでいる人もセット料金（¥300）としてCSVに計上されます。",
     specialDaysAdd:"追加", specialDaysNone:"登録されている日付はありません。", specialDaysRemove:"削除",
     specialDaysAlready:"すでに登録されています。",
+
+    closedDaysTitle:"休業日登録",
+    closedDaysHelp:"給食が出ない日を登録してください。登録した日は社員側のカレンダーで選択できなくなり、金額計算の対象日からも除かれます。お盆・年末年始などは開始日と終了日を入れて一括登録できます（終了日は省略可）。",
+    closedDaysAdd:"追加", closedDaysFrom:"開始日", closedDaysTo:"終了日（任意）",
+    closedDaysNone:"登録されている休業日はありません。", closedDaysRemove:"削除",
+    closedDaysAdded:"{n}日を追加しました。", closedDaysAlready:"すでに登録されています。",
+    closedDaysBadRange:"終了日は開始日より後の日付を選んでください。",
+    weekdayShort:["日","月","火","水","木","金","土"],
   },
   en:{
     formTab:"Employee Form", mineTab:"My Records", adminTab:"Admin",
     title:"Miyada Tofu Workshop — Cafeteria Lunch Cancellation", subtitle:"For same-day cancellations, please submit before 8:00 AM.",
     empId:"Employee ID", empIdPh:"e.g. 123", empName:"Name", empNamePh:"e.g. Taro Yamada",
     empIdNotice:"Please don't include a leading \"0\" (e.g. 12, not 012).",
-    pin:"Confirmation PIN (4 digits)", pinPh:"e.g. 1234",
-    pinNotice:"A 4-digit PIN so others can't view your \"My Records\" (optional). If set, you'll need the same PIN next time. If left blank, anyone can view or edit the record using just the employee ID.",
-    optional:"(optional)",
-    pinOpenLink:"🔒 Set a PIN (optional)",
-    needPin:"Please enter a 4-digit confirmation PIN.",
-    mineNeedIdOrPin:"Please enter your employee ID. If you set a PIN, enter the 4-digit number as well.",
-    wrongPin:"Employee ID or PIN does not match.",
-    changePin:"Change PIN", newPin:"New PIN (4 digits)", pinChanged:"PIN changed.",
-    step1:"Your Information", step2:"Select date(s) to cancel (multiple allowed)", step3:"Recurring cancellation (optional)",
-    cutoffTitle:"Same-day cutoff", cutoffBody:"For same-day cancellations, please submit by 8:00 AM. After 8:00 AM, today's date can no longer be selected.",
+    step1:"Your Information", step2:"Select date(s) to cancel (multiple allowed)",
+    recOpen:"Cancel every week on the same weekday (optional)", recClose:"Close",
+    recStopBtn:"Stop", recEndedLabel:"Ended",
+    recStopHint:"Stopping only affects future dates. Past months and their amounts stay unchanged.",
+    modeCancel:"Lunch cancellation", modePurchase:"Discounted products",
+    step2Purchase:"Enter what you bought",
+    purchaseHelp:"Enter the quantity for each unit price. The total is added to your payroll deduction.",
+    purchaseTotalLabel:"Total",
+    purchaseConfirmTitle:"This cannot be undone after you submit",
+    purchaseConfirmBody:"Please check your entry once more, then press the button below to continue.",
+    purchaseConfirmBtn:"Submit this entry",
+    purchaseConfirmSummary:"Total ¥{n} ({items})",
+    purPinEnter:"Please enter your 4-digit PIN to confirm it is you.",
+    purPinSet:"If this is your first time, please set a 4-digit PIN. The same PIN is used to view your records.",
+    purPinLocked:"Too many incorrect attempts. You cannot register a purchase for about {n} minutes. Please ask the cafeteria staff to reset your PIN.",
+    mineDeductNote:"Deducted from the payroll in month {m}",
+    submitPurchase:"Register purchase", needQty:"Please enter a quantity of at least one item.",
+    purchaseSuccessBody:"Your purchase has been registered and will be added to your payroll deduction.",
+    minePurchaseTitle:"Discounted product purchases", minePurchaseNone:"No purchases this month.",
+    adminPurchaseLabel:"Purchases",
+    cutoffBody:"For same-day cancellations, please submit by 8:00 AM. After 8:00 AM, today's date can no longer be selected.",
     selected:"Selected dates", noneSelected:"No dates selected yet",
     recurringToggle:"Cancel automatically on a recurring weekday", recurringWd:"Choose weekday(s)",
     recurringStart:"Start date", recurringEnd:"End date (optional, leave blank for ongoing)",
@@ -439,26 +765,83 @@ const T = {
     masterMismatch:"The employee ID and name do not match. Please check your input.",
     successTitle:"Received", successBody:"Your cancellation has been received and will be counted by the cafeteria.",
     close:"Close",
-    mineTitle:"Check my cancellation records", mineDesc:"Enter your employee ID to search.",
+    legendClosed:"Closed / past cutoff (not selectable)", legendSelected:"Selected",
+    closedDayLabel:"Closed (no lunch)",
+
+    mineTitle:"Check my records", mineDesc:"Enter your employee ID and full name to search.",
+    mineIdPh:"Employee ID (e.g. 123)", mineNamePh:"Full name (e.g. Taro Yamada)",
     search:"Search", mineNotFound:"No record found. You may not have any cancellations yet, or please check your employee ID.",
+    mineNeedIdName:"Please enter both your employee ID and full name.",
+    pinSetTitle:"Set a PIN to view your records",
+    pinSetDesc:"Register a 4-digit number so others cannot see your amounts. Please avoid a number you use elsewhere, such as a bank card PIN.",
+    pinEnterTitle:"Enter your viewing PIN",
+    pinEnterDesc:"Please enter the 4-digit PIN you registered.",
+    pinLabel:"PIN (4 digits)", pinLabel2:"Enter it again to confirm",
+    pinRemember:"Skip the PIN on this device next time ({n} days)",
+    pinSetBtn:"Save and view my records", pinEnterBtn:"Continue",
+    pinNeed4:"Please enter 4 digits.", pinNotMatch:"The two PINs do not match.",
+    pinWrong:"Incorrect PIN. {n} more attempt(s) before it locks.",
+    pinLockedTitle:"Temporarily locked",
+    pinLockedBody:"Too many incorrect attempts. Please wait about {n} minutes, or ask the cafeteria staff to reset your PIN.",
+    pinChangeLink:"Change PIN", pinForgetLink:"Forget this device",
+    pinChanged:"Your PIN has been changed.", pinForgotten:"This device has been forgotten. The PIN will be required next time.",
+    pinNewLabel:"New PIN (4 digits)",
+    pinSaveBtn:"Change", pinCancelBtn:"Cancel",
+    mineNameMismatch:"The employee ID and name do not match. Enter the full name as registered in the roster.",
     singleDates:"Individual cancelled dates", recurringRules:"Recurring cancellations", none:"None",
     delete:"Remove", weekdayLabel:"Every",
     su:"Sun",mo:"Mon",tu:"Tue",we:"Wed",th:"Thu",fr:"Fri",sa:"Sat",
     todayIs:"Today", pastCutoffCell:"Closed",
-    adminLoginTitle:"Admin login", adminLoginDesc:"For cafeteria staff. Enter the password.",
-    password:"Password", login:"Log in", wrongPw:"Incorrect password.",
-    logout:"Log out",
-    calMonthCount:"cancellations", allEmployees:"Search employees", searchEmployeePh:"Search by ID or name",
-    monthlyTable:"Monthly summary (paste into spreadsheet)", exportCsv:"Copy CSV", copied:"Copied",
-    sheetSettings:"Spreadsheet integration settings", sheetUrlLabel:"Google Apps Script Web App URL",
-    sheetUrlPh:"https://script.google.com/macros/s/.../exec", save:"Save", testConn:"Test connection", saved:"Saved",
-    sheetHelp:"Deploy the included Apps Script code to your spreadsheet to auto-log every cancellation.",
-    dateCol:"Date", countCol:"Count", namesCol:"Employees (ID / Name)", typeCol:"Type",
-    employeeDetail:"Employee record", noEmployees:"No matching employees.",
+
+    mineSummaryTitle:"Estimated deduction breakdown",
+    mineDeductLabel:"Estimated deduction (month {m})",
+    rcptLunch:"Lunch", rcptProducts:"Discounted products",
+    rcptDays:"{n} day(s)", rcptPieces:"{n} item(s)",
+    rcptLunchSub:"{serving} serving days / {cancel} cancelled",
+    rcptPausedSub:" / {n} paused",
+    rcptProductsNone:"No purchases this month",
+    singleDatesMonth:"Individual cancellations in month {m}", minePurchaseMonth:"Purchases in month {m}",
+    recurringRulesNote:"Weekday-based settings, applied automatically in each month within the period.",
+    recurringAppliedThisMonth:"{n} day(s) this month",
+    outOfScopeBadge:"Not counted",
+    pastEditLabel:"Cannot be removed",
+    pastEditHint:"Past dates, and today after 8:00 AM, can no longer be removed. Please contact the cafeteria staff if a change is needed.",
+    outOfScopeHint:"Falls on a weekend, closed day or pause period, so it is not included in the amount.",
+    mineMonth:"Month",
+    mineCancelDays:"Cancelled days", mineEatDays:"Lunch days", mineAmount:"Estimated deduction",
+    mineBreakdown:"Individual {s} / Recurring {r}",
+    breakdownSingle:"{n} individual", breakdownRecurring:"{n} recurring",
+    mineServingDays:"{n} serving days (weekends and closed days excluded)",
+    minePausedNote:"{n} day(s) excluded by your pause period.",
+    mineUnitNote:"Unit price: {u} (set-price days are ¥300 for everyone)",
+    mineUnitSet:"Set ¥300", mineUnitOkazu:"Okazu ¥200", mineUnitUnknown:"Not set (calculated as Okazu ¥200)",
+    mineEstimateNote:"This is an estimate: serving days − cancelled days − pause period. Please check your payslip for the final amount.",
+    weekdayShort:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
   }
 };
+/* ============================================================
+   ロゴ画像
+   元のファイルの <img src="data:image/png;base64,……"> の
+   src の値（data:image/png;base64, から最後まで）を、
+   下の "" の中にそのまま貼り付けてください。
+   貼り付けなくても動きます（その場合ロゴは表示されず、店名だけが出ます）。
+   ============================================================ */
+const LOGO_DATA_URL = "";
+const HAS_LOGO = LOGO_DATA_URL.indexOf('data:image') === 0;
+
 const WD_KEYS = ['su','mo','tu','we','th','fr','sa'];
 const ADMIN_PASSWORD = "masuda";
+const PRICE_SET = 300;
+const PRICE_OKAZU = 200;
+// 割引商品の単価（この7種類から個数を入力する）
+const PRICE_OPTIONS = [50,100,150,200,250,300,350];
+// 本社カレンダー2026の赤字（平日のみ）。土日はもともと給食がないため含めない。
+const CALENDAR_PRESET_2026 = [
+  "2026-01-01","2026-01-02","2026-02-23","2026-05-04","2026-05-05","2026-07-20",
+  "2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14",
+  "2026-09-21","2026-10-12","2026-11-23",
+  "2026-12-28","2026-12-29","2026-12-30","2026-12-31","2027-01-01",
+];
 
 /* ===================== state ===================== */
 const today = new Date();
@@ -466,6 +849,11 @@ function pad(n){return String(n).padStart(2,'0');}
 function iso(y,m,d){return `${y}-${pad(m+1)}-${pad(d)}`;}
 function todayISO(){return iso(today.getFullYear(),today.getMonth(),today.getDate());}
 function parseISO(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function yesterdayISO(){
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()-1);
+  return iso(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function currentMonthValue(){return `${today.getFullYear()}-${pad(today.getMonth()+1)}`;}
 
 let state = {
   lang: 'ja',
@@ -473,34 +861,52 @@ let state = {
   msg: null,
   mineOpen: false,
 
+  formMode: 'cancel',      // cancel | purchase
+  purchaseQty: {},         // {単価: 個数}
+  purchaseConfirm: false,  // 送信前の最終確認を表示中かどうか
+  purchasePin:'', purchasePin2:'', purchasePinMsg:null,
+  purchasePinMode:'enter', // enter | set | locked
+  purchaseLockMin:0,
+
   formMonth: {y:today.getFullYear(), m:today.getMonth()},
   selectedDates: new Set(),
-  empId: '', empName: '', empPin: '', pinPanelOpen: false,
+  empId: '', empName: '',
   recurringOn:false, recurringWd:new Set(), recurringStart: todayISO(), recurringEnd:'',
   submitting:false,
 
-  mineId:'', minePin:'', mineRecord:null, mineSearched:false, mineWrongPin:false,
+  closedDays: [],          // 社員側カレンダーで使う休業日（起動時に読み込み）
+
+  mineId:'', mineName:'', mineRecord:null, mineMaster:null,
+  mineSearched:false, mineError:null,
+  mineStage:'search',     // search | setPin | enterPin | locked | view
+  minePin:'', minePin2:'', minePinMsg:null, mineRemember:true,
+  mineLockUntil:null, minePinChangeOpen:false, minePinNotice:null,
+  mineMonth: currentMonthValue(),
+  mineSummary:null,
 
   adminPw:'', adminError:'', adminUnlocked:false,
-  adminMonth:{y:today.getFullYear(), m:today.getMonth()},
   adminSelectedDay:null,
   adminAllRecords:null,
-  adminSearch:'',
+  adminSearch:'', adminPinSearch:'', adminPinMsg:null,
+  adminSearchMode:'date',
+  boardDate: todayISO(),
+  adminOpen:{closed:false, paused:false, conn:false, pw:false},
+  closedBulkText:'', closedBulkPending:null, closedBulkMsg:null,
   adminDateSearch: todayISO(),
-  adminSelectedEmp:null,
-  totalEmployees:'', totalMsg:null,
+  totalMsg:null,
   pwMsg:null,
-  appsScriptUrl:'', urlSavedMsg:'', csvCopiedMsg:'',
-  csvMonth: `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`,
+  urlSavedMsg:'',
+  csvMonth: currentMonthValue(),
   employeeMasterText:'', employeeMasterMsg:null,
+  masterPending:null,      // 保存前の確認内容
   specialDaysMsg:null,
+  closedDaysMsg:null,
   csvWarning:'',
 };
 
 /* ===================== storage helpers ===================== */
 /* ============================================================
    BACKEND STORAGE ADAPTER
-   window.storage (Claude.ai artifact専用) の代わりに、
    Google Apps Script をデータの保存先として使う。
    ============================================================ */
 
@@ -549,7 +955,6 @@ async function setEmp(id, record){
   return !!(r && r.ok);
 }
 async function listAllEmpRecords(){
-  // kvGetByPrefix でまとめて取得（1件ずつ通信すると遅いため）
   const r = await kvRequest('kvGetByPrefix', {prefix:'emp:'});
   const items = (r && r.items) || [];
   const out = [];
@@ -585,6 +990,7 @@ async function setSetting(key,val){
   return !!(r && r.ok);
 }
 const SEED_EMPLOYEE_MASTER = [{"id": "28", "name": "宮澤 基夫", "mealType": "set"}, {"id": "46", "name": "平澤 幸司", "mealType": "okazu"}, {"id": "60", "name": "稲垣 裕一", "mealType": "set"}, {"id": "62", "name": "沖村千代子", "mealType": "okazu"}, {"id": "69", "name": "毛利 久美子", "mealType": "okazu"}, {"id": "72", "name": "林 寛道", "mealType": "set"}, {"id": "75", "name": "代田 浩房", "mealType": "set"}, {"id": "78", "name": "赤羽 学", "mealType": "set"}, {"id": "80", "name": "増田 英樹", "mealType": "set"}, {"id": "90", "name": "松崎 昌純", "mealType": "set"}, {"id": "98", "name": "大槻 真由子", "mealType": "set"}, {"id": "99", "name": "中谷 絵美", "mealType": "okazu"}, {"id": "115", "name": "井上 大助", "mealType": "set"}, {"id": "137", "name": "倉田 由理子", "mealType": "set"}, {"id": "148", "name": "細田 裕", "mealType": "set"}, {"id": "155", "name": "笠原 正", "mealType": "set"}, {"id": "156", "name": "友野 正明", "mealType": "set"}, {"id": "157", "name": "水田 憲二", "mealType": "set"}, {"id": "163", "name": "湯澤 すみ子", "mealType": "set"}, {"id": "180", "name": "松田 一良", "mealType": "set"}, {"id": "184", "name": "伊藤 健司", "mealType": "set"}, {"id": "192", "name": "清水 美佳", "mealType": "set"}, {"id": "202", "name": "伊東 千裕", "mealType": "set"}, {"id": "208", "name": "木下真紀", "mealType": "okazu"}, {"id": "210", "name": "林 賢一郎", "mealType": "set"}, {"id": "234", "name": "有賀 恵理", "mealType": "set"}, {"id": "242", "name": "伊藤 徹哉", "mealType": "set"}, {"id": "247", "name": "佐藤哲也", "mealType": "set"}, {"id": "257", "name": "林 篤人", "mealType": "set"}, {"id": "260", "name": "宮越 清忠", "mealType": "set"}, {"id": "266", "name": "有賀 圭佑", "mealType": "set"}, {"id": "268", "name": "三浦 憲和", "mealType": "set"}, {"id": "281", "name": "久保田 明", "mealType": "set"}, {"id": "330", "name": "原 幸弘", "mealType": "set"}, {"id": "346", "name": "竹村 昌典", "mealType": "set"}, {"id": "351", "name": "野澤 政樹", "mealType": "set"}, {"id": "361", "name": "奥原 志津雄", "mealType": "set"}, {"id": "364", "name": "伊東理恵子", "mealType": "set"}, {"id": "366", "name": "向山 博子", "mealType": "set"}, {"id": "378", "name": "ナキーネス", "mealType": "set"}, {"id": "379", "name": "中村 慎二", "mealType": "set"}, {"id": "396", "name": "細田 由貴", "mealType": "set"}, {"id": "402", "name": "村上 寛樹", "mealType": "set"}, {"id": "403", "name": "秋山 龍男", "mealType": "set"}, {"id": "408", "name": "中山 亮太", "mealType": "set"}, {"id": "409", "name": "丹治 由次", "mealType": "set"}, {"id": "418", "name": "丸茂 理絵", "mealType": "set"}, {"id": "426", "name": "松崎 里美", "mealType": "set"}, {"id": "427", "name": "湊 純也", "mealType": "set"}, {"id": "437", "name": "木下 美代子", "mealType": "set"}, {"id": "439", "name": "小出 雄平", "mealType": "set"}, {"id": "441", "name": "飯島 秀静", "mealType": "okazu"}, {"id": "456", "name": "中山 佳祐", "mealType": "set"}, {"id": "459", "name": "木下 竜介", "mealType": "set"}, {"id": "460", "name": "酒井 美香", "mealType": "set"}, {"id": "465", "name": "加藤 匠", "mealType": "set"}, {"id": "467", "name": "石井 明香", "mealType": "set"}, {"id": "497", "name": "中田 周作", "mealType": "set"}, {"id": "500", "name": "利根川 久", "mealType": "set"}, {"id": "502", "name": "西澤 将史", "mealType": "okazu"}, {"id": "506", "name": "目黒 道裕", "mealType": "set"}, {"id": "507", "name": "宮下 柚輝", "mealType": "set"}, {"id": "510", "name": "濱 正喜", "mealType": "set"}, {"id": "513", "name": "清水 悦雄", "mealType": "set"}, {"id": "517", "name": "平沢 ゆかり", "mealType": "set"}, {"id": "523", "name": "森 和広", "mealType": "set"}, {"id": "532", "name": "渡邊 康平", "mealType": "set"}, {"id": "538", "name": "遠山 さくら", "mealType": "okazu"}, {"id": "542", "name": "ゴメス ナオキ", "mealType": "set"}, {"id": "543", "name": "林 諒大", "mealType": "set"}, {"id": "550", "name": "山田 潤也", "mealType": "set"}, {"id": "552", "name": "伊藤 健太郎", "mealType": "set"}, {"id": "564", "name": "松原 敏夫", "mealType": "set"}, {"id": "565", "name": "北原 浩二", "mealType": "set"}, {"id": "570", "name": "ドーン真菜", "mealType": "set"}, {"id": "573", "name": "河村 拓也", "mealType": "set"}, {"id": "575", "name": "小平 藍花", "mealType": "set"}, {"id": "577", "name": "舘前 流星", "mealType": "set"}, {"id": "578", "name": "保科 和希", "mealType": "set"}, {"id": "579", "name": "三浦 研太", "mealType": "set"}, {"id": "581", "name": "平松 美穂", "mealType": "set"}, {"id": "582", "name": "福沢 慶太", "mealType": "set"}, {"id": "585", "name": "辻 治之", "mealType": "set"}, {"id": "587", "name": "吉田 陽輔", "mealType": "set"}, {"id": "591", "name": "小田切 梁", "mealType": "set"}, {"id": "594", "name": "池上 毅", "mealType": "set"}, {"id": "600", "name": "小原 隆二", "mealType": "set"}, {"id": "602", "name": "岩永 喜孝", "mealType": "set"}, {"id": "606", "name": "北川 涼晴", "mealType": "set"}, {"id": "608", "name": "堀内 伊知郎", "mealType": "set"}, {"id": "5013", "name": "ﾍﾞﾔﾄﾞ ｼﾞｮｾﾙ", "mealType": "set"}, {"id": "5058", "name": "ﾍﾟｼｬｽ ﾚｲﾗﾝ", "mealType": "set"}, {"id": "5060", "name": "ﾊﾟﾁｶ ｸﾘｽﾄﾌｧｰ", "mealType": "set"}, {"id": "5063", "name": "ﾌｪﾙｸﾘｽ", "mealType": "set"}, {"id": "5071", "name": "ｴﾚﾆｮ ｼﾞｬｰｿﾝ", "mealType": "set"}, {"id": "5079", "name": "ｱﾚｶﾞﾄﾞ ﾘﾃﾞｨｱ", "mealType": "set"}, {"id": "5080", "name": "ﾊﾞﾛﾝｸﾞ ﾁｪﾘ", "mealType": "set"}, {"id": "5084", "name": "ｸﾘﾏｺ ﾁｬｰﾘｰﾄ", "mealType": "set"}, {"id": "5092", "name": "ﾇｶﾞﾛｯﾄ ｽﾃﾜｰﾄﾞ", "mealType": "set"}, {"id": "5094", "name": "ﾙｱﾙﾊﾃｨ ﾁｪ ｱｰﾙ", "mealType": "set"}, {"id": "5097", "name": "ﾀﾌﾟﾀﾞｻﾝ ﾏｲｹﾙ", "mealType": "set"}, {"id": "5100", "name": "ﾋﾞﾀﾞﾙ ｼﾞｮｱﾝ", "mealType": "set"}];
+
 // items(配列)を小分けにして kvSetMany へ送る（1リクエストのURLが長くなりすぎないように）
 async function kvSetManyChunked(items, chunkSize){
   chunkSize = chunkSize || 15;
@@ -616,6 +1022,14 @@ async function getEmployeeMaster(){
     return out;
   }catch(e){ return []; }
 }
+// 社員1名分だけ取得（社員側の画面用。名簿全体を読まないので速い）
+async function getMasterEmp(id){
+  const r = await kvRequest('kvGet', {key:'master:'+id});
+  if(r && r.found){
+    try{ return JSON.parse(r.value); }catch(e){ return null; }
+  }
+  return null;
+}
 // 従業員マスタを保存し直す（まとめて少ない通信回数で送る）
 async function setEmployeeMaster(list){
   const existing = await getEmployeeMaster();
@@ -630,20 +1044,183 @@ async function setEmployeeMaster(list){
   await kvSetManyChunked(items);
   return true;
 }
+
 async function getSpecialPriceDays(){
   try{
     const raw = await getSetting('specialPriceDays');
     return raw ? JSON.parse(raw) : [];
   }catch(e){ return []; }
 }
-// returns null (no master configured => skip check), or {ok, reason}
+// 休業日（祝日・会社休業日）
+async function getClosedDays(){
+  try{
+    const raw = await getSetting('closedDays');
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+async function setClosedDays(list){
+  const uniq = Array.from(new Set(list)).sort();
+  await setSetting('closedDays', JSON.stringify(uniq));
+  state.closedDays = uniq;
+  return uniq;
+}
+
+/* ============================================================
+   閲覧用PIN（4桁）
+   ・PINそのものは保存せず、ソルト付きのハッシュだけを保存する
+   ・間違えた回数もサーバ側（スプレッドシート）に記録するので、
+     ページを再読み込みしても回避できない
+   ============================================================ */
+const DEVICE_TRUST_DAYS = 14;   // 一度PINを通した端末で入力を省略する日数
+const PIN_MAX_FAILS = 5;        // 何回間違えたらロックするか
+const PIN_LOCK_MINUTES = 10;    // ロックする時間（分）
+
+async function getPinRecord(id){
+  const r = await kvRequest('kvGet', {key:'pin:'+id});
+  if(r && r.found){
+    try{ return JSON.parse(r.value); }catch(e){ return null; }
+  }
+  return null;
+}
+async function setPinRecord(id, rec){
+  const r = await kvRequest('kvSet', {key:'pin:'+id, value: JSON.stringify(rec)});
+  return !!(r && r.ok);
+}
+async function deletePinRecord(id){
+  const r = await kvRequest('kvDelete', {key:'pin:'+id});
+  return !!(r && r.ok);
+}
+async function listPinRecords(){
+  const r = await kvRequest('kvGetByPrefix', {prefix:'pin:'});
+  const items = (r && r.items) || [];
+  const out = {};
+  for(const item of items){
+    try{ out[String(item.key).slice(4)] = JSON.parse(item.value); }catch(e){}
+  }
+  return out;
+}
+
+function randomSalt(){
+  return Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+}
+function hasWebCrypto(){
+  return typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function';
+}
+// SHA-256が使えない環境（file:// で開いた場合など）でも動くように予備の方式を持つ
+function fallbackHash(str){
+  let h1 = 0x811c9dc5, h2 = 0x1000193;
+  for(let i=0;i<str.length;i++){
+    const c = str.charCodeAt(i);
+    h1 = (h1 ^ c) * 16777619 >>> 0;
+    h2 = ((h2 << 5) + h2 + c) >>> 0;
+  }
+  return ('00000000'+h1.toString(16)).slice(-8) + ('00000000'+h2.toString(16)).slice(-8);
+}
+async function hashPin(pin, salt, alg){
+  const src = salt + ':' + pin;
+  if(alg === 'sha256' && hasWebCrypto()){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(src));
+    return Array.from(new Uint8Array(buf)).map(b=>('0'+b.toString(16)).slice(-2)).join('');
+  }
+  return fallbackHash(src);
+}
+function pinLockRemainMinutes(rec){
+  if(!rec || !rec.lockedUntil) return 0;
+  const diff = new Date(rec.lockedUntil).getTime() - Date.now();
+  return diff > 0 ? Math.ceil(diff/60000) : 0;
+}
+async function savePin(id, pin){
+  const alg = hasWebCrypto() ? 'sha256' : 'fallback';
+  const salt = randomSalt();
+  const hash = await hashPin(pin, salt, alg);
+  return await setPinRecord(id, {
+    alg, salt, hash, fails:0, lockedUntil:null, updatedAt:new Date().toISOString(),
+  });
+}
+// {status:'ok'|'wrong'|'locked'|'none', left, minutes}
+async function verifyPin(id, pin){
+  const rec = await getPinRecord(id);
+  if(!rec) return {status:'none'};
+  const locked = pinLockRemainMinutes(rec);
+  if(locked > 0) return {status:'locked', minutes:locked};
+
+  const hash = await hashPin(pin, rec.salt, rec.alg);
+  if(hash === rec.hash){
+    if(rec.fails || rec.lockedUntil){
+      rec.fails = 0; rec.lockedUntil = null;
+      await setPinRecord(id, rec);
+    }
+    return {status:'ok'};
+  }
+  rec.fails = Number(rec.fails||0) + 1;
+  if(rec.fails >= PIN_MAX_FAILS){
+    rec.fails = 0;
+    rec.lockedUntil = new Date(Date.now() + PIN_LOCK_MINUTES*60000).toISOString();
+    await setPinRecord(id, rec);
+    return {status:'locked', minutes:PIN_LOCK_MINUTES};
+  }
+  await setPinRecord(id, rec);
+  return {status:'wrong', left: PIN_MAX_FAILS - rec.fails};
+}
+
+/* この端末を信頼する（localStorageなので、この端末の中だけの話） */
+function deviceKey(id){ return 'pin_ok:' + id; }
+function isDeviceTrusted(id, name){
+  try{
+    const raw = localStorage.getItem(deviceKey(id));
+    if(!raw) return false;
+    const o = JSON.parse(raw);
+    if(!o.until || new Date(o.until).getTime() < Date.now()) return false;
+    return normName(o.name||'') === normName(name);
+  }catch(e){ return false; }
+}
+function trustDevice(id, name){
+  try{
+    localStorage.setItem(deviceKey(id), JSON.stringify({
+      name, until: new Date(Date.now() + DEVICE_TRUST_DAYS*86400000).toISOString(),
+    }));
+  }catch(e){ /* 保存できなくても、毎回PINを入れれば使える */ }
+}
+function forgetDevice(id){
+  try{ localStorage.removeItem(deviceKey(id)); }catch(e){}
+}
+
+/* ===================== 名前・日付のゆらぎ吸収 ===================== */
+// 全角/半角スペース・大文字小文字の違いを無視して氏名を比較する
+function normName(s){
+  return String(s??'').replace(/[\s\u3000]/g,'').toLowerCase();
+}
+// 2026/8/1・2026年8月1日 なども 2026-08-01 に揃える。読めなければ null
+function normDate(s){
+  const raw = String(s??'').trim();
+  if(!raw) return '';
+  const t = raw.replace(/年|月/g,'-').replace(/日/g,'').replace(/\//g,'-').replace(/\./g,'-').replace(/-+$/,'');
+  const m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(!m) return null;
+  return `${m[1]}-${pad(Number(m[2]))}-${pad(Number(m[3]))}`;
+}
+
+// 停止期間：停止開始日 〜 再開日の前日 まで（再開日は「食べ始める日」）
+function isPausedOn(emp, dateStr){
+  if(!emp || !emp.pauseStart) return false;
+  if(dateStr < emp.pauseStart) return false;
+  if(emp.pauseEnd && dateStr >= emp.pauseEnd) return false;
+  return true;
+}
+function pauseLabel(emp, lang){
+  if(!emp || !emp.pauseStart) return '';
+  const end = emp.pauseEnd ? emp.pauseEnd : (lang==='en' ? 'ongoing' : '未定');
+  return (lang==='en' ? 'Paused ' : '停止 ') + emp.pauseStart + '〜' + end;
+}
+
+// returns null (no master configured => skip check), or {ok, reason, emp}
 async function checkAgainstMaster(id, name){
   const master = await getEmployeeMaster();
   if(!master || master.length===0) return null; // no roster uploaded yet: don't block
   const found = master.find(e=>String(e.id)===String(id));
   if(!found) return {ok:false, reason:'not_found'};
-  if(String(found.name).trim() !== name.trim()) return {ok:false, reason:'mismatch'};
-  return {ok:true};
+  if(normName(found.name) !== normName(name)) return {ok:false, reason:'mismatch'};
+  return {ok:true, emp:found};
 }
 
 /* ===================== date logic ===================== */
@@ -659,6 +1236,10 @@ function isPastCutoff(dateISOStr){
 function monthLabel(y,m,lang){
   const monthsEn = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   return lang==='ja' ? `${y}年${m+1}月` : `${monthsEn[m]} ${y}`;
+}
+function dowLabel(dateStr, lang){
+  const names = (T[lang]||T.ja).weekdayShort || T.ja.weekdayShort;
+  return names[parseISO(dateStr).getDay()];
 }
 function buildMonthGrid(y,m){
   const first = new Date(y,m,1);
@@ -685,17 +1266,90 @@ function occurrencesInMonth(rule, y, m){
   }
   return out;
 }
+// 給食のある日＝平日から休業日を除いた日
+function servingDaysInMonth(y, m0, closedSet){
+  const out = [];
+  const last = new Date(y, m0+1, 0).getDate();
+  for(let d=1; d<=last; d++){
+    const dstr = iso(y,m0,d);
+    const wd = new Date(y,m0,d).getDay();
+    if(wd===0 || wd===6) continue;
+    if(closedSet && closedSet.has(dstr)) continue;
+    out.push(dstr);
+  }
+  return out;
+}
+// その社員が実際に食べた日と金額（社員側の見込み表示・CSV出力の両方で使う）
+function calcForEmployee(emp, cancelledSet, servingDays, specialSet){
+  const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
+  let eatDays=0, amount=0, pausedDays=0, cancelledDays=0;
+  servingDays.forEach(d=>{
+    if(isPausedOn(emp, d)){ pausedDays++; return; }
+    if(cancelledSet.has(d)){ cancelledDays++; return; }
+    eatDays++;
+    amount += (specialSet && specialSet.has(d)) ? PRICE_SET : basePrice;
+  });
+  return {eatDays, amount, pausedDays, cancelledDays};
+}
+// 割引商品の購入：その月の分だけ取り出す
+function purchasesInMonth(rec, y, m0){
+  return ((rec && rec.purchases) || []).filter(p=>{
+    if(!p || !p.date) return false;
+    const dt = parseISO(p.date);
+    return dt.getFullYear()===y && dt.getMonth()===m0;
+  }).sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+}
+function purchaseTotal(list){
+  return (list||[]).reduce((s,p)=> s + Number(p.total||0), 0);
+}
+// その月の購入を単価ごとにまとめる（例：¥100×2、¥250×1）
+function aggregatePurchaseItems(list){
+  const map = new Map();
+  (list||[]).forEach(p=>(p.items||[]).forEach(it=>{
+    const price = Number(it.price);
+    map.set(price, (map.get(price)||0) + Number(it.qty||0));
+  }));
+  const entries = Array.from(map.entries()).sort((a,b)=>a[0]-b[0]);
+  return {
+    pieces: entries.reduce((n,[,q])=>n+q, 0),
+    text: entries.map(([price,qty])=>`¥${price}×${qty}`).join('、'),
+  };
+}
+// キャンセルの内訳（0件の側は書かない）
+function cancelBreakdownText(summary, t){
+  const parts = [];
+  if(summary.single > 0) parts.push(t.breakdownSingle.replace('{n}', summary.single));
+  if(summary.recurring > 0) parts.push(t.breakdownRecurring.replace('{n}', summary.recurring));
+  return parts.length ? `（${parts.join('・')}）` : '';
+}
+function purchaseItemsText(p){
+  return (p.items||[]).map(it=>`¥${it.price}×${it.qty}`).join('、');
+}
+
+// 記録から、その月のキャンセル日を「個別」「定期」に分けて集める
+function cancelledSetsForMonth(rec, y, m0){
+  const single = new Set();
+  const recurring = new Set();
+  if(!rec) return {single, recurring, all:new Set()};
+  (rec.singleDates||[]).forEach(d=>{
+    const dt = parseISO(d);
+    if(dt.getFullYear()===y && dt.getMonth()===m0) single.add(d);
+  });
+  (rec.recurring||[]).forEach(rule=>{
+    occurrencesInMonth(rule, y, m0).forEach(d=>{ if(!single.has(d)) recurring.add(d); });
+  });
+  const all = new Set([...single, ...recurring]);
+  return {single, recurring, all};
+}
 
 /* ===================== render ===================== */
-function h(strings){ return strings; } // no-op tag placeholder (not used, kept simple)
-
 function render(){
   const t = T[state.lang];
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="masthead">
       <div class="masthead-brand">
-        <img src="data:image/png;base64,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" alt="宮田とうふ工房" class="brand-logo">
+        ${HAS_LOGO ? `<img src="${LOGO_DATA_URL}" alt="宮田とうふ工房" class="brand-logo">` : ''}
         <h1>${t.title}</h1>
       </div>
       <div class="masthead-right">
@@ -739,6 +1393,7 @@ function renderForm(vp){
   const {y,m} = state.formMonth;
   const cells = buildMonthGrid(y,m);
   const wdLabels = [t.su,t.mo,t.tu,t.we,t.th,t.fr,t.sa];
+  const closedSet = new Set(state.closedDays||[]);
 
   const isPrevDisabled = (y===today.getFullYear() && m===today.getMonth());
   const chips = Array.from(state.selectedDates).sort().map(d=>`
@@ -747,7 +1402,7 @@ function renderForm(vp){
 
   vp.innerHTML = `
     <div class="card">
-      <h2><span class="num">1</span>${t.step1}</h2>
+      <h2>${t.step1}</h2>
       <div class="row2">
         <div class="field">
           <label>${t.empId}</label>
@@ -759,23 +1414,39 @@ function renderForm(vp){
           <input type="text" id="f-empname" placeholder="${t.empNamePh}" value="${escapeHtml(state.empName)}">
         </div>
       </div>
-      <div id="pin-toggle-wrap" style="${state.pinPanelOpen?'display:none':''}">
-        <button type="button" class="pin-link" id="pin-open-link">${t.pinOpenLink}</button>
-      </div>
-      <div id="pin-panel" style="${state.pinPanelOpen?'':'display:none'}">
-        <div class="field" style="margin-top:2px;">
-          <label class="small">${t.pin} <span style="font-weight:400;color:var(--ink-soft)">${t.optional}</span></label>
-          <input type="password" inputmode="numeric" maxlength="4" id="f-emppin" class="pin-input-small" placeholder="${t.pinPh}" value="${escapeHtml(state.empPin)}">
-        </div>
-        <p class="footnote">${t.pinNotice}</p>
-      </div>
     </div>
 
     <div class="card">
-      <h2><span class="num">2</span>${t.step2}</h2>
-      <div class="notice">
-        <div>🕗</div>
-        <div><b>${t.cutoffTitle}</b>${t.cutoffBody}</div>
+      <div class="modeswitch">
+        <button type="button" class="${state.formMode==='cancel'?'active':''}" data-mode="cancel">${t.modeCancel}</button>
+        <button type="button" class="${state.formMode==='purchase'?'active':''}" data-mode="purchase">${t.modePurchase}</button>
+      </div>
+      ${state.formMode==='purchase' ? `
+      <h2>${t.step2Purchase}</h2>
+      <p class="footnote" style="margin-top:0;margin-bottom:12px;">${t.purchaseHelp}</p>
+      <div class="pricelist">
+        ${PRICE_OPTIONS.map(p=>{
+          const q = Number(state.purchaseQty[p]||0);
+          return `<div class="pricerow ${q>0?'has':''}" data-row="${p}">
+            <div class="p">¥${p}</div>
+            <div class="qtyctl">
+              <button type="button" data-step="-1" data-price="${p}" aria-label="−">−</button>
+              <input type="number" inputmode="numeric" min="0" step="1" id="qty-${p}" data-price="${p}" value="${q}">
+              <button type="button" data-step="1" data-price="${p}" aria-label="＋">＋</button>
+            </div>
+            <div class="sub" id="sub-${p}">¥${(q*p).toLocaleString()}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="purtotal">
+        <span class="l">${t.purchaseTotalLabel}</span>
+        <span class="v" id="pur-total">¥${purchaseSumFromState().toLocaleString()}</span>
+      </div>
+      ` : `
+      <h2>${t.step2}</h2>
+      <div class="cutoff">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3.1 2"/></svg>
+        <div>${t.cutoffBody.replace(/8:00/g, '<span class="hh">8:00</span>')}</div>
       </div>
       <div class="calnav">
         <button class="navbtn" id="cal-prev" ${isPrevDisabled?'disabled':''}>‹</button>
@@ -786,92 +1457,303 @@ function renderForm(vp){
         ${wdLabels.map(w=>`<div class="wd">${w}</div>`).join('')}
         ${cells.map(dstr=>{
           if(!dstr) return `<div class="calcell outmonth"></div>`;
-          const disabled = isPastCutoff(dstr);
+          const isClosed = closedSet.has(dstr);
+          const disabled = isClosed || isPastCutoff(dstr);
           const selected = state.selectedDates.has(dstr);
           const isToday = dstr === todayISO();
           const dayNum = Number(dstr.split('-')[2]);
-          return `<div class="calcell ${disabled?'disabled':''} ${selected?'selected':''} ${isToday?'today':''}" data-date="${dstr}" title="${disabled?t.pastCutoffCell:''}">
+          const title = isClosed ? t.closedDayLabel : (disabled ? t.pastCutoffCell : '');
+          return `<div class="calcell ${isClosed?'closed':''} ${disabled?'disabled':''} ${selected?'selected':''} ${isToday?'today':''}" data-date="${dstr}" title="${title}">
               <div>${dayNum}</div>
             </div>`;
         }).join('')}
+      </div>
+      <div class="callegend">
+        <span><i class="legend-swatch closed"></i>${t.legendClosed}</span>
+        <span><i class="legend-swatch sel"></i>${t.legendSelected}</span>
       </div>
       <div style="margin-top:12px;">
         <label>${t.selected}</label>
         <div class="chipwrap">${chips}</div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2><span class="num">3</span>${t.step3}</h2>
-      <div class="checkline" id="recurring-toggle-line">
-        <input type="checkbox" id="recurring-toggle" ${state.recurringOn?'checked':''}>
-        <span>${t.recurringToggle}</span>
-      </div>
-      <div id="recurring-panel" style="${state.recurringOn?'':'display:none'}">
-        <label>${t.recurringWd}</label>
-        <div class="weekday-pick" style="margin-bottom:14px;">
-          ${wdLabels.map((w,idx)=>`<button type="button" class="wdbtn ${state.recurringWd.has(idx)?'active':''}" data-wd="${idx}">${w}</button>`).join('')}
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>${t.recurringStart}</label>
-            <input type="date" id="rec-start" value="${state.recurringStart}">
+      <div class="recdisclose">
+        ${state.recurringOn ? `
+          <div class="recpanel">
+            <label>${t.recurringWd}</label>
+            <div class="weekday-pick" style="margin-bottom:14px;">
+              ${wdLabels.map((w,idx)=>`<button type="button" class="wdbtn ${state.recurringWd.has(idx)?'active':''}" data-wd="${idx}">${w}</button>`).join('')}
+            </div>
+            <div class="row2">
+              <div class="field" style="margin-bottom:0;">
+                <label>${t.recurringStart}</label>
+                <input type="date" id="rec-start" value="${state.recurringStart}">
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label>${t.recurringEnd}</label>
+                <input type="date" id="rec-end" value="${state.recurringEnd}">
+              </div>
+            </div>
+            <div style="margin-top:10px;"><button type="button" class="minilink" id="rec-toggle">${t.recClose}</button></div>
           </div>
-          <div class="field">
-            <label>${t.recurringEnd}</label>
-            <input type="date" id="rec-end" value="${state.recurringEnd}">
-          </div>
-        </div>
+        ` : `<button type="button" class="minilink" id="rec-toggle">＋ ${t.recOpen}</button>`}
       </div>
+      `}
     </div>
 
     ${state.msg ? `<div class="notice danger">${state.msg}</div>` : ''}
 
+    ${(state.formMode==='purchase' && state.purchaseConfirm) ? `
+      <div class="notice danger" id="pur-confirm-note">
+        <div>⚠️</div>
+        <div><b>${t.purchaseConfirmTitle}</b>${t.purchaseConfirmBody}
+          <div style="margin-top:6px;font-weight:700;">${t.purchaseConfirmSummary
+            .replace('{n}', purchaseSumFromState().toLocaleString())
+            .replace('{items}', purchaseItemsFromState().map(it=>`¥${it.price}×${it.qty}`).join('、'))}</div>
+        </div>
+      </div>
+      ${state.purchasePinMode==='locked' ? `
+        <div class="notice danger"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
+      ` : `
+        <div class="gate" style="padding:15px;margin-bottom:14px;">
+          <p style="margin:0 0 12px;">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
+          <div class="field pinfield" style="margin-bottom:${state.purchasePinMode==='set'?'12px':'0'};">
+            <label>${t.pinLabel}</label>
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}">
+          </div>
+          ${state.purchasePinMode==='set' ? `
+          <div class="field pinfield" style="margin-bottom:0;">
+            <label>${t.pinLabel2}</label>
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}">
+          </div>` : ''}
+          <div class="status-msg">${state.purchasePinMsg ? `<span style="color:var(--danger)">${state.purchasePinMsg}</span>` : ''}</div>
+        </div>
+      `}
+    ` : ''}
+
     <div class="btnrow">
-      <button class="btn btn-submit" id="submit-btn" ${state.submitting?'disabled':''}>${state.submitting? t.submitting : '✓ '+t.submit}</button>
+      <button class="btn btn-submit" id="submit-btn" ${
+        state.submitting || (state.formMode==='purchase' && state.purchaseConfirm && state.purchasePinMode==='locked') ? 'disabled' : ''
+      }>${
+        state.submitting ? t.submitting
+          : (state.formMode==='purchase'
+              ? (state.purchaseConfirm ? '✓ ' + t.purchaseConfirmBtn : '✓ ' + t.submitPurchase)
+              : '✓ ' + t.submit)
+      }</button>
     </div>
   `;
 
-  vp.querySelector('#f-empid').oninput = e=>{ state.empId = e.target.value; persistEmpProfile(); };
-  vp.querySelector('#f-empname').oninput = e=>{ state.empName = e.target.value; persistEmpProfile(); };
-  const pinOpenLink = vp.querySelector('#pin-open-link');
-  if(pinOpenLink) pinOpenLink.onclick = ()=>{ state.pinPanelOpen = true; renderForm(vp); };
-  const pinInput = vp.querySelector('#f-emppin');
-  if(pinInput) pinInput.oninput = e=>{ state.empPin = e.target.value.replace(/[^0-9]/g,'').slice(0,4); };
-  
-  vp.querySelector('#cal-prev').onclick = ()=>{
-    let {y,m} = state.formMonth; m--; if(m<0){m=11;y--;}
-    state.formMonth = {y,m}; render();
-  };
-  vp.querySelector('#cal-next').onclick = ()=>{
-    let {y,m} = state.formMonth; m++; if(m>11){m=0;y++;}
-    state.formMonth = {y,m}; render();
-  };
-  vp.querySelectorAll('.calcell[data-date]').forEach(c=>{
-    c.onclick = ()=>{
-      const d = c.dataset.date;
-      if(isPastCutoff(d)) return;
-      if(state.selectedDates.has(d)) state.selectedDates.delete(d);
-      else state.selectedDates.add(d);
-      render();
-    };
-  });
-  vp.querySelectorAll('.chip button[data-del]').forEach(b=>{
-    b.onclick = ()=>{ state.selectedDates.delete(b.dataset.del); render(); };
-  });
-  vp.querySelector('#recurring-toggle').onchange = e=>{ state.recurringOn = e.target.checked; render(); };
-  vp.querySelectorAll('.wdbtn').forEach(b=>{
-    b.onclick = ()=>{
-      const idx = Number(b.dataset.wd);
-      if(state.recurringWd.has(idx)) state.recurringWd.delete(idx);
-      else state.recurringWd.add(idx);
-      render();
-    };
-  });
-  const rs = vp.querySelector('#rec-start'); if(rs) rs.onchange = e=>{ state.recurringStart = e.target.value; };
-  const re = vp.querySelector('#rec-end'); if(re) re.onchange = e=>{ state.recurringEnd = e.target.value; };
+  vp.querySelector('#f-empid').oninput = e=>{ state.empId = e.target.value; persistEmpProfile(); resetPurchaseConfirm(); };
+  vp.querySelector('#f-empname').oninput = e=>{ state.empName = e.target.value; persistEmpProfile(); resetPurchaseConfirm(); };
 
-  vp.querySelector('#submit-btn').onclick = submitCancellation;
+  vp.querySelectorAll('.modeswitch button').forEach(b=>{
+    b.onclick = ()=>{ state.formMode = b.dataset.mode; state.msg = null; state.purchaseConfirm = false; render(); };
+  });
+
+  if(state.formMode==='purchase'){
+    vp.querySelectorAll('.qtyctl input').forEach(inp=>{
+      inp.oninput = ()=>{ setQty(Number(inp.dataset.price), inp.value, false); };
+      inp.onblur = ()=>{ const p = Number(inp.dataset.price); inp.value = Number(state.purchaseQty[p]||0); };
+    });
+    const digits4 = v => String(v||'').replace(/[^0-9]/g,'').slice(0,4);
+    const purPin = vp.querySelector('#pur-pin');
+    if(purPin) purPin.oninput = e=>{ state.purchasePin = digits4(e.target.value); e.target.value = state.purchasePin; };
+    const purPin2 = vp.querySelector('#pur-pin2');
+    if(purPin2) purPin2.oninput = e=>{ state.purchasePin2 = digits4(e.target.value); e.target.value = state.purchasePin2; };
+
+    vp.querySelectorAll('.qtyctl button[data-step]').forEach(btn=>{
+      btn.onclick = ()=>{
+        const p = Number(btn.dataset.price);
+        setQty(p, Number(state.purchaseQty[p]||0) + Number(btn.dataset.step), true);
+      };
+    });
+  } else {
+    vp.querySelector('#cal-prev').onclick = ()=>{
+      let {y,m} = state.formMonth; m--; if(m<0){m=11;y--;}
+      state.formMonth = {y,m}; render();
+    };
+    vp.querySelector('#cal-next').onclick = ()=>{
+      let {y,m} = state.formMonth; m++; if(m>11){m=0;y++;}
+      state.formMonth = {y,m}; render();
+    };
+    vp.querySelectorAll('.calcell[data-date]').forEach(c=>{
+      c.onclick = ()=>{
+        const d = c.dataset.date;
+        if(isPastCutoff(d) || closedSet.has(d)) return;
+        if(state.selectedDates.has(d)) state.selectedDates.delete(d);
+        else state.selectedDates.add(d);
+        render();
+      };
+    });
+    vp.querySelectorAll('.chip button[data-del]').forEach(b=>{
+      b.onclick = ()=>{ state.selectedDates.delete(b.dataset.del); render(); };
+    });
+    const recToggle = vp.querySelector('#rec-toggle');
+    if(recToggle) recToggle.onclick = ()=>{
+      state.recurringOn = !state.recurringOn;
+      if(!state.recurringOn) state.recurringWd = new Set();
+      render();
+    };
+    vp.querySelectorAll('.wdbtn').forEach(b=>{
+      b.onclick = ()=>{
+        const idx = Number(b.dataset.wd);
+        if(state.recurringWd.has(idx)) state.recurringWd.delete(idx);
+        else state.recurringWd.add(idx);
+        render();
+      };
+    });
+    const rs = vp.querySelector('#rec-start'); if(rs) rs.onchange = e=>{ state.recurringStart = e.target.value; };
+    const re = vp.querySelector('#rec-end'); if(re) re.onchange = e=>{ state.recurringEnd = e.target.value; };
+  }
+
+  vp.querySelector('#submit-btn').onclick = ()=>{
+    if(state.formMode==='purchase') submitPurchase();
+    else submitCancellation();
+  };
+}
+
+/* ---- 割引商品の購入：個数と合計 ---- */
+// 送信した日付と時刻（例：2026-08-05 09:12:34）
+function nowLocalStamp(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+// 対象月（0始まり）の分が天引きされる月
+function payrollMonthOf(m0){
+  const m = m0 + 2;
+  return m > 12 ? m - 12 : m;
+}
+function purchaseSumFromState(){
+  return PRICE_OPTIONS.reduce((sum,p)=> sum + p * Number(state.purchaseQty[p]||0), 0);
+}
+function purchaseItemsFromState(){
+  return PRICE_OPTIONS
+    .map(p=>({price:p, qty:Number(state.purchaseQty[p]||0)}))
+    .filter(it=>it.qty > 0);
+}
+// 個数や氏名を触ったら最終確認をやり直す（古い内容のまま送信されないように）
+function resetPurchaseConfirm(){
+  if(!state.purchaseConfirm) return;
+  state.purchaseConfirm = false;
+  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  render();   // PIN入力欄も含めて描き直す
+}
+function setQty(price, raw, writeInput){
+  let q = Math.floor(Number(raw));
+  if(!isFinite(q) || q < 0) q = 0;
+  if(q > 999) q = 999;
+  state.purchaseQty[price] = q;
+  resetPurchaseConfirm();
+  const inp = document.getElementById('qty-'+price);
+  if(inp && writeInput) inp.value = q;
+  const sub = document.getElementById('sub-'+price);
+  if(sub) sub.textContent = '¥' + (q*price).toLocaleString();
+  const row = document.querySelector('.pricerow[data-row="'+price+'"]');
+  if(row) row.classList.toggle('has', q>0);
+  const tot = document.getElementById('pur-total');
+  if(tot) tot.textContent = '¥' + purchaseSumFromState().toLocaleString();
+}
+
+async function submitPurchase(){
+  const t = T[state.lang];
+  state.msg = null;
+  if(!state.empId.trim() || !state.empName.trim()){
+    state.msg = t.needIdName; render(); return;
+  }
+  const items = purchaseItemsFromState();
+  if(items.length === 0){
+    state.msg = t.needQty; render(); return;
+  }
+  const id = state.empId.trim();
+  const masterCheck = await checkAgainstMaster(id, state.empName.trim());
+  if(masterCheck && !masterCheck.ok){
+    state.msg = masterCheck.reason==='not_found' ? t.masterNotFound : t.masterMismatch;
+    render(); return;
+  }
+
+  // 1回目は最終確認とPIN入力を出して止める。2回目で送信する。
+  if(!state.purchaseConfirm){
+    const pinRec = await getPinRecord(id);
+    if(!pinRec){
+      state.purchasePinMode = 'set';
+    } else {
+      const lock = pinLockRemainMinutes(pinRec);
+      state.purchasePinMode = lock > 0 ? 'locked' : 'enter';
+      state.purchaseLockMin = lock;
+    }
+    state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+    state.purchaseConfirm = true;
+    render();
+    const note = document.getElementById('pur-confirm-note');
+    if(note && note.scrollIntoView) note.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  // 2回目：PINで本人確認する
+  if(state.purchasePinMode === 'locked'){
+    state.purchaseLockMin = pinLockRemainMinutes(await getPinRecord(id));
+    if(state.purchaseLockMin > 0){ render(); return; }
+    state.purchasePinMode = 'enter';   // ロックが明けた
+  }
+  if(state.purchasePinMode === 'set'){
+    if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
+    if(state.purchasePin !== state.purchasePin2){ state.purchasePinMsg = t.pinNotMatch; render(); return; }
+    const already = await getPinRecord(id);
+    if(already){                        // 途中で誰かが設定した場合
+      state.purchasePinMode = 'enter'; state.purchasePin = ''; state.purchasePin2 = '';
+      state.purchasePinMsg = null; render(); return;
+    }
+    await savePin(id, state.purchasePin);
+  } else {
+    if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
+    const res = await verifyPin(id, state.purchasePin);
+    if(res.status === 'locked'){
+      state.purchasePinMode = 'locked'; state.purchaseLockMin = res.minutes;
+      state.purchasePin = ''; render(); return;
+    }
+    if(res.status === 'none'){         // 担当者がリセットした直後
+      state.purchasePinMode = 'set'; state.purchasePin = ''; state.purchasePin2 = '';
+      state.purchasePinMsg = null; render(); return;
+    }
+    if(res.status !== 'ok'){
+      state.purchasePin = '';
+      state.purchasePinMsg = t.pinWrong.replace('{n}', res.left);
+      render(); return;
+    }
+  }
+
+  state.purchaseConfirm = false;
+  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  state.submitting = true; render();
+
+  const total = items.reduce((s,it)=> s + it.price*it.qty, 0);
+  const entry = {
+    id: 'p'+Date.now(),
+    date: todayISO(),                 // 集計に使う日付（送信日）
+    submittedAt: nowLocalStamp(),     // 送信した日付と時刻（記録用）
+    items, total,
+    createdAt: new Date().toISOString(),
+  };
+
+  const existing = (await getEmp(id)) || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
+  existing.name = state.empName.trim();
+  existing.purchases = existing.purchases || [];
+  existing.purchases.push(entry);
+  existing.updatedAt = new Date().toISOString();
+  await setEmp(id, existing);
+
+  // fire-and-forget push to Google Sheets if configured
+  kvRequest('logPurchase', {payload:{
+    employeeId:id, name:existing.name, date:entry.date, items:entry.items, total:entry.total,
+    submittedAt:entry.submittedAt, timestamp:entry.createdAt,
+  }});
+
+  state.submitting = false;
+  state.purchaseQty = {};
+  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
+  render();
+  showStamp(t.successTitle, t.purchaseSuccessBody);
 }
 
 async function submitCancellation(){
@@ -880,17 +1762,15 @@ async function submitCancellation(){
   if(!state.empId.trim() || !state.empName.trim()){
     state.msg = t.needIdName; render(); return;
   }
-  if(state.empPin.trim() && !/^\d{4}$/.test(state.empPin.trim())){
-    state.msg = t.needPin; render(); return;
-  }
-  const hasSingle = state.selectedDates.size > 0;
+  const closedSet = new Set(state.closedDays||[]);
+  const pickedDates = Array.from(state.selectedDates).filter(d=>!closedSet.has(d));
+  const hasSingle = pickedDates.length > 0;
   const hasRecurring = state.recurringOn && state.recurringWd.size > 0;
   if(!hasSingle && !hasRecurring){
     state.msg = t.needDates; render(); return;
   }
 
   const id = state.empId.trim();
-  const pin = state.empPin.trim();
 
   const masterCheck = await checkAgainstMaster(id, state.empName.trim());
   if(masterCheck && !masterCheck.ok){
@@ -898,18 +1778,12 @@ async function submitCancellation(){
     render(); return;
   }
 
-  const preCheck = await getEmp(id);
-  if(preCheck && preCheck.pin && preCheck.pin !== pin){
-    state.msg = t.wrongPin; render(); return;
-  }
-
   state.submitting = true; render();
 
-  const existing = preCheck || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
+  const existing = (await getEmp(id)) || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
   existing.name = state.empName.trim();
-  existing.pin = existing.pin || pin;
   const singleSet = new Set(existing.singleDates || []);
-  state.selectedDates.forEach(d=>singleSet.add(d));
+  pickedDates.forEach(d=>singleSet.add(d));
   existing.singleDates = Array.from(singleSet).sort();
 
   if(hasRecurring){
@@ -928,7 +1802,7 @@ async function submitCancellation(){
   // fire-and-forget push to Google Sheets if configured
   pushToSheet({
     employeeId: id, name: existing.name,
-    singleDates: Array.from(state.selectedDates),
+    singleDates: pickedDates,
     recurring: hasRecurring ? [{
       weekdays: Array.from(state.recurringWd),
       start: state.recurringStart || todayISO(),
@@ -940,8 +1814,10 @@ async function submitCancellation(){
   state.submitting = false;
   state.selectedDates = new Set();
   state.recurringOn = false; state.recurringWd = new Set(); state.recurringEnd='';
+  // 記録欄を開いていたら、最新の内容に更新する
+  if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
   render();
-  showStamp(t.successTitle, t.successBody, state.lang==='ja' ? '受付済' : 'RECEIVED');
+  showStamp(t.successTitle, t.successBody);
 }
 
 async function pushToSheet(payload){
@@ -964,7 +1840,7 @@ function showStamp(title, body){
   overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
 }
 
-/* ---------- MY RECORDS SECTION (collapsible, lives on the same page as the form) ---------- */
+/* ---------- MY RECORDS (社員番号＋氏名フルネームで確認) ---------- */
 function renderMineSection(vp){
   const t = T[state.lang];
   vp.innerHTML = `
@@ -977,10 +1853,10 @@ function renderMineSection(vp){
         <p class="small" style="margin-top:10px">${t.mineDesc}</p>
         <div class="row2" style="margin-bottom:10px;">
           <div class="field" style="margin-bottom:0;">
-            <input type="text" id="mine-id" placeholder="${t.empIdPh}" value="${escapeHtml(state.mineId)}">
+            <input type="text" id="mine-id" placeholder="${t.mineIdPh}" value="${escapeHtml(state.mineId)}">
           </div>
           <div class="field" style="margin-bottom:0;">
-            <input type="password" inputmode="numeric" maxlength="4" id="mine-pin" placeholder="${t.pinPh}" value="${escapeHtml(state.minePin)}">
+            <input type="text" id="mine-name" placeholder="${t.mineNamePh}" value="${escapeHtml(state.mineName)}">
           </div>
         </div>
         <div class="btnrow" style="margin-top:0;margin-bottom:10px;">
@@ -993,109 +1869,402 @@ function renderMineSection(vp){
   vp.querySelector('#mine-toggle-header').onclick = ()=>{
     state.mineOpen = !state.mineOpen;
     if(state.mineOpen && !state.mineId && state.empId) state.mineId = state.empId;
-    if(state.mineOpen && !state.minePin && state.empPin) state.minePin = state.empPin;
+    if(state.mineOpen && !state.mineName && state.empName) state.mineName = state.empName;
     renderMineSection(vp);
   };
   const mineIdInput = vp.querySelector('#mine-id');
   if(!mineIdInput) return;
   mineIdInput.oninput = e=>{ state.mineId = e.target.value; };
-  const minePinInput = vp.querySelector('#mine-pin');
-  minePinInput.oninput = e=>{ state.minePin = e.target.value.replace(/[^0-9]/g,'').slice(0,4); };
+  vp.querySelector('#mine-name').oninput = e=>{ state.mineName = e.target.value; };
   vp.querySelector('#mine-search').onclick = async ()=>{
-    const id = state.mineId.trim();
-    const pin = state.minePin.trim();
-    if(!id || (pin && !/^\d{4}$/.test(pin))){
-      state.mineRecord = null; state.mineWrongPin = false; state.mineSearched = true;
-      renderMineResult(true);
-      return;
-    }
-    const rec = await getEmp(id);
-    if(rec && rec.pin && rec.pin !== pin){
-      state.mineRecord = null; state.mineWrongPin = true; state.mineSearched = true;
-      renderMineResult();
-      return;
-    }
-    state.mineRecord = rec; state.mineWrongPin = false; state.mineSearched = true;
-    renderMineResult();
+    const btn = vp.querySelector('#mine-search');
+    btn.disabled = true;
+    await runMineSearch();
+    btn.disabled = false;
+    paintMineResult();
   };
-  if(state.mineSearched) renderMineResult();
+  if(state.mineSearched) paintMineResult();
+}
 
-  function renderMineResult(needPinMsg){
-    const box = document.getElementById('mine-result');
-    if(needPinMsg){
-      box.innerHTML = `<div class="card"><p class="notice danger">${t.mineNeedIdOrPin}</p></div>`;
-      return;
-    }
-    if(state.mineWrongPin){
-      box.innerHTML = `<div class="card"><p class="notice danger">${t.wrongPin}</p></div>`;
-      return;
-    }
-    if(!state.mineRecord){
-      box.innerHTML = `<div class="card"><p class="notice danger">${t.mineNotFound}</p></div>`;
-      return;
-    }
-    const rec = state.mineRecord;
-    const singleRows = (rec.singleDates||[]).sort().map(d=>`
-      <div class="daylist item"><span>${d}${d===todayISO()?' ('+t.todayIs+')':''}</span>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" data-del-single="${d}">${t.delete}</button>
-      </div>`).join('') || `<p class="small">${t.none}</p>`;
-    const recRows = (rec.recurring||[]).map(r=>{
-      const wdNames = r.weekdays.map(i=>T[state.lang][WD_KEYS[i]]).join(state.lang==='ja'?'・':', ');
-      return `<div class="daylist item"><span>${t.weekdayLabel} ${wdNames} <span class="small">(${r.start} 〜 ${r.end||(state.lang==='ja'?'継続':'ongoing')})</span></span>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" data-del-rec="${r.id}">${t.delete}</button>
-      </div>`;
-    }).join('') || `<p class="small">${t.none}</p>`;
+async function runMineSearch(){
+  const t = T[state.lang];
+  const id = state.mineId.trim();
+  const name = state.mineName.trim();
+  state.mineSearched = true;
+  state.mineError = null; state.mineRecord = null; state.mineMaster = null; state.mineSummary = null;
+  state.mineStage = 'search'; state.minePin = ''; state.minePin2 = '';
+  state.minePinMsg = null; state.minePinNotice = null; state.minePinChangeOpen = false;
 
-    box.innerHTML = `
-      <div class="card">
-        <h2>${escapeHtml(rec.name)} <span class="small">(${rec.employeeId})</span></h2>
-        <label>${t.singleDates}</label>
-        ${singleRows}
-        <div style="height:14px"></div>
-        <label>${t.recurringRules}</label>
-        ${recRows}
-        <div style="height:18px"></div>
-        <label>${t.changePin}</label>
-        <div class="row2" style="align-items:end;">
-          <div class="field" style="margin-bottom:0;">
-            <input type="password" inputmode="numeric" maxlength="4" id="mine-newpin" placeholder="${t.pinPh}">
+  if(!id || !name){ state.mineError = t.mineNeedIdName; return; }
+
+  const [master, rec] = await Promise.all([getMasterEmp(id), getEmp(id)]);
+  if(master){
+    if(normName(master.name) !== normName(name)){ state.mineError = t.mineNameMismatch; return; }
+  } else if(rec){
+    if(normName(rec.name) !== normName(name)){ state.mineError = t.mineNameMismatch; return; }
+  } else {
+    state.mineError = t.mineNotFound; return;
+  }
+  state.mineMaster = master;
+  state.mineRecord = rec;
+
+  // ここからPINによる本人確認
+  const pinRec = await getPinRecord(id);
+  if(!pinRec){                       // まだPINを設定していない人
+    state.mineStage = 'setPin';
+    return;
+  }
+  const locked = pinLockRemainMinutes(pinRec);
+  if(locked > 0){
+    state.mineStage = 'locked'; state.mineLockUntil = locked;
+    return;
+  }
+  if(isDeviceTrusted(id, name)){     // この端末では前回PINを通している
+    state.mineStage = 'view';
+    await computeMineSummary();
+    return;
+  }
+  state.mineStage = 'enterPin';
+}
+
+async function computeMineSummary(){
+  const [closed, special] = await Promise.all([getClosedDays(), getSpecialPriceDays()]);
+  state.closedDays = closed;
+  const [ys, ms] = (state.mineMonth || currentMonthValue()).split('-');
+  const y = parseInt(ys,10), m0 = parseInt(ms,10)-1;
+  const closedSet = new Set(closed), specialSet = new Set(special);
+  const serving = servingDaysInMonth(y, m0, closedSet);
+  const sets = cancelledSetsForMonth(state.mineRecord, y, m0);
+  const emp = state.mineMaster || {};
+  const calc = calcForEmployee(emp, sets.all, serving, specialSet);
+
+  let single = 0, recurring = 0;
+  serving.forEach(d=>{
+    if(isPausedOn(emp, d)) return;
+    if(sets.single.has(d)) single++;
+    else if(sets.recurring.has(d)) recurring++;
+  });
+
+  const purchases = purchasesInMonth(state.mineRecord, y, m0);
+  const purchaseAmount = purchaseTotal(purchases);
+  const purchaseAgg = aggregatePurchaseItems(purchases);
+
+  // その月に登録されている個別キャンセル日（金額に入らない日も一覧には出す）
+  const singleDatesInMonth = Array.from(sets.single).sort();
+  const servingSet = new Set(serving);
+
+  state.mineSummary = {
+    y, m0, servingCount: serving.length,
+    singleDatesInMonth, servingSet,
+    eatDays: calc.eatDays,
+    lunchAmount: calc.amount,
+    purchaseAmount,
+    amount: calc.amount + purchaseAmount,
+    pausedDays: calc.pausedDays, cancelledDays: calc.cancelledDays,
+    single, recurring, mealType: emp.mealType,
+    purchases, purchaseAgg,
+  };
+}
+
+function paintPinGate(box, t){
+  const isSetup = state.mineStage === 'setPin';
+  const who = `${escapeHtml((state.mineMaster && state.mineMaster.name) || state.mineName.trim())}（${escapeHtml(state.mineId.trim())}）`;
+  box.innerHTML = `
+    <div class="gate">
+      <div class="who">${who}</div>
+      <h3>${isSetup ? t.pinSetTitle : t.pinEnterTitle}</h3>
+      <p>${isSetup ? t.pinSetDesc : t.pinEnterDesc}</p>
+      <div class="field pinfield">
+        <label>${isSetup ? t.pinLabel : t.pinLabel}</label>
+        <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="gate-pin" value="${escapeHtml(state.minePin)}">
+      </div>
+      ${isSetup ? `
+      <div class="field pinfield">
+        <label>${t.pinLabel2}</label>
+        <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="gate-pin2" value="${escapeHtml(state.minePin2)}">
+      </div>` : ''}
+      <label class="checkline" style="font-weight:600;font-size:13px;">
+        <input type="checkbox" id="gate-remember" ${state.mineRemember?'checked':''}>
+        <span>${t.pinRemember.replace('{n}', DEVICE_TRUST_DAYS)}</span>
+      </label>
+      <div class="btnrow">
+        <button class="btn btn-accent" id="gate-go">${isSetup ? t.pinSetBtn : t.pinEnterBtn}</button>
+      </div>
+      <div class="status-msg">${state.minePinMsg ? `<span style="color:var(--danger)">${state.minePinMsg}</span>` : ''}</div>
+    </div>
+  `;
+  const pin1 = box.querySelector('#gate-pin');
+  const digits = v => v.replace(/[^0-9]/g,'').slice(0,4);
+  pin1.oninput = e=>{ state.minePin = digits(e.target.value); e.target.value = state.minePin; };
+  const pin2 = box.querySelector('#gate-pin2');
+  if(pin2) pin2.oninput = e=>{ state.minePin2 = digits(e.target.value); e.target.value = state.minePin2; };
+  box.querySelector('#gate-remember').onchange = e=>{ state.mineRemember = e.target.checked; };
+  const go = box.querySelector('#gate-go');
+  const submit = ()=> isSetup ? submitNewPin() : submitPinCheck();
+  go.onclick = submit;
+  (pin2 || pin1).onkeydown = e=>{ if(e.key==='Enter') submit(); };
+  pin1.focus();
+}
+
+async function submitNewPin(){
+  const t = T[state.lang];
+  const id = state.mineId.trim();
+  if(!/^\d{4}$/.test(state.minePin)){ state.minePinMsg = t.pinNeed4; paintMineResult(); return; }
+  if(state.minePin !== state.minePin2){ state.minePinMsg = t.pinNotMatch; paintMineResult(); return; }
+
+  // 設定の直前にもう一度確認する（別の人が同時に設定していた場合に上書きしないため）
+  const existing = await getPinRecord(id);
+  if(existing){
+    state.mineStage = 'enterPin'; state.minePin = ''; state.minePin2 = '';
+    state.minePinMsg = null; paintMineResult(); return;
+  }
+  await savePin(id, state.minePin);
+  if(state.mineRemember) trustDevice(id, state.mineName.trim());
+  state.minePin = ''; state.minePin2 = ''; state.minePinMsg = null;
+  state.mineStage = 'view';
+  await computeMineSummary();
+  paintMineResult();
+}
+
+async function submitPinCheck(){
+  const t = T[state.lang];
+  const id = state.mineId.trim();
+  if(!/^\d{4}$/.test(state.minePin)){ state.minePinMsg = t.pinNeed4; paintMineResult(); return; }
+  const res = await verifyPin(id, state.minePin);
+  if(res.status === 'ok'){
+    if(state.mineRemember) trustDevice(id, state.mineName.trim());
+    state.minePin = ''; state.minePinMsg = null;
+    state.mineStage = 'view';
+    await computeMineSummary();
+    paintMineResult();
+    return;
+  }
+  if(res.status === 'locked'){
+    state.mineStage = 'locked'; state.mineLockUntil = res.minutes; state.minePin = '';
+    paintMineResult(); return;
+  }
+  if(res.status === 'none'){   // 途中でリセットされた場合
+    state.mineStage = 'setPin'; state.minePin = ''; state.minePinMsg = null;
+    paintMineResult(); return;
+  }
+  state.minePin = '';
+  state.minePinMsg = t.pinWrong.replace('{n}', res.left);
+  paintMineResult();
+}
+
+function paintMineResult(){
+  const t = T[state.lang];
+  const box = document.getElementById('mine-result');
+  if(!box) return;
+
+  if(state.mineError){
+    box.innerHTML = `<div class="notice danger">${state.mineError}</div>`;
+    return;
+  }
+  if(state.mineStage === 'locked'){
+    box.innerHTML = `<div class="notice danger"><div>🔒</div><div><b>${t.pinLockedTitle}</b>${
+      t.pinLockedBody.replace('{n}', state.mineLockUntil||PIN_LOCK_MINUTES)}</div></div>`;
+    return;
+  }
+  if(state.mineStage === 'setPin' || state.mineStage === 'enterPin'){
+    paintPinGate(box, t);
+    return;
+  }
+  if(!state.mineSummary){ box.innerHTML = ''; return; }
+
+  const rec = state.mineRecord;
+  const master = state.mineMaster;
+  const s = state.mineSummary;
+  const displayName = (master && master.name) || (rec && rec.name) || state.mineName;
+  const unitText = s.mealType==='set' ? t.mineUnitSet : (s.mealType==='okazu' ? t.mineUnitOkazu : t.mineUnitUnknown);
+
+  const lockedDates = (s.singleDatesInMonth||[]).filter(d=>isPastCutoff(d));
+  const singleRows = (s.singleDatesInMonth||[]).length
+    ? s.singleDatesInMonth.map(d=>{
+        const counted = s.servingSet.has(d) && !isPausedOn(master||{}, d);
+        const editable = !isPastCutoff(d);   // 過ぎた日・当日8:00以降は取り消せない
+        return `<div class="item"><span>${d}（${dowLabel(d,state.lang)}）${d===todayISO()?' <span class="small">'+t.todayIs+'</span>':''}${
+          counted ? '' : ` <span class="badge out">${t.outOfScopeBadge}</span>`}</span>
+          ${editable
+            ? `<button class="btn btn-danger" style="padding:4px 10px;font-size:12px" data-del-single="${d}">${t.delete}</button>`
+            : `<span class="statuspill off">${t.pastEditLabel}</span>`}
+        </div>`;
+      }).join('')
+      + ((s.singleDatesInMonth||[]).some(d=>!(s.servingSet.has(d) && !isPausedOn(master||{}, d)))
+          ? `<p class="footnote">${t.outOfScopeHint}</p>` : '')
+      + (lockedDates.length ? `<p class="footnote">${t.pastEditHint}</p>` : '')
+    : `<p class="small">${t.none}</p>`;
+
+  const activeRules = (rec && (rec.recurring||[]).filter(r=>!r.end || r.end >= todayISO())) || [];
+  const recRows = (rec && (rec.recurring||[]).length)
+    ? rec.recurring.map(r=>{
+        const wdNames = r.weekdays.map(i=>T[state.lang][WD_KEYS[i]]).join(state.lang==='ja'?'・':', ');
+        const applied = occurrencesInMonth(r, s.y, s.m0).length;
+        const ended = !!(r.end && r.end < todayISO());
+        return `<div class="item"><span>${t.weekdayLabel} ${wdNames} <span class="small">(${r.start} 〜 ${r.end||(state.lang==='ja'?'継続':'ongoing')}) ・ ${t.recurringAppliedThisMonth.replace('{n}', applied)}</span></span>
+          ${ended
+            ? `<span class="statuspill off">${t.recEndedLabel}</span>`
+            : `<button class="btn btn-ghost" style="padding:4px 12px;font-size:12px" data-stop-rec="${r.id}">${t.recStopBtn}</button>`}
+        </div>`;
+      }).join('')
+      + `<p class="footnote">${t.recurringRulesNote}</p>`
+      + (activeRules.length ? `<p class="footnote">${t.recStopHint}</p>` : '')
+    : `<p class="small">${t.none}</p>`;
+
+  const purRows = (s.purchases && s.purchases.length)
+    ? s.purchases.map(p=>`
+        <div class="item"><span>${p.date}（${dowLabel(p.date,state.lang)}）　<span class="small">${escapeHtml(purchaseItemsText(p))}</span></span>
+          <b>¥${Number(p.total||0).toLocaleString()}</b>
+        </div>`).join('')
+    : `<p class="small">${t.minePurchaseNone}</p>`;
+
+  box.innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom:6px;">${escapeHtml(displayName)} <span class="small">(${escapeHtml(state.mineId.trim())})</span>
+        ${master && master.pauseStart ? `<span class="pausechip">${pauseLabel(master, state.lang)}</span>` : ''}
+      </h2>
+
+      <label style="margin-top:12px;">${t.mineSummaryTitle}</label>
+      <div class="monthbar">
+        <button type="button" class="navbtn" id="mine-prev">‹</button>
+        <input type="month" id="mine-month" value="${state.mineMonth}">
+        <button type="button" class="navbtn" id="mine-next">›</button>
+      </div>
+      <div class="deduct">
+        <div class="deduct-head">
+          <span class="l">${t.mineDeductLabel.replace('{m}', s.m0+1)}</span>
+          <span class="v">¥${s.amount.toLocaleString()}</span>
+        </div>
+        <div class="deduct-note">${t.mineDeductNote.replace('{m}', payrollMonthOf(s.m0))}</div>
+        <div class="rcpt">
+          <div class="rcpt-row ${s.eatDays===0?'zero':''}">
+            <span class="k">${t.rcptLunch}</span>
+            <span class="q">${t.rcptDays.replace('{n}', s.eatDays)}</span>
+            <span class="a">¥${s.lunchAmount.toLocaleString()}</span>
+            <span class="sub">${t.rcptLunchSub.replace('{serving}', s.servingCount).replace('{cancel}', s.cancelledDays)}${
+              s.pausedDays ? t.rcptPausedSub.replace('{n}', s.pausedDays) : ''
+            }${cancelBreakdownText(s, t)}</span>
+            <span class="sub">${t.mineUnitNote.replace('{u}', unitText)}</span>
           </div>
-          <div class="field" style="margin-bottom:0;">
-            <button class="btn btn-ghost" id="mine-pin-save" style="width:100%">${t.changePin}</button>
+          <div class="rcpt-row ${s.purchaseAmount===0?'zero':''}">
+            <span class="k">${t.rcptProducts}</span>
+            <span class="q">${t.rcptPieces.replace('{n}', s.purchaseAgg.pieces)}</span>
+            <span class="a">¥${s.purchaseAmount.toLocaleString()}</span>
+            <span class="sub">${s.purchaseAgg.pieces ? escapeHtml(s.purchaseAgg.text) : t.rcptProductsNone}</span>
           </div>
         </div>
-        <div class="status-msg" id="mine-pin-status"></div>
       </div>
-    `;
-    box.querySelector('#mine-pin-save').onclick = async ()=>{
-      const npInput = box.querySelector('#mine-newpin');
-      const np = npInput.value.replace(/[^0-9]/g,'').slice(0,4);
-      const statusEl = box.querySelector('#mine-pin-status');
-      if(!/^\d{4}$/.test(np)){
-        statusEl.textContent = t.needPin; statusEl.style.color = 'var(--danger)';
-        return;
-      }
-      rec.pin = np;
-      await setEmp(rec.employeeId, rec);
-      state.minePin = np;
-      statusEl.textContent = t.pinChanged; statusEl.style.color = 'var(--good)';
-      npInput.value = '';
-    };
-    box.querySelectorAll('[data-del-single]').forEach(b=>{
-      b.onclick = async ()=>{
-        rec.singleDates = (rec.singleDates||[]).filter(d=>d!==b.dataset.delSingle);
-        await setEmp(rec.employeeId, rec);
-        renderMineResult();
-      };
-    });
-    box.querySelectorAll('[data-del-rec]').forEach(b=>{
-      b.onclick = async ()=>{
-        rec.recurring = (rec.recurring||[]).filter(r=>r.id!==b.dataset.delRec);
-        await setEmp(rec.employeeId, rec);
-        renderMineResult();
-      };
-    });
+      <p class="footnote">${t.mineEstimateNote}</p>
+
+      <div style="height:18px"></div>
+      <label>${t.singleDatesMonth.replace('{m}', s.m0+1)}</label>
+      <div class="daylist">${singleRows}</div>
+      <div style="height:14px"></div>
+      <label>${t.minePurchaseMonth.replace('{m}', s.m0+1)}</label>
+      <div class="daylist">${purRows}</div>
+      <div style="height:14px"></div>
+      <label>${t.recurringRules}</label>
+      <div class="daylist">${recRows}</div>
+
+      <div style="height:18px"></div>
+      <div style="border-top:1px dashed var(--line);padding-top:12px;">
+        ${state.minePinNotice ? `<p class="footnote" style="color:var(--good)">${state.minePinNotice}</p>` : ''}
+        ${state.minePinChangeOpen ? `
+          <label>${t.pinNewLabel}</label>
+          <div class="field pinfield" style="margin-bottom:8px;">
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pin-new">
+          </div>
+          <label>${t.pinLabel2}</label>
+          <div class="field pinfield" style="margin-bottom:8px;">
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pin-new2">
+          </div>
+          <div class="btnrow">
+            <button class="btn btn-accent" id="pin-save">${t.pinSaveBtn}</button>
+            <button class="btn btn-ghost" id="pin-cancel">${t.pinCancelBtn}</button>
+          </div>
+          <div class="status-msg">${state.minePinMsg ? `<span style="color:var(--danger)">${state.minePinMsg}</span>` : ''}</div>
+        ` : `
+          <button class="minilink" id="pin-change-open">${t.pinChangeLink}</button>
+          　
+          <button class="minilink" id="pin-forget">${t.pinForgetLink}</button>
+        `}
+      </div>
+    </div>
+  `;
+
+  async function gotoMonth(ym){
+    state.mineMonth = ym || currentMonthValue();
+    await computeMineSummary();
+    paintMineResult();
   }
+  box.querySelector('#mine-month').onchange = e=> gotoMonth(e.target.value);
+  box.querySelector('#mine-prev').onclick = ()=>{
+    let y = s.y, m = s.m0 - 1;
+    if(m < 0){ m = 11; y--; }
+    gotoMonth(`${y}-${pad(m+1)}`);
+  };
+  box.querySelector('#mine-next').onclick = ()=>{
+    let y = s.y, m = s.m0 + 1;
+    if(m > 11){ m = 0; y++; }
+    gotoMonth(`${y}-${pad(m+1)}`);
+  };
+  box.querySelectorAll('[data-del-single]').forEach(b=>{
+    b.onclick = async ()=>{
+      const target = b.dataset.delSingle;
+      if(isPastCutoff(target)){ paintMineResult(); return; }   // 二重の安全確認
+      b.disabled = true;
+      rec.singleDates = (rec.singleDates||[]).filter(d=>d!==target);
+      await setEmp(rec.employeeId, rec);
+      await computeMineSummary();
+      paintMineResult();
+    };
+  });
+  const pinOpenBtn = box.querySelector('#pin-change-open');
+  if(pinOpenBtn) pinOpenBtn.onclick = ()=>{
+    state.minePinChangeOpen = true; state.minePinMsg = null; state.minePinNotice = null;
+    paintMineResult();
+  };
+  const pinForgetBtn = box.querySelector('#pin-forget');
+  if(pinForgetBtn) pinForgetBtn.onclick = ()=>{
+    forgetDevice(state.mineId.trim());
+    state.minePinNotice = T[state.lang].pinForgotten;
+    paintMineResult();
+  };
+  const pinCancelBtn = box.querySelector('#pin-cancel');
+  if(pinCancelBtn) pinCancelBtn.onclick = ()=>{
+    state.minePinChangeOpen = false; state.minePinMsg = null;
+    paintMineResult();
+  };
+  const pinSaveBtn = box.querySelector('#pin-save');
+  if(pinSaveBtn) pinSaveBtn.onclick = async ()=>{
+    const t2 = T[state.lang];
+    const a = (box.querySelector('#pin-new').value||'').replace(/[^0-9]/g,'');
+    const b = (box.querySelector('#pin-new2').value||'').replace(/[^0-9]/g,'');
+    if(!/^\d{4}$/.test(a)){ state.minePinMsg = t2.pinNeed4; paintMineResult(); return; }
+    if(a !== b){ state.minePinMsg = t2.pinNotMatch; paintMineResult(); return; }
+    pinSaveBtn.disabled = true;
+    await savePin(state.mineId.trim(), a);
+    trustDevice(state.mineId.trim(), state.mineName.trim());
+    state.minePinChangeOpen = false; state.minePinMsg = null;
+    state.minePinNotice = t2.pinChanged;
+    paintMineResult();
+  };
+
+  box.querySelectorAll('[data-stop-rec]').forEach(b=>{
+    b.onclick = async ()=>{
+      b.disabled = true;
+      // 削除ではなく終了日を入れる。過ぎた月の金額を後から変えないため。
+      const stopEnd = isPastCutoff(todayISO()) ? todayISO() : yesterdayISO();
+      rec.recurring = (rec.recurring||[]).map(r=>{
+        if(r.id !== b.dataset.stopRec) return r;
+        const end = (r.end && r.end < stopEnd) ? r.end : stopEnd;
+        return Object.assign({}, r, {end, stoppedAt:new Date().toISOString()});
+      });
+      await setEmp(rec.employeeId, rec);
+      await computeMineSummary();
+      paintMineResult();
+    };
+  });
 }
 
 /* ---------- ADMIN LOGIN ---------- */
@@ -1128,6 +2297,95 @@ function renderAdminLogin(vp){
   }
 }
 
+/* ---------- 従業員マスタのテキスト変換 ---------- */
+function mealTypeJa(v){ return v==='set' ? 'セット' : (v==='okazu' ? 'おかず' : '未設定'); }
+function masterToText(list){
+  return list
+    .slice()
+    .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
+    .map(e=>{
+      const cols = [e.id, e.name, e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':''];
+      if(e.pauseStart || e.pauseEnd) cols.push(e.pauseStart||'', e.pauseEnd||'');
+      return cols.join(',');
+    }).join('\n');
+}
+function masterEntryDesc(e){
+  const p = e.pauseStart ? `／停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}` : '';
+  return `${e.id} ${e.name}（${mealTypeJa(e.mealType)}${p}）`;
+}
+function diffMaster(oldList, newList){
+  const oldMap = new Map(oldList.map(e=>[String(e.id), e]));
+  const newMap = new Map(newList.map(e=>[String(e.id), e]));
+  const added = [], removed = [], changed = [];
+  newMap.forEach((n, id)=>{
+    const o = oldMap.get(id);
+    if(!o){ added.push(n); return; }
+    const parts = [];
+    if(String(o.name||'') !== String(n.name||'')) parts.push(`氏名 ${o.name} → ${n.name}`);
+    if((o.mealType||'') !== (n.mealType||'')) parts.push(`お食事タイプ ${mealTypeJa(o.mealType)} → ${mealTypeJa(n.mealType)}`);
+    const oP = o.pauseStart ? `${o.pauseStart}〜${o.pauseEnd||'未定'}` : 'なし';
+    const nP = n.pauseStart ? `${n.pauseStart}〜${n.pauseEnd||'未定'}` : 'なし';
+    if(oP !== nP) parts.push(`停止期間 ${oP} → ${nP}`);
+    if(parts.length) changed.push({id, name:n.name, parts});
+  });
+  oldMap.forEach((o, id)=>{ if(!newMap.has(id)) removed.push(o); });
+  return {added, removed, changed};
+}
+
+/* 貼り付けられた日付を読み取って、登録できるものに振り分ける */
+function parseClosedBulk(text, already){
+  const tokens = String(text||'').split(/[\s,、\t]+/).filter(Boolean);
+  const dup=new Set(), weekend=[], bad=[], add=new Set();
+  const have = new Set(already||[]);
+  tokens.forEach(tk=>{
+    const d = normDate(tk);
+    if(d === null || d === ''){ bad.push(tk); return; }
+    const wd = parseISO(d).getDay();
+    if(wd===0 || wd===6){ weekend.push(d); return; }
+    if(have.has(d)){ dup.add(d); return; }
+    add.add(d);
+  });
+  return {
+    add: Array.from(add).sort(),
+    dup: Array.from(dup).sort(),
+    weekend: Array.from(new Set(weekend)).sort(),
+    bad,
+  };
+}
+function renderClosedBulkPreview(pv){
+  const t = T.ja;
+  const hasPast = pv.add.some(d=>d < todayISO());
+  const list = arr => arr.map(d=>`${d}（${dowLabel(d,'ja')}）`).join('、');
+  return `
+    <div class="diffbox">
+      <h3>${t.diffTitle}</h3>
+      ${pv.add.length ? `<div class="diffsec"><div class="t">${t.closedBulkNew.replace('{n}', pv.add.length)}</div>
+        <p class="small" style="margin:0;line-height:1.8;">${escapeHtml(list(pv.add))}</p></div>` : `<p class="small">${t.closedBulkNone}</p>`}
+      ${pv.dup.length ? `<div class="diffsec"><div class="t">${t.closedBulkDup.replace('{n}', pv.dup.length)}</div>
+        <p class="small" style="margin:0;">${escapeHtml(list(pv.dup))}</p></div>` : ''}
+      ${pv.weekend.length ? `<div class="diffsec"><div class="t">${t.closedBulkWeekend.replace('{n}', pv.weekend.length)}</div>
+        <p class="small" style="margin:0;">${escapeHtml(list(pv.weekend))}</p></div>` : ''}
+      ${pv.bad.length ? `<div class="diffsec del"><div class="t">${t.closedBulkBad.replace('{n}', pv.bad.length)}</div>
+        <p class="small" style="margin:0;">${escapeHtml(pv.bad.join('、'))}</p></div>` : ''}
+      ${hasPast ? `<p class="footnote" style="color:var(--danger)">${t.closedBulkPast}</p>` : ''}
+      <div class="btnrow">
+        ${pv.add.length ? `<button class="btn btn-accent" id="adm-closed-run">${t.closedBulkRun}</button>` : ''}
+        <button class="btn btn-ghost" id="adm-closed-bulk-cancel">${t.closedBulkCancel}</button>
+      </div>
+    </div>`;
+}
+
+/* 目立たせたくないカードは折りたたんで表示する */
+function qcard(key, title, body){
+  const open = !!(state.adminOpen && state.adminOpen[key]);
+  return `<div class="card cardq">
+      <div class="cardq-head" data-toggle="${key}">
+        <h2>${title}</h2><span class="chev">${open ? '▾' : '▸'}</span>
+      </div>
+      ${open ? `<div style="margin-top:14px;">${body}</div>` : ''}
+    </div>`;
+}
+
 /* ---------- ADMIN DASHBOARD ---------- */
 async function renderAdmin(vp){
   const t = T.ja;
@@ -1136,7 +2394,7 @@ async function renderAdmin(vp){
   state.adminAllRecords = records;
   if(!state.employeeMasterText){
     const masterForText = await getEmployeeMaster();
-    state.employeeMasterText = masterForText.map(e=>`${e.id},${e.name},${e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':''}`).join('\n');
+    state.employeeMasterText = masterToText(masterForText);
   }
   drawAdmin();
 
@@ -1155,23 +2413,36 @@ async function renderAdmin(vp){
         out.push({employeeId:rec.employeeId,name:rec.name,type:'recurring'});
       });
     });
-    return out;
+    // 同じ人が個別＋定期で重複しないようにまとめる
+    const seen = new Set();
+    return out.filter(x=>{
+      if(seen.has(x.employeeId)) return false;
+      seen.add(x.employeeId); return true;
+    });
   }
 
   function drawAdmin(){
-    Promise.all([getEmployeeMaster(), getSpecialPriceDays()]).then(([master, specialDays])=>{
-    specialDays.sort();
+    Promise.all([getEmployeeMaster(), getSpecialPriceDays(), getClosedDays(), listPinRecords()]).then(([master, specialDays, closedDays, pinMap])=>{
+    specialDays.sort(); closedDays.sort();
+    state.closedDays = closedDays;
+    const closedSet = new Set(closedDays);
+    const masterById = new Map(master.map(e=>[String(e.id), e]));
+
     const tISO = todayISO();
-    const todayCancelList = occurrencesForDate(tISO);
-    const cancelledIdsToday = new Set(todayCancelList.map(x=>x.employeeId));
+    const bISO = state.boardDate || tISO;          // 上部の表示対象日（前後に移動できる）
+    const todayIsClosed = closedSet.has(bISO);
+    const todayCancelList = occurrencesForDate(bISO);
+    const cancelledIdsToday = new Set(todayCancelList.map(x=>String(x.employeeId)));
 
     const masterAvailable = master.length > 0;
     let eatingTotal=0, eatingSet=0, eatingOkazu=0, eatingUnknown=0;
     let cancelTotal=0, cancelSet=0, cancelOkazu=0, cancelUnknown=0;
+    let pausedTotal=0;
 
     if(masterAvailable){
       master.forEach(e=>{
-        if(cancelledIdsToday.has(e.id)){
+        if(isPausedOn(e, bISO)){ pausedTotal++; return; }
+        if(cancelledIdsToday.has(String(e.id))){
           cancelTotal++;
           if(e.mealType==='set') cancelSet++; else if(e.mealType==='okazu') cancelOkazu++; else cancelUnknown++;
         }else{
@@ -1191,14 +2462,48 @@ async function renderAdmin(vp){
       (r.employeeId+'').toLowerCase().includes(nameSearchLower) || (r.name||'').toLowerCase().includes(nameSearchLower)
     ).sort((a,b)=> (a.employeeId+'').localeCompare(b.employeeId+'')) : [];
 
+    // 閲覧用PINの状況
+    const pinStats = {set:0, unset:0, locked:0};
+    const pinRows = master.map(e=>{
+      const rec = pinMap[String(e.id)];
+      const lockMin = pinLockRemainMinutes(rec);
+      const hasPin = !!rec;
+      if(!hasPin) pinStats.unset++;
+      else if(lockMin > 0) pinStats.locked++;
+      else pinStats.set++;
+      return {
+        id:String(e.id), name:e.name, hasPin,
+        stateLabel: !hasPin ? t.adminPinStateOff : (lockMin>0 ? `${t.adminPinStateLock}（あと約${lockMin}分）` : t.adminPinStateOn),
+        stateClass: !hasPin ? 'off' : (lockMin>0 ? 'lock' : 'on'),
+      };
+    });
+    const pinQuery = (state.adminPinSearch||'').trim().toLowerCase();
+    const pinSearchResults = pinQuery
+      ? pinRows.filter(e=> e.id.toLowerCase().includes(pinQuery) || (e.name||'').toLowerCase().includes(pinQuery))
+      : [];
+    const pinUnsetList = pinRows.filter(e=>!e.hasPin);
+
+    const pausedList = master.filter(e=>e.pauseStart && (!e.pauseEnd || e.pauseEnd > tISO))
+      .sort((a,b)=> String(a.pauseStart).localeCompare(String(b.pauseStart)));
+
     vp.innerHTML = `
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
         <button class="btn btn-ghost" id="admin-logout">${t.logout}</button>
       </div>
 
       <div class="board">
-        <div class="board-date">${tISO}${t.adminTodayLabel}</div>
-        ${masterAvailable ? `
+        <div class="boardnav">
+          <button type="button" class="navbtn" data-board-shift="-1">‹</button>
+          <button type="button" class="navbtn" data-board-shift="1">›</button>
+          <span class="d">${bISO}（${dowLabel(bISO,'ja')}）${t.adminTodayLabel}</span>
+          ${bISO===tISO ? `<span class="todaypill">${t.boardToday}</span>`
+                        : `<button type="button" class="backtoday" id="board-today">${t.boardBackToday}</button>`}
+        </div>
+        ${todayIsClosed ? `
+        <div class="board-main">
+          <div class="board-main-lbl" style="font-size:20px;font-family:'Shippori Mincho',serif;">${t.boardClosedToday}</div>
+        </div>
+        ` : masterAvailable ? `
         <div class="board-main">
           <div class="board-main-num">${eatingTotal}</div>
           <div class="board-main-lbl">${t.eatingToday}</div>
@@ -1208,6 +2513,7 @@ async function renderAdmin(vp){
           <div class="board-sub-num">${cancelTotal}</div>
           <div class="board-sub-lbl">${t.cancelToday}</div>
           <div class="board-sub-sub">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
+          ${pausedTotal? `<div class="board-sub-sub">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
         </div>
         ` : `
         <div class="board-main">
@@ -1218,32 +2524,12 @@ async function renderAdmin(vp){
         `}
       </div>
 
-      <div class="card">
-        <h2>${t.specialDaysTitle}</h2>
-        <p class="footnote">${t.specialDaysHelp}</p>
-        <div class="field-row">
-          <input type="date" id="adm-special-date">
-          <button class="btn btn-primary" id="adm-special-add">${t.specialDaysAdd}</button>
+      ${qcard('search', t.searchTitle, `
+        <div class="modeswitch" style="margin-bottom:14px;">
+          <button type="button" class="${state.adminSearchMode==='date'?'active':''}" data-search-mode="date">${t.searchByDate}</button>
+          <button type="button" class="${state.adminSearchMode==='emp'?'active':''}" data-search-mode="emp">${t.searchByEmp}</button>
         </div>
-        <div class="status-msg">${state.specialDaysMsg ? `<span style="color:${state.specialDaysMsg.ok?'var(--good)':'var(--danger)'}">${state.specialDaysMsg.text}</span>` : ''}</div>
-        <div class="daylist" style="margin-top:10px;">
-          ${specialDays.length? specialDays.map(d=>`<div class="item"><span>${d}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-special="${d}">${t.specialDaysRemove}</button></div>`).join('') : `<p class="small">${t.specialDaysNone}</p>`}
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>${t.dateSearchTitle}</h2>
-        <input type="date" id="adm-date-search" value="${searchDate}">
-        <div style="margin-top:12px;">
-          <b>${searchDate}</b> ・ ${dateList.length}${t.calMonthCount}
-          <div class="daylist">
-            ${dateList.length? dateList.map(x=>`<div class="item"><span>${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span></span><span class="badge ${x.type}">${x.type==='recurring'?'定期':'個別'}</span></div>`).join('') : `<p class="small">${t.noResults}</p>`}
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>${t.nameSearchTitle}</h2>
+        ${state.adminSearchMode==='emp' ? `
         <input type="text" id="adm-name-search" placeholder="${t.nameSearchPh}" value="${escapeHtml(state.adminSearch||'')}">
         <div id="adm-name-results" style="margin-top:10px;">
           ${nameSearchLower ? (nameResults.length? nameResults.map(r=>{
@@ -1252,17 +2538,118 @@ async function renderAdmin(vp){
               const wdNames = rule.weekdays.map(i=>['日','月','火','水','木','金','土'][i]).join('・');
               return `毎週${wdNames}（${rule.start}〜${rule.end||'継続'}）`;
             }).join(' / ') || t.none;
+            const me = masterById.get(String(r.employeeId));
             return `<div class="daylist item" style="display:block;">
               <b>${escapeHtml(r.name)} <span class="small">(${escapeHtml(r.employeeId)})</span></b>
+              ${me && me.pauseStart ? `<span class="pausechip">停止 ${me.pauseStart}〜${me.pauseEnd||'未定'}</span>` : ''}
               <p class="small" style="margin:6px 0 2px">個別: ${escapeHtml(singles)}</p>
               <p class="small" style="margin:2px 0">定期: ${escapeHtml(recs)}</p>
             </div>`;
           }).join('') : `<p class="small">${t.noEmployees}</p>`) : ''}
         </div>
-      </div>
+        ` : `
+        <input type="date" id="adm-date-search" value="${searchDate}">
+        <div style="margin-top:12px;">
+          <b>${searchDate}（${dowLabel(searchDate,'ja')}）</b> ・ ${dateList.length}${t.calMonthCount}
+          ${closedSet.has(searchDate) ? `<p class="footnote" style="color:var(--danger)">${t.dateIsClosed}</p>` : ''}
+          <div class="daylist">
+            ${dateList.length? dateList.map(x=>{
+              const me = masterById.get(String(x.employeeId));
+              const paused = me && isPausedOn(me, searchDate);
+              return `<div class="item"><span>${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span>${paused?`<span class="pausechip">停止期間中</span>`:''}</span><span class="badge ${x.type}">${x.type==='recurring'?'定期':'個別'}</span></div>`;
+            }).join('') : `<p class="small">${t.noResults}</p>`}
+          </div>
+        </div>
+        `}
+      `)}
 
-      <div class="card">
-        <h2>${t.csvExportTitle}</h2>
+      ${qcard('special', t.specialDaysTitle, `
+        <p class="footnote">${t.specialDaysHelp}</p>
+        <div class="field-row">
+          <input type="date" id="adm-special-date">
+          <button class="btn btn-primary" id="adm-special-add">${t.specialDaysAdd}</button>
+        </div>
+        <div class="status-msg">${state.specialDaysMsg ? `<span style="color:${state.specialDaysMsg.ok?'var(--good)':'var(--danger)'}">${state.specialDaysMsg.text}</span>` : ''}</div>
+        <div class="daylist" style="margin-top:10px;">
+          ${specialDays.length? specialDays.map(d=>`<div class="item"><span>${d}（${dowLabel(d,'ja')}）</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-special="${d}">${t.specialDaysRemove}</button></div>`).join('') : `<p class="small">${t.specialDaysNone}</p>`}
+        </div>
+      `)}
+
+      ${qcard('closed', t.closedDaysTitle, `
+        <p class="footnote">${t.closedDaysHelp}</p>
+        <div class="row2" style="margin-top:10px;">
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.closedDaysFrom}</label>
+            <input type="date" id="adm-closed-from">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.closedDaysTo}</label>
+            <input type="date" id="adm-closed-to">
+          </div>
+        </div>
+        <div class="btnrow"><button class="btn btn-primary" id="adm-closed-add">${t.closedDaysAdd}</button></div>
+        <div class="status-msg">${state.closedDaysMsg ? `<span style="color:${state.closedDaysMsg.ok?'var(--good)':'var(--danger)'}">${state.closedDaysMsg.text}</span>` : ''}</div>
+        <div class="daylist" style="margin-top:10px;">
+          ${closedDays.length? closedDays.map(d=>`<div class="item"><span>${d}（${dowLabel(d,'ja')}）</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-closed="${d}">${t.closedDaysRemove}</button></div>`).join('') : `<p class="small">${t.closedDaysNone}</p>`}
+        </div>
+
+        <div style="height:18px"></div>
+        <label>${t.closedBulkTitle}</label>
+        <p class="footnote" style="margin-top:0;">${t.closedBulkHelp}</p>
+        <div class="btnrow" style="margin-bottom:8px;">
+          <button class="btn btn-ghost" id="adm-closed-preset">${t.closedBulkPreset}</button>
+        </div>
+        <textarea class="csvbox" id="adm-closed-bulk" style="min-height:110px;">${escapeHtml(state.closedBulkText)}</textarea>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="adm-closed-check">${t.closedBulkCheck}</button>
+        </div>
+        <div class="status-msg">${state.closedBulkMsg ? `<span style="color:${state.closedBulkMsg.ok?'var(--good)':'var(--danger)'}">${state.closedBulkMsg.text}</span>` : ''}</div>
+        ${state.closedBulkPending ? renderClosedBulkPreview(state.closedBulkPending) : ''}
+      `)}
+
+      ${qcard('master', t.employeeMasterTitle, `
+        <p class="footnote">${t.employeeMasterHelp}</p>
+        <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
+        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:180px;">${escapeHtml(state.employeeMasterText)}</textarea>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
+        </div>
+        <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
+        ${state.masterPending ? renderMasterDiff(state.masterPending) : ''}
+      `)}
+
+      ${pausedList.length ? qcard('paused', t.pausedListTitle.replace('{n}', pausedList.length), `
+        <div class="daylist">
+          ${pausedList.map(e=>`<div class="item"><span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span></span><span class="small">${e.pauseStart} 〜 ${e.pauseEnd||'未定'}${isPausedOn(e,tISO)?'（停止中）':''}</span></div>`).join('')}
+        </div>
+        <p class="footnote">停止期間は下の「従業員マスタ」で編集できます。</p>
+      `) : ''}
+
+      ${qcard('pin', t.adminPinTitle, `
+        <p class="footnote">${t.adminPinHelp}</p>
+        <p class="small">${t.adminPinSummary
+          .replace('{set}', pinStats.set).replace('{unset}', pinStats.unset).replace('{locked}', pinStats.locked)}</p>
+        <input type="text" id="adm-pin-search" placeholder="${t.adminPinSearchPh}" value="${escapeHtml(state.adminPinSearch||'')}">
+        <div class="status-msg">${state.adminPinMsg ? `<span style="color:var(--good)">${state.adminPinMsg}</span>` : ''}</div>
+        ${pinSearchResults.length ? `<div class="scrolllist" style="margin-top:8px;">
+          ${pinSearchResults.map(e=>`<div class="daylist item" style="border-top:none;margin-top:0;padding-top:8px;">
+            <span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span>
+              <span class="statuspill ${e.stateClass}">${e.stateLabel}</span></span>
+            ${e.hasPin ? `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-pin-reset="${escapeHtml(e.id)}" data-pin-name="${escapeHtml(e.name)}">${t.adminPinReset}</button>` : ''}
+          </div>`).join('')}
+        </div>` : (state.adminPinSearch ? `<p class="small">${t.noEmployees}</p>` : '')}
+        ${pinUnsetList.length ? `
+          <div style="height:14px"></div>
+          <label>${t.adminPinUnsetTitle.replace('{n}', pinUnsetList.length)}</label>
+          <p class="footnote" style="margin-top:0;">${t.adminPinUnsetHelp}</p>
+          <div class="scrolllist">
+            ${pinUnsetList.map(e=>`<div class="daylist item" style="border-top:none;margin-top:0;padding-top:8px;">
+              <span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span></span>
+            </div>`).join('')}
+          </div>` : ''}
+      `)}
+
+      ${qcard('csv', t.csvExportTitle, `
         <p class="footnote">${t.csvExportHelp}</p>
         <div class="field">
           <label>${t.csvExportMonthLabel}</label>
@@ -1272,43 +2659,121 @@ async function renderAdmin(vp){
           <button class="btn btn-primary" id="adm-csv-export">${t.csvExportBtn}</button>
         </div>
         ${state.csvWarning ? `<p class="small" style="color:var(--danger);margin-top:8px;">${state.csvWarning}</p>` : ''}
-      </div>
+      `)}
 
-      <div class="card">
-        <h2>${t.sheetSettings}</h2>
+      ${qcard('conn', t.sheetSettings, `
         <p class="footnote">${t.sheetHelp}</p>
         <div class="btnrow">
           <button class="btn btn-primary" id="adm-test-url">${t.testConn}</button>
           ${state.urlSavedMsg? `<span class="small" style="align-self:center;color:${state.urlSavedMsg.startsWith('❌')?'var(--danger)':'var(--good)'}">${state.urlSavedMsg}</span>`:''}
         </div>
-      </div>
+      `)}
 
-      <div class="card">
-        <h2>${t.adminPasswordChangeTitle}</h2>
+      ${qcard('pw', t.adminPasswordChangeTitle, `
         <div class="field-row">
           <input type="password" id="adm-new-pw" placeholder="${t.newAdminPasswordPh}">
           <button class="btn btn-ghost" id="adm-pw-save">${t.save}</button>
         </div>
         <div class="status-msg">${state.pwMsg ? `<span style="color:${state.pwMsg.ok?'var(--good)':'var(--danger)'}">${state.pwMsg.text}</span>` : ''}</div>
-      </div>
-
-      <div class="card">
-        <h2>${t.employeeMasterTitle}</h2>
-        <p class="footnote">${t.employeeMasterHelp}</p>
-        <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
-        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:160px;">${escapeHtml(state.employeeMasterText)}</textarea>
-        <div class="btnrow">
-          <button class="btn btn-primary" id="adm-master-save">${t.employeeMasterSave}</button>
-        </div>
-        <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
-      </div>
+      `)}
     `;
 
-    vp.querySelector('#admin-logout').onclick = ()=>{
+    vp.querySelectorAll('[data-toggle]').forEach(el=>{
+      el.onclick = ()=>{
+        const k = el.dataset.toggle;
+        state.adminOpen[k] = !state.adminOpen[k];
+        drawAdmin();
+      };
+    });
+    vp.querySelectorAll('[data-board-shift]').forEach(b=>{
+      b.onclick = ()=>{
+        const base = parseISO(state.boardDate || todayISO());
+        base.setDate(base.getDate() + Number(b.dataset.boardShift));
+        state.boardDate = iso(base.getFullYear(), base.getMonth(), base.getDate());
+        drawAdmin();
+      };
+    });
+    const backToday = vp.querySelector('#board-today');
+    if(backToday) backToday.onclick = ()=>{ state.boardDate = todayISO(); drawAdmin(); };
+
+    vp.querySelectorAll('[data-search-mode]').forEach(b=>{
+      b.onclick = ()=>{ state.adminSearchMode = b.dataset.searchMode; drawAdmin(); };
+    });
+
+    const bulkBox = vp.querySelector('#adm-closed-bulk');
+    if(bulkBox) bulkBox.oninput = e=>{
+      state.closedBulkText = e.target.value;
+      if(state.closedBulkPending) state.closedBulkPending = null;
+    };
+    const bulkPreset = vp.querySelector('#adm-closed-preset');
+    if(bulkPreset) bulkPreset.onclick = ()=>{
+      state.closedBulkText = CALENDAR_PRESET_2026.join('\n');
+      state.closedBulkPending = null; state.closedBulkMsg = null;
+      drawAdmin();
+    };
+    const bulkCheck = vp.querySelector('#adm-closed-check');
+    if(bulkCheck) bulkCheck.onclick = ()=>{
+      state.closedBulkPending = parseClosedBulk(state.closedBulkText, closedDays);
+      state.closedBulkMsg = null;
+      drawAdmin();
+    };
+    const bulkRun = vp.querySelector('#adm-closed-run');
+    if(bulkRun) bulkRun.onclick = async ()=>{
+      bulkRun.disabled = true;
+      const add = state.closedBulkPending.add;
+      await setClosedDays(closedDays.concat(add));
+      state.closedBulkPending = null; state.closedBulkText = '';
+      state.closedBulkMsg = {text:t.closedBulkDone.replace('{n}', add.length), ok:true};
+      drawAdmin();
+      setTimeout(()=>{ state.closedBulkMsg=null; drawAdmin(); }, 6000);
+    };
+    const bulkCancel = vp.querySelector('#adm-closed-bulk-cancel');
+    if(bulkCancel) bulkCancel.onclick = ()=>{ state.closedBulkPending = null; drawAdmin(); };
+
+    const _el_admin_logout = vp.querySelector('#admin-logout');
+    if(_el_admin_logout) _el_admin_logout.onclick = ()=>{
       state.adminUnlocked=false; state.adminPw=''; state.view='main'; render();
     };
 
-    vp.querySelector('#adm-special-add').onclick = async ()=>{
+    /* --- 休業日 --- */
+    const closedAddBtn = vp.querySelector('#adm-closed-add');
+    if(closedAddBtn) closedAddBtn.onclick = async ()=>{
+      const from = document.getElementById('adm-closed-from').value;
+      const to = document.getElementById('adm-closed-to').value;
+      if(!from) return;
+      if(to && to < from){
+        state.closedDaysMsg = {text:t.closedDaysBadRange, ok:false}; drawAdmin(); return;
+      }
+      const current = await getClosedDays();
+      const set = new Set(current);
+      const addList = [];
+      let cur = parseISO(from);
+      const endDt = to ? parseISO(to) : parseISO(from);
+      while(cur <= endDt){
+        const dstr = iso(cur.getFullYear(), cur.getMonth(), cur.getDate());
+        if(!set.has(dstr)){ set.add(dstr); addList.push(dstr); }
+        cur.setDate(cur.getDate()+1);
+      }
+      if(addList.length===0){
+        state.closedDaysMsg = {text:t.closedDaysAlready, ok:false}; drawAdmin(); return;
+      }
+      await setClosedDays(Array.from(set));
+      state.closedDaysMsg = {text:t.closedDaysAdded.replace('{n}', addList.length), ok:true};
+      drawAdmin();
+    };
+    vp.querySelectorAll('[data-remove-closed]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        const d = btn.dataset.removeClosed;
+        const current = await getClosedDays();
+        await setClosedDays(current.filter(x=>x!==d));
+        state.closedDaysMsg = null;
+        drawAdmin();
+      };
+    });
+
+    /* --- セット料金指定日 --- */
+    const _el_adm_special_add = vp.querySelector('#adm-special-add');
+    if(_el_adm_special_add) _el_adm_special_add.onclick = async ()=>{
       const dateInput = document.getElementById('adm-special-date');
       const d = dateInput.value;
       if(!d) return;
@@ -1331,18 +2796,22 @@ async function renderAdmin(vp){
       };
     });
 
-    vp.querySelector('#adm-date-search').onchange = e=>{
+    const dateSearchInput = vp.querySelector('#adm-date-search');
+    if(dateSearchInput) dateSearchInput.onchange = e=>{
       state.adminDateSearch = e.target.value;
       drawAdmin();
     };
 
-    vp.querySelector('#adm-name-search').oninput = e=>{
+    const nameSearchInput = vp.querySelector('#adm-name-search');
+    if(nameSearchInput) nameSearchInput.oninput = e=>{
       state.adminSearch = e.target.value;
       drawAdmin();
     };
 
-    vp.querySelector('#adm-csv-month').onchange = e=>{ state.csvMonth = e.target.value; };
-    vp.querySelector('#adm-csv-export').onclick = async ()=>{
+    const _el_adm_csv_month = vp.querySelector('#adm-csv-month');
+    if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
+    const _el_adm_csv_export = vp.querySelector('#adm-csv-export');
+    if(_el_adm_csv_export) _el_adm_csv_export.onclick = async ()=>{
       const result = await exportMonthlyCsv(records, state.csvMonth);
       if(result && result.missingMealType > 0){
         state.csvWarning = t.csvMealTypeWarning.replace('{n}', result.missingMealType);
@@ -1351,14 +2820,30 @@ async function renderAdmin(vp){
       }
     };
 
-    vp.querySelector('#adm-test-url').onclick = async ()=>{
+    const testUrlBtn = vp.querySelector('#adm-test-url');
+    if(testUrlBtn) testUrlBtn.onclick = async ()=>{
       const r = await kvRequest('kvSet', {key:'settings:__connectionTest', value:new Date().toISOString()});
       state.urlSavedMsg = (r && r.ok) ? '✅ 接続に成功しました' : '❌ 接続できませんでした。BACKEND_URLの設定を確認してください。';
       drawAdmin();
       setTimeout(()=>{ state.urlSavedMsg=''; drawAdmin(); },4000);
     };
 
-    vp.querySelector('#adm-pw-save').onclick = async ()=>{
+    const pinSearchInput = vp.querySelector('#adm-pin-search');
+    if(pinSearchInput) pinSearchInput.oninput = e=>{
+      state.adminPinSearch = e.target.value; state.adminPinMsg = null; drawAdmin();
+    };
+    vp.querySelectorAll('[data-pin-reset]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        btn.disabled = true;
+        await deletePinRecord(btn.dataset.pinReset);
+        state.adminPinMsg = t.adminPinResetDone.replace('{name}', btn.dataset.pinName);
+        drawAdmin();
+        setTimeout(()=>{ state.adminPinMsg=null; drawAdmin(); }, 5000);
+      };
+    });
+
+    const pwSaveBtn = vp.querySelector('#adm-pw-save');
+    if(pwSaveBtn) pwSaveBtn.onclick = async ()=>{
       const pwInput = document.getElementById('adm-new-pw');
       const newPw = pwInput.value;
       if(newPw.trim().length < 4){
@@ -1370,47 +2855,106 @@ async function renderAdmin(vp){
       setTimeout(()=>{ state.pwMsg=null; drawAdmin(); },4000);
     };
 
-    vp.querySelector('#adm-master-text').oninput = e=>{ state.employeeMasterText = e.target.value; };
-    vp.querySelector('#adm-master-save').onclick = async ()=>{
-      const lines = state.employeeMasterText.split('\n').map(l=>l.trim()).filter(Boolean);
-      const parsed = [];
-      for(const line of lines){
-        const parts = line.split(',').map(p=>p.trim());
-        if(parts.length<2 || !parts[0] || !parts[1]){
-          state.employeeMasterMsg = {text:t.employeeMasterInvalid, ok:false}; drawAdmin(); return;
-        }
-        const [id, name, typeRaw] = parts;
-        let mealType;
-        if(typeRaw){
-          if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
-          else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
-        }
-        parsed.push({id, name, mealType});
-      }
-      await setEmployeeMaster(parsed);
-      state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', parsed.length), ok:true};
-      drawAdmin();
-      setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },3000);
+    /* --- 従業員マスタ：確認 → 保存 --- */
+    const _el_adm_master_text = vp.querySelector('#adm-master-text');
+    if(_el_adm_master_text) _el_adm_master_text.oninput = e=>{
+      state.employeeMasterText = e.target.value;
+      if(state.masterPending){ state.masterPending = null; }
     };
+    const _el_adm_master_check = vp.querySelector('#adm-master-check');
+    if(_el_adm_master_check) _el_adm_master_check.onclick = ()=>{
+      const parsed = parseMasterText(state.employeeMasterText);
+      if(parsed.error){
+        state.masterPending = null;
+        state.employeeMasterMsg = {text:parsed.error, ok:false};
+        drawAdmin(); return;
+      }
+      state.employeeMasterMsg = null;
+      state.masterPending = { list: parsed.list, diff: diffMaster(master, parsed.list) };
+      drawAdmin();
+    };
+    const confirmBtn = vp.querySelector('#adm-master-confirm');
+    if(confirmBtn) confirmBtn.onclick = async ()=>{
+      confirmBtn.disabled = true;
+      const list = state.masterPending.list;
+      await setEmployeeMaster(list);
+      state.masterPending = null;
+      state.employeeMasterText = masterToText(list);
+      state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', list.length), ok:true};
+      drawAdmin();
+      setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },4000);
+    };
+    const cancelBtn = vp.querySelector('#adm-master-cancel');
+    if(cancelBtn) cancelBtn.onclick = ()=>{ state.masterPending = null; drawAdmin(); };
     }); // end Promise.all(...).then
   }
 }
 
-/* ---- Monthly payroll-deduction CSV export ---- */
-const PRICE_SET = 300;
-const PRICE_OKAZU = 200;
-
-function servingWeekdaysInMonth(y, m0){
-  const out = [];
-  const last = new Date(y, m0+1, 0).getDate();
-  for(let d=1; d<=last; d++){
-    const dt = new Date(y, m0, d);
-    const wd = dt.getDay();
-    if(wd!==0 && wd!==6) out.push(iso(y,m0,d));
+/* 「社員番号,氏名,お食事タイプ,停止開始日,再開日」を読み取る */
+function parseMasterText(text){
+  const t = T.ja;
+  const lines = String(text||'').split('\n');
+  const list = [];
+  const seenIds = new Set();
+  for(let i=0;i<lines.length;i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+    const lineNo = i+1;
+    const parts = line.split(',').map(p=>p.trim());
+    if(parts.length < 2 || !parts[0] || !parts[1]){
+      return {error: t.employeeMasterInvalid.replace('{line}', lineNo)};
+    }
+    const id = parts[0], name = parts[1], typeRaw = parts[2]||'';
+    let mealType;
+    if(typeRaw){
+      if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
+      else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
+    }
+    const pauseStart = normDate(parts[3]||'');
+    const pauseEnd = normDate(parts[4]||'');
+    if(pauseStart===null || pauseEnd===null){
+      return {error: t.employeeMasterBadDate.replace('{line}', lineNo)};
+    }
+    if(pauseStart && pauseEnd && pauseEnd < pauseStart){
+      return {error: t.employeeMasterBadRange.replace('{line}', lineNo)};
+    }
+    if(seenIds.has(id)){
+      return {error: t.employeeMasterDup.replace('{line}', lineNo).replace('{id}', id)};
+    }
+    seenIds.add(id);
+    const entry = {id, name, mealType};
+    if(pauseStart) entry.pauseStart = pauseStart;
+    if(pauseEnd) entry.pauseEnd = pauseEnd;
+    list.push(entry);
   }
-  return out;
+  return {list};
 }
 
+function renderMasterDiff(pending){
+  const t = T.ja;
+  const d = pending.diff;
+  const nothing = !d.added.length && !d.removed.length && !d.changed.length;
+  return `
+    <div class="diffbox">
+      <h3>${t.diffTitle}</h3>
+      ${nothing ? `<p class="small">${t.diffSame}</p>` : ''}
+      ${d.added.length ? `<div class="diffsec"><div class="t">${t.diffAdd.replace('{n}', d.added.length)}</div>
+        <ul>${d.added.map(e=>`<li>${escapeHtml(masterEntryDesc(e))}</li>`).join('')}</ul></div>` : ''}
+      ${d.changed.length ? `<div class="diffsec"><div class="t">${t.diffChange.replace('{n}', d.changed.length)}</div>
+        <ul>${d.changed.map(c=>`<li>${escapeHtml(c.id+' '+c.name)}：${escapeHtml(c.parts.join('、'))}</li>`).join('')}</ul></div>` : ''}
+      ${d.removed.length ? `<div class="diffsec del"><div class="t">${t.diffDel.replace('{n}', d.removed.length)}</div>
+        <ul>${d.removed.map(e=>`<li>${escapeHtml(masterEntryDesc(e))}</li>`).join('')}</ul>
+        <p class="footnote" style="color:var(--danger)">${t.diffDelWarn}</p></div>` : ''}
+      <p class="small">保存後の人数：${pending.list.length}件</p>
+      <div class="btnrow">
+        <button class="btn btn-accent" id="adm-master-confirm">${t.employeeMasterConfirm}</button>
+        <button class="btn btn-ghost" id="adm-master-cancel">${t.employeeMasterCancel}</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---- Monthly payroll-deduction CSV export ---- */
 async function exportMonthlyCsv(records, yyyyMm){
   const [yStr, mStr] = yyyyMm.split('-');
   const y = parseInt(yStr,10);
@@ -1422,44 +2966,37 @@ async function exportMonthlyCsv(records, yyyyMm){
   let payYear = y;
   if(payRound > 12){ payRound = 1; payYear = y + 1; }
 
-  const specialDays = new Set(await getSpecialPriceDays());
-  const servingDays = servingWeekdaysInMonth(y, m0);
-  const master = await getEmployeeMaster();
+  const [specialList, closedList, master] = await Promise.all([
+    getSpecialPriceDays(), getClosedDays(), getEmployeeMaster()
+  ]);
+  const specialSet = new Set(specialList);
+  const closedSet = new Set(closedList);
+  const servingDays = servingDaysInMonth(y, m0, closedSet); // 平日 − 休業日
   let missingMealType = 0;
 
   // cancelled-day set per employee id, built from records (only source of cancellation data)
   const cancelledByEmp = {};
+  const purchaseByEmp = {}; // 割引商品の購入額（その月分）
   records.forEach(rec=>{
-    const cancelled = new Set();
-    (rec.singleDates||[]).forEach(d=>{
-      const dt = parseISO(d);
-      if(dt.getFullYear()===y && dt.getMonth()===m0) cancelled.add(d);
-    });
-    (rec.recurring||[]).forEach(rule=>{
-      occurrencesInMonth(rule,y,m0).forEach(d=> cancelled.add(d));
-    });
-    cancelledByEmp[rec.employeeId] = {name:rec.name, cancelled};
+    const sets = cancelledSetsForMonth(rec, y, m0);
+    cancelledByEmp[rec.employeeId] = {name:rec.name, cancelled:sets.all};
+    purchaseByEmp[rec.employeeId] = purchaseTotal(purchasesInMonth(rec, y, m0));
   });
 
   // base employee list: prefer the uploaded roster (includes people who never cancel);
   // fall back to whoever has cancellation records if no roster has been configured.
-  const baseList = master.length ? master.map(e=>({id:e.id, name:e.name, mealType:e.mealType}))
-                                  : Object.keys(cancelledByEmp).map(id=>({id, name:cancelledByEmp[id].name, mealType:undefined}));
+  const baseList = master.length
+    ? master.map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd}))
+    : Object.keys(cancelledByEmp).map(id=>({id, name:cancelledByEmp[id].name, mealType:undefined}));
 
   const perEmployee = {}; // id -> {name, amount}
   baseList.forEach(e=>{
     const mealTypeKnown = e.mealType==='set' || e.mealType==='okazu';
     if(!mealTypeKnown) missingMealType++;
-    const basePrice = e.mealType==='set' ? PRICE_SET : PRICE_OKAZU; // defaults to okazu(200) if unknown
-
     const cancelled = (cancelledByEmp[e.id] && cancelledByEmp[e.id].cancelled) || new Set();
-    let amount = 0;
-    servingDays.forEach(d=>{
-      if(cancelled.has(d)) return; // treated as not eating that day
-      amount += specialDays.has(d) ? PRICE_SET : basePrice;
-    });
-
-    perEmployee[e.id] = {name:e.name, amount};
+    const calc = calcForEmployee(e, cancelled, servingDays, specialSet);
+    const purchase = Number(purchaseByEmp[e.id]||0);
+    perEmployee[e.id] = {name:e.name, amount:calc.amount + purchase, lunch:calc.amount, purchase};
   });
 
   const ids = Object.keys(perEmployee).sort((a,b)=> a.localeCompare(b,'ja',{numeric:true}));
@@ -1492,14 +3029,24 @@ async function exportMonthlyCsv(records, yyyyMm){
   return { count: ids.length, missingMealType };
 }
 
-/* ---------- ADMIN SETTINGS (backend status / password / employee master) ---------- */
 /* ===================== utils ===================== */
 function escapeHtml(s){
   return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-loadEmpProfile().then(render);
-ensureEmployeeMasterSeeded(); // バックグラウンドで実行（表示をブロックしない）
+/* ===================== 起動 ===================== */
+(async function bootstrap(){
+  await loadEmpProfile();
+  render();
+  try{
+    const closed = await getClosedDays();
+    if(closed && closed.length){
+      state.closedDays = closed;
+      if(state.view==='main') render(); // カレンダーの休業日を反映
+    }
+  }catch(e){ /* 休業日が取れなくてもフォームは使える */ }
+  ensureEmployeeMasterSeeded(); // バックグラウンドで実行（表示をブロックしない）
+})();
 </script>
 </body>
 </html>
