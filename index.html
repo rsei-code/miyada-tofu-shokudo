@@ -10,7 +10,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>宮田とうふ工房 社員食堂ランチキャンセル</title>
+<title>宮田とうふ工房</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&family=Shippori+Mincho:wght@700;800&family=Yomogi&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -66,14 +66,15 @@ body{
 .brand-logo{height:52px;width:auto;display:block;flex-shrink:0;border-radius:10px;}
 @media (max-width:560px){.brand-logo{height:40px;}}
 .masthead h1{
-  font-family:'Yomogi',cursive;
-  font-weight:700;
-  font-size:23px;
+  font-family:'Shippori Mincho',serif;
+  font-weight:800;
+  font-size:25px;
   margin:0;
-  letter-spacing:0.02em;
-  color:var(--accent-deep);
-  line-height:1.3;
+  letter-spacing:0.1em;
+  color:var(--accent-deeper);
+  line-height:1.35;
 }
+@media (max-width:560px){.masthead h1{font-size:21px;letter-spacing:0.08em;}}
 .masthead p{margin:0;color:var(--ink-soft);font-size:13.5px;}
 .eyebrow{
   font-size:15px;letter-spacing:0.06em;color:var(--accent-deep);
@@ -362,7 +363,7 @@ textarea.csvbox{
   .masthead{padding:16px 16px 16px 20px;}
   .masthead-brand{gap:10px;}
   .brand-logo{height:34px;}
-  .masthead h1{font-size:16.5px;}
+  .masthead h1{font-size:19px;letter-spacing:0.07em;}
   .admin-corner-btn{padding:5px 10px;font-size:10.5px;}
   .card{padding:16px;}
   .card h2{font-size:16px;margin-bottom:12px;}
@@ -575,7 +576,7 @@ textarea.csvbox{
 const T = {
   ja:{
     formTab:"社員フォーム", mineTab:"自分の記録", adminTab:"管理画面",
-    title:"宮田とうふ工房 社員食堂ランチキャンセル", subtitle:"当日キャンセルは朝8:00までにご提出ください。",
+    title:"宮田とうふ工房",
     empId:"社員番号", empIdPh:"例）123", empName:"名前", empNamePh:"例）山田 太郎",
     empIdNotice:"先頭に「0」を付けずに入力してください（例：012 ではなく 12）。",
     step1:"社員情報", step2:"キャンセルする日を選択（複数選択可）",
@@ -732,7 +733,7 @@ const T = {
   },
   en:{
     formTab:"Employee Form", mineTab:"My Records", adminTab:"Admin",
-    title:"Miyada Tofu Workshop — Cafeteria Lunch Cancellation", subtitle:"For same-day cancellations, please submit before 8:00 AM.",
+    title:"Miyada Tofu Workshop",
     empId:"Employee ID", empIdPh:"e.g. 123", empName:"Name", empNamePh:"e.g. Taro Yamada",
     empIdNotice:"Please don't include a leading \"0\" (e.g. 12, not 012).",
     step1:"Your Information", step2:"Select date(s) to cancel (multiple allowed)",
