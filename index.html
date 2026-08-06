@@ -669,7 +669,7 @@ const T = {
 
     adminLoginTitle:"管理画面ログイン", adminLoginDesc:"社員食堂スタッフ用。パスワードを入力してください。",
     password:"パスワード", login:"ログイン", wrongPw:"パスワードが違います。",
-    logout:"ログアウト",
+    logout:"ログアウト", refresh:"↻ 最新に更新", refreshing:"更新中…",
     calMonthCount:"件のキャンセル", allEmployees:"社員検索", searchEmployeePh:"社員番号または名前で検索",
     sheetSettings:"データ保存先（バックエンド）の接続状況",
     save:"保存", testConn:"接続テスト", saved:"保存しました",
@@ -2391,12 +2391,27 @@ function qcard(key, title, body){
 async function renderAdmin(vp){
   const t = T.ja;
   vp.innerHTML = `<div class="card"><p class="small">読み込み中…</p></div>`;
-  const records = await listAllEmpRecords();
-  state.adminAllRecords = records;
-  if(!state.employeeMasterText){
-    const masterForText = await getEmployeeMaster();
-    state.employeeMasterText = masterToText(masterForText);
+
+  let records = [];
+  let cache = null;
+
+  // スプレッドシートへの問い合わせはここだけ。
+  // 折りたたみの開閉や検索は、この読み込み済みデータから描き直すので通信しない。
+  async function loadAll(){
+    const [recs, master, specialDays, closedDays, pinMap] = await Promise.all([
+      listAllEmpRecords(), getEmployeeMaster(), getSpecialPriceDays(), getClosedDays(), listPinRecords()
+    ]);
+    records = recs;
+    state.adminAllRecords = recs;
+    specialDays.sort(); closedDays.sort();
+    state.closedDays = closedDays;
+    cache = {master:master, specialDays:specialDays, closedDays:closedDays, pinMap:pinMap};
+    if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
   }
+  // 書き込みのあとは最新の状態を読み直す
+  async function reload(){ await loadAll(); drawAdmin(); }
+
+  await loadAll();
   drawAdmin();
 
   function occurrencesForDate(dateStr){
@@ -2423,9 +2438,8 @@ async function renderAdmin(vp){
   }
 
   function drawAdmin(){
-    Promise.all([getEmployeeMaster(), getSpecialPriceDays(), getClosedDays(), listPinRecords()]).then(([master, specialDays, closedDays, pinMap])=>{
-    specialDays.sort(); closedDays.sort();
-    state.closedDays = closedDays;
+    const master = cache.master, specialDays = cache.specialDays,
+          closedDays = cache.closedDays, pinMap = cache.pinMap;
     const closedSet = new Set(closedDays);
     const masterById = new Map(master.map(e=>[String(e.id), e]));
 
@@ -2489,6 +2503,7 @@ async function renderAdmin(vp){
 
     vp.innerHTML = `
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
+        <button class="btn btn-ghost" id="admin-refresh">${t.refresh}</button>
         <button class="btn btn-ghost" id="admin-logout">${t.logout}</button>
       </div>
 
@@ -2725,11 +2740,17 @@ async function renderAdmin(vp){
       await setClosedDays(closedDays.concat(add));
       state.closedBulkPending = null; state.closedBulkText = '';
       state.closedBulkMsg = {text:t.closedBulkDone.replace('{n}', add.length), ok:true};
-      drawAdmin();
+      await reload();
       setTimeout(()=>{ state.closedBulkMsg=null; drawAdmin(); }, 6000);
     };
     const bulkCancel = vp.querySelector('#adm-closed-bulk-cancel');
     if(bulkCancel) bulkCancel.onclick = ()=>{ state.closedBulkPending = null; drawAdmin(); };
+
+    const refreshBtn = vp.querySelector('#admin-refresh');
+    if(refreshBtn) refreshBtn.onclick = async ()=>{
+      refreshBtn.disabled = true; refreshBtn.textContent = t.refreshing;
+      await reload();
+    };
 
     const _el_admin_logout = vp.querySelector('#admin-logout');
     if(_el_admin_logout) _el_admin_logout.onclick = ()=>{
@@ -2745,8 +2766,7 @@ async function renderAdmin(vp){
       if(to && to < from){
         state.closedDaysMsg = {text:t.closedDaysBadRange, ok:false}; drawAdmin(); return;
       }
-      const current = await getClosedDays();
-      const set = new Set(current);
+      const set = new Set(closedDays);
       const addList = [];
       let cur = parseISO(from);
       const endDt = to ? parseISO(to) : parseISO(from);
@@ -2760,15 +2780,14 @@ async function renderAdmin(vp){
       }
       await setClosedDays(Array.from(set));
       state.closedDaysMsg = {text:t.closedDaysAdded.replace('{n}', addList.length), ok:true};
-      drawAdmin();
+      await reload();
     };
     vp.querySelectorAll('[data-remove-closed]').forEach(btn=>{
       btn.onclick = async ()=>{
         const d = btn.dataset.removeClosed;
-        const current = await getClosedDays();
-        await setClosedDays(current.filter(x=>x!==d));
+        await setClosedDays(closedDays.filter(x=>x!==d));
         state.closedDaysMsg = null;
-        drawAdmin();
+        await reload();
       };
     });
 
@@ -2778,22 +2797,18 @@ async function renderAdmin(vp){
       const dateInput = document.getElementById('adm-special-date');
       const d = dateInput.value;
       if(!d) return;
-      const current = await getSpecialPriceDays();
-      if(current.includes(d)){
+      if(specialDays.includes(d)){
         state.specialDaysMsg = {text:t.specialDaysAlready, ok:false}; drawAdmin(); return;
       }
-      current.push(d);
-      await setSetting('specialPriceDays', JSON.stringify(current));
+      await setSetting('specialPriceDays', JSON.stringify(specialDays.concat([d])));
       state.specialDaysMsg = null;
-      drawAdmin();
+      await reload();
     };
     vp.querySelectorAll('[data-remove-special]').forEach(btn=>{
       btn.onclick = async ()=>{
         const d = btn.dataset.removeSpecial;
-        const current = await getSpecialPriceDays();
-        const next = current.filter(x=>x!==d);
-        await setSetting('specialPriceDays', JSON.stringify(next));
-        drawAdmin();
+        await setSetting('specialPriceDays', JSON.stringify(specialDays.filter(x=>x!==d)));
+        await reload();
       };
     });
 
@@ -2838,7 +2853,7 @@ async function renderAdmin(vp){
         btn.disabled = true;
         await deletePinRecord(btn.dataset.pinReset);
         state.adminPinMsg = t.adminPinResetDone.replace('{name}', btn.dataset.pinName);
-        drawAdmin();
+        await reload();
         setTimeout(()=>{ state.adminPinMsg=null; drawAdmin(); }, 5000);
       };
     });
@@ -2882,12 +2897,11 @@ async function renderAdmin(vp){
       state.masterPending = null;
       state.employeeMasterText = masterToText(list);
       state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', list.length), ok:true};
-      drawAdmin();
+      await reload();
       setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },4000);
     };
     const cancelBtn = vp.querySelector('#adm-master-cancel');
     if(cancelBtn) cancelBtn.onclick = ()=>{ state.masterPending = null; drawAdmin(); };
-    }); // end Promise.all(...).then
   }
 }
 
