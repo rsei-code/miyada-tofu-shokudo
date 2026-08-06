@@ -21,8 +21,8 @@
   --accent-mid:#DFC152;    /* 少し濃い金色（枠線・目印） */
   --accent-line:#EBD79A;   /* 淡い枠線 */
   --accent-soft:#FDF6DA;   /* ごく淡い黄色の塗り */
-  --accent-deep:#5A4632;   /* こげ茶（見出し・ラベル） */
-  --accent-deeper:#43331F; /* 濃いこげ茶（ボタン・強調） */
+  --accent-deep:#5D423B;   /* こげ茶（ロゴの文字と同じ色） */
+  --accent-deeper:#452F29; /* 濃いこげ茶（見出し・金額） */
   --good:#5E7F3B;
   --good-soft:#EDF2E0;
   --stamp:#B23A2E;
@@ -61,7 +61,7 @@ body{
   background:linear-gradient(180deg,var(--accent),var(--accent-deeper));
 }
 .masthead-brand{display:flex;align-items:center;gap:16px;}
-.brand-logo{height:52px;width:auto;display:block;flex-shrink:0;border-radius:10px;}
+.brand-logo{height:56px;width:auto;display:block;flex-shrink:0;border-radius:12px;}
 @media (max-width:560px){.brand-logo{height:40px;}}
 .masthead h1{
   font-family:'Shippori Mincho',serif;
@@ -239,6 +239,7 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus{
   font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink-soft);
 }
 .wdbtn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.wdbtn.off{background:#F7F4EC;color:#B5AEA3;cursor:not-allowed;}
 
 .btn{
   border:none;border-radius:10px;padding:12px 20px;font-size:14.5px;font-weight:700;
@@ -375,6 +376,9 @@ textarea.csvbox{
 }
 
 /* ================= 追加分（停止期間・休業日・確認画面・控除見込み） ================= */
+.calcell.weekend{
+  background:#F7F4EC;color:#B5AEA3;cursor:not-allowed;
+}
 .calcell.closed{
   background:repeating-linear-gradient(135deg,#efeade,#efeade 4px,#e2dbc9 4px,#e2dbc9 8px);
   opacity:0.5;cursor:not-allowed;
@@ -387,6 +391,7 @@ textarea.csvbox{
 .legend-swatch{
   width:14px;height:14px;border-radius:4px;border:1px solid var(--line);display:inline-block;
 }
+.legend-swatch.weekend{background:#F7F4EC;}
 .legend-swatch.closed{background:repeating-linear-gradient(135deg,#efeade,#efeade 4px,#e2dbc9 4px,#e2dbc9 8px);}
 .legend-swatch.sel{background:var(--accent-deep);border-color:var(--accent-deep);}
 
@@ -607,7 +612,9 @@ const T = {
     masterMismatch:"社員番号と名前が一致しません。入力内容を確認してください。",
     successTitle:"受付済", successBody:"キャンセルを受け付けました。社員食堂にて集計されます。",
     close:"閉じる",
-    legendClosed:"休業日・締切済み（選択できません）", legendSelected:"選択中",
+    legendWeekend:"土日（給食なし）",
+    legendClosed:"休業日・締切済み", legendSelected:"選択中",
+    weekendLabel:"土日は給食がありません",
     closedDayLabel:"休業日（給食なし）",
 
     mineTitle:"自分の記録を確認", mineDesc:"社員番号と氏名（フルネーム）を入力して検索してください。",
@@ -764,7 +771,9 @@ const T = {
     masterMismatch:"The employee ID and name do not match. Please check your input.",
     successTitle:"Received", successBody:"Your cancellation has been received and will be counted by the cafeteria.",
     close:"Close",
-    legendClosed:"Closed / past cutoff (not selectable)", legendSelected:"Selected",
+    legendWeekend:"Weekend (no lunch)",
+    legendClosed:"Closed / past cutoff", legendSelected:"Selected",
+    weekendLabel:"No lunch is served on weekends",
     closedDayLabel:"Closed (no lunch)",
 
     mineTitle:"Check my records", mineDesc:"Enter your employee ID and full name to search.",
@@ -818,14 +827,9 @@ const T = {
     weekdayShort:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
   }
 };
-/* ============================================================
-   ロゴ画像
-   元のファイルの <img src="data:image/png;base64,……"> の
-   src の値（data:image/png;base64, から最後まで）を、
-   下の "" の中にそのまま貼り付けてください。
-   貼り付けなくても動きます（その場合ロゴは表示されず、店名だけが出ます）。
-   ============================================================ */
-const LOGO_DATA_URL = "";
+/* ロゴ画像（120×120px・約3KB）。差し替えるときは、この "" の中身を
+   data:image/png;base64,…… の形式の文字列に置き換えてください。 */
+const LOGO_DATA_URL = "data:image/png;base64,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";
 const HAS_LOGO = LOGO_DATA_URL.indexOf('data:image') === 0;
 
 const WD_KEYS = ['su','mo','tu','we','th','fr','sa'];
@@ -1201,6 +1205,17 @@ function normDate(s){
   return `${m[1]}-${pad(Number(m[2]))}-${pad(Number(m[3]))}`;
 }
 
+// 給食がある日か（土日と休業日は給食なし）
+function isLunchDay(dateStr){
+  const wd = parseISO(dateStr).getDay();
+  if(wd === 0 || wd === 6) return false;
+  return !(state.closedDays || []).includes(dateStr);
+}
+// 社員がカレンダーで選べる日か（給食があり、まだ締切前）
+function canPickDate(dateStr){
+  return isLunchDay(dateStr) && !isPastCutoff(dateStr);
+}
+
 // 停止期間：停止開始日 〜 再開日の前日 まで（再開日は「食べ始める日」）
 function isPausedOn(emp, dateStr){
   if(!emp || !emp.pauseStart) return false;
@@ -1458,18 +1473,22 @@ function renderForm(vp){
         ${wdLabels.map(w=>`<div class="wd">${w}</div>`).join('')}
         ${cells.map(dstr=>{
           if(!dstr) return `<div class="calcell outmonth"></div>`;
-          const isClosed = closedSet.has(dstr);
-          const disabled = isClosed || isPastCutoff(dstr);
+          const wd = parseISO(dstr).getDay();
+          const isWeekend = (wd === 0 || wd === 6);
+          const isClosed = !isWeekend && closedSet.has(dstr);
+          const pickable = canPickDate(dstr);
           const selected = state.selectedDates.has(dstr);
           const isToday = dstr === todayISO();
           const dayNum = Number(dstr.split('-')[2]);
-          const title = isClosed ? t.closedDayLabel : (disabled ? t.pastCutoffCell : '');
-          return `<div class="calcell ${isClosed?'closed':''} ${disabled?'disabled':''} ${selected?'selected':''} ${isToday?'today':''}" data-date="${dstr}" title="${title}">
+          const title = isWeekend ? t.weekendLabel : (isClosed ? t.closedDayLabel : (!pickable ? t.pastCutoffCell : ''));
+          const cls = isWeekend ? 'weekend' : (isClosed ? 'closed disabled' : (!pickable ? 'disabled' : ''));
+          return `<div class="calcell ${cls} ${selected?'selected':''} ${isToday?'today':''}" data-date="${dstr}" title="${title}">
               <div>${dayNum}</div>
             </div>`;
         }).join('')}
       </div>
       <div class="callegend">
+        <span><i class="legend-swatch weekend"></i>${t.legendWeekend}</span>
         <span><i class="legend-swatch closed"></i>${t.legendClosed}</span>
         <span><i class="legend-swatch sel"></i>${t.legendSelected}</span>
       </div>
@@ -1483,7 +1502,10 @@ function renderForm(vp){
           <div class="recpanel">
             <label>${t.recurringWd}</label>
             <div class="weekday-pick" style="margin-bottom:14px;">
-              ${wdLabels.map((w,idx)=>`<button type="button" class="wdbtn ${state.recurringWd.has(idx)?'active':''}" data-wd="${idx}">${w}</button>`).join('')}
+              ${wdLabels.map((w,idx)=>{
+                const off = (idx === 0 || idx === 6);   // 日曜と土曜は給食がない
+                return `<button type="button" class="wdbtn ${state.recurringWd.has(idx)?'active':''} ${off?'off':''}" data-wd="${idx}" ${off?'disabled title="'+t.weekendLabel+'"':''}>${w}</button>`;
+              }).join('')}
             </div>
             <div class="row2">
               <div class="field" style="margin-bottom:0;">
@@ -1580,7 +1602,7 @@ function renderForm(vp){
     vp.querySelectorAll('.calcell[data-date]').forEach(c=>{
       c.onclick = ()=>{
         const d = c.dataset.date;
-        if(isPastCutoff(d) || closedSet.has(d)) return;
+        if(!canPickDate(d)) return;
         if(state.selectedDates.has(d)) state.selectedDates.delete(d);
         else state.selectedDates.add(d);
         render();
@@ -1598,6 +1620,7 @@ function renderForm(vp){
     vp.querySelectorAll('.wdbtn').forEach(b=>{
       b.onclick = ()=>{
         const idx = Number(b.dataset.wd);
+        if(idx === 0 || idx === 6) return;   // 土日は選べない
         if(state.recurringWd.has(idx)) state.recurringWd.delete(idx);
         else state.recurringWd.add(idx);
         render();
@@ -1763,8 +1786,7 @@ async function submitCancellation(){
   if(!state.empId.trim() || !state.empName.trim()){
     state.msg = t.needIdName; render(); return;
   }
-  const closedSet = new Set(state.closedDays||[]);
-  const pickedDates = Array.from(state.selectedDates).filter(d=>!closedSet.has(d));
+  const pickedDates = Array.from(state.selectedDates).filter(d=>isLunchDay(d));
   const hasSingle = pickedDates.length > 0;
   const hasRecurring = state.recurringOn && state.recurringWd.size > 0;
   if(!hasSingle && !hasRecurring){
@@ -1791,7 +1813,7 @@ async function submitCancellation(){
     existing.recurring = existing.recurring || [];
     existing.recurring.push({
       id: 'r'+Date.now(),
-      weekdays: Array.from(state.recurringWd).sort(),
+      weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6).sort(),
       start: state.recurringStart || todayISO(),
       end: state.recurringEnd || null,
     });
@@ -1805,7 +1827,7 @@ async function submitCancellation(){
     employeeId: id, name: existing.name,
     singleDates: pickedDates,
     recurring: hasRecurring ? [{
-      weekdays: Array.from(state.recurringWd),
+      weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6),
       start: state.recurringStart || todayISO(),
       end: state.recurringEnd || null,
     }] : [],
