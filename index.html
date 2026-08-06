@@ -517,6 +517,32 @@ textarea.csvbox{
 .rcpt-row .a{text-align:right;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;}
 .rcpt-row .sub{grid-column:1/-1;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
 .rcpt-row.zero .k,.rcpt-row.zero .q,.rcpt-row.zero .a{color:#A9A499;}
+.subsec{
+  border:1px solid var(--line);border-radius:10px;background:#FDFBF5;
+  padding:14px;margin-bottom:14px;
+}
+.subsec > .sublabel{
+  font-size:13px;font-weight:800;color:var(--accent-deep);margin:0 0 10px;letter-spacing:0.02em;
+}
+.typepick{display:flex;gap:8px;margin-bottom:12px;}
+.typepick button{
+  flex:1;border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:9px;padding:10px 8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+}
+.typepick button.active{background:var(--accent-deep);color:#fff;border-color:var(--accent-deep);}
+.typepick button:hover:not(.active){border-color:var(--accent-mid);color:var(--ink);}
+.emprow{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid #F1EDE2;flex-wrap:wrap;
+}
+.emprow:last-child{border-bottom:none;}
+.emprow .who{font-size:14px;font-weight:700;}
+.emprow .btns{display:flex;gap:6px;flex-shrink:0;}
+.emprow .btns button{padding:4px 12px;font-size:12px;}
+.editbox{
+  border:1px solid var(--accent-mid);background:var(--accent-soft);
+  border-radius:10px;padding:14px;margin:8px 0;
+}
 .diffbox{
   border:1px solid var(--accent-mid);background:var(--accent-soft);
   border-radius:10px;padding:14px;margin-top:12px;
@@ -711,6 +737,26 @@ const T = {
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず）を登録してください。",
 
     employeeMasterTitle:"従業員マスタ",
+    masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
+    masterSearchPh:"社員番号または名前で検索",
+    mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）",
+    pauseOptional:"停止期間（任意・休職や長期出張で給食を止める場合）",
+    pauseFrom:"停止開始日", pauseTo:"再開日（空欄なら継続）",
+    masterAddBtn:"この内容で登録する", masterEditBtn:"変更", masterDeleteBtn:"削除",
+    masterSaveBtn:"保存する", masterCancelBtn:"やめる",
+    masterAdded:"{name} さんを登録しました。",
+    masterUpdated:"{name} さんの情報を更新しました。",
+    masterDeleted:"{name} さんを削除しました。",
+    masterNeedId:"社員番号を入力してください。",
+    masterNeedName:"氏名を入力してください。",
+    masterNeedType:"お食事タイプを選んでください。",
+    masterDupId:"社員番号 {id} はすでに登録されています。",
+    masterBadPause:"停止期間の日付を確認してください（再開日は停止開始日より後）。",
+    masterDeleteConfirm:"{name}（{id}）を削除しますか？",
+    masterDeleteWarn:"削除すると、この社員はキャンセルや購入の登録ができなくなり、月次CSVにも出力されません。これまでの記録そのものは残ります。",
+    masterIdChangeWarn:"社員番号を {from} → {to} に変更します。キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
+    masterSearchHint:"社員番号か氏名で検索すると、変更・削除ができます。",
+    masterBulkOpen:"まとめて書き換える（貼り付け）", masterBulkClose:"閉じる",
     employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日」の順で貼り付けてください。お食事タイプは「セット」または「おかず」。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。",
     employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01",
     employeeMasterCheck:"内容を確認する", employeeMasterConfirm:"この内容で保存する", employeeMasterCancel:"やめる",
@@ -901,6 +947,9 @@ let state = {
   urlSavedMsg:'',
   csvMonth: currentMonthValue(),
   employeeMasterText:'', employeeMasterMsg:null,
+  masterNew:{id:'', name:'', mealType:'', pauseStart:'', pauseEnd:''}, masterNewMsg:null,
+  masterSearch:'', masterEditId:null, masterEditDraft:null, masterEditMsg:null,
+  masterDeleteId:null, masterBulkOpen:false,
   masterPending:null,      // 保存前の確認内容
   specialDaysMsg:null,
   closedDaysMsg:null,
@@ -2398,6 +2447,135 @@ function renderClosedBulkPreview(pv){
     </div>`;
 }
 
+/* 従業員マスタ：新規登録と、検索してからの変更・削除 */
+function masterTypePick(prefix, current, t){
+  return `<div class="typepick">
+      <button type="button" class="${current==='set'?'active':''}" data-${prefix}-type="set">${t.typeSet}</button>
+      <button type="button" class="${current==='okazu'?'active':''}" data-${prefix}-type="okazu">${t.typeOkazu}</button>
+    </div>`;
+}
+function masterPauseFields(prefix, ps, pe, t){
+  return `<p class="footnote" style="margin-top:0;">${t.pauseOptional}</p>
+    <div class="row2">
+      <div class="field" style="margin-bottom:0;">
+        <label>${t.pauseFrom}</label>
+        <input type="date" id="${prefix}-ps" value="${escapeHtml(ps||'')}">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>${t.pauseTo}</label>
+        <input type="date" id="${prefix}-pe" value="${escapeHtml(pe||'')}">
+      </div>
+    </div>`;
+}
+function masterCardBody(master, t){
+  const n = state.masterNew;
+  const q = (state.masterSearch||'').trim().toLowerCase();
+  const results = q
+    ? master.filter(e=> String(e.id).toLowerCase().includes(q) || String(e.name||'').toLowerCase().includes(q))
+        .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
+    : [];
+
+  const rows = results.map(e=>{
+    const id = String(e.id);
+    if(state.masterEditId === id){
+      const dr = state.masterEditDraft || {};
+      return `<div class="editbox">
+        <div class="row2">
+          <div class="field"><label>${t.empId}</label><input type="text" id="me-id" value="${escapeHtml(dr.id||'')}"></div>
+          <div class="field"><label>${t.empName}</label><input type="text" id="me-name" value="${escapeHtml(dr.name||'')}"></div>
+        </div>
+        <label>${t.mealTypeLabel}</label>
+        ${masterTypePick('me', dr.mealType, t)}
+        ${masterPauseFields('me', dr.pauseStart, dr.pauseEnd, t)}
+        <p class="footnote" id="me-idwarn" data-oldid="${escapeHtml(id)}" style="color:var(--danger);${
+          (dr.id||'') !== id ? '' : 'display:none;'}">${
+          t.masterIdChangeWarn.replace('{from}', id).replace('{to}', escapeHtml(dr.id||''))}</p>
+        <div class="btnrow">
+          <button class="btn btn-accent" id="me-save">${t.masterSaveBtn}</button>
+          <button class="btn btn-ghost" id="me-cancel">${t.masterCancelBtn}</button>
+        </div>
+        <div class="status-msg">${state.masterEditMsg ? `<span style="color:var(--danger)">${state.masterEditMsg}</span>` : ''}</div>
+      </div>`;
+    }
+    if(state.masterDeleteId === id){
+      return `<div class="editbox" style="border-color:var(--danger);background:var(--danger-soft);">
+        <p style="margin:0 0 6px;font-weight:700;color:#8C2E22;">${
+          t.masterDeleteConfirm.replace('{name}', escapeHtml(e.name)).replace('{id}', escapeHtml(id))}</p>
+        <p class="footnote" style="margin-top:0;color:#8C2E22;">${t.masterDeleteWarn}</p>
+        <div class="btnrow">
+          <button class="btn btn-danger" id="md-yes">${t.masterDeleteBtn}</button>
+          <button class="btn btn-ghost" id="md-no">${t.masterCancelBtn}</button>
+        </div>
+      </div>`;
+    }
+    const pause = e.pauseStart ? `<span class="pausechip">停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}</span>` : '';
+    return `<div class="emprow">
+      <span class="who">${escapeHtml(e.name)} <span class="small">(${escapeHtml(id)})</span>
+        <span class="statuspill ${e.mealType==='set'?'on':'off'}">${mealTypeJa(e.mealType)}</span>${pause}</span>
+      <span class="btns">
+        <button class="btn btn-ghost" data-edit-emp="${escapeHtml(id)}">${t.masterEditBtn}</button>
+        <button class="btn btn-danger" data-del-emp="${escapeHtml(id)}">${t.masterDeleteBtn}</button>
+      </span>
+    </div>`;
+  }).join('');
+
+  return `
+    <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
+
+    <div class="subsec">
+      <p class="sublabel">${t.masterNewTitle}</p>
+      <div class="row2">
+        <div class="field"><label>${t.empId}</label><input type="text" id="mn-id" value="${escapeHtml(n.id)}" placeholder="${t.empIdPh}"></div>
+        <div class="field"><label>${t.empName}</label><input type="text" id="mn-name" value="${escapeHtml(n.name)}" placeholder="${t.empNamePh}"></div>
+      </div>
+      <label>${t.mealTypeLabel}</label>
+      ${masterTypePick('mn', n.mealType, t)}
+      ${masterPauseFields('mn', n.pauseStart, n.pauseEnd, t)}
+      <div class="btnrow">
+        <button class="btn btn-primary" id="mn-add">${t.masterAddBtn}</button>
+      </div>
+      <div class="status-msg">${state.masterNewMsg ? `<span style="color:${state.masterNewMsg.ok?'var(--good)':'var(--danger)'}">${state.masterNewMsg.text}</span>` : ''}</div>
+    </div>
+
+    <div class="subsec">
+      <p class="sublabel">${t.masterSearchTitle}</p>
+      <input type="text" id="mm-search" placeholder="${t.masterSearchPh}" value="${escapeHtml(state.masterSearch||'')}">
+      <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
+      <div style="margin-top:6px;">
+        ${q ? (rows || `<p class="small">${t.noEmployees}</p>`) : `<p class="small">${t.masterSearchHint}</p>`}
+      </div>
+    </div>
+
+    ${state.masterBulkOpen ? `
+      <div class="subsec">
+        <p class="sublabel">${t.masterBulkOpen}</p>
+        <p class="footnote" style="margin-top:0;">${t.employeeMasterHelp}</p>
+        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:160px;">${escapeHtml(state.employeeMasterText)}</textarea>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
+          <button class="btn btn-ghost" id="adm-master-bulk-close">${t.masterBulkClose}</button>
+        </div>
+        ${state.masterPending ? renderMasterDiff(state.masterPending) : ''}
+      </div>
+    ` : `<button type="button" class="minilink" id="adm-master-bulk-open">${t.masterBulkOpen}</button>`}
+  `;
+}
+
+/* 社員番号を変えたとき、キャンセル記録・購入記録・PINも新しい番号へ移す */
+async function migrateEmployeeId(oldId, newId){
+  const emp = await getEmp(oldId);
+  if(emp){
+    emp.employeeId = newId;
+    await setEmp(newId, emp);
+    await kvRequest('kvDelete', {key:'emp:'+oldId});
+  }
+  const pin = await getPinRecord(oldId);
+  if(pin){
+    await setPinRecord(newId, pin);
+    await deletePinRecord(oldId);
+  }
+}
+
 /* 目立たせたくないカードは折りたたんで表示する */
 function qcard(key, title, body){
   const open = !!(state.adminOpen && state.adminOpen[key]);
@@ -2432,6 +2610,14 @@ async function renderAdmin(vp){
   }
   // 書き込みのあとは最新の状態を読み直す
   async function reload(){ await loadAll(); drawAdmin(); }
+
+  // 何秒か経ったらメッセージを消す。項目ごとにタイマーを分けて、
+  // 別の操作のタイマーに消されないようにする。
+  const msgTimers = {};
+  function autoClear(key, ms){
+    if(msgTimers[key]) clearTimeout(msgTimers[key]);
+    msgTimers[key] = setTimeout(()=>{ state[key] = null; drawAdmin(); }, ms || 5000);
+  }
 
   await loadAll();
   drawAdmin();
@@ -2645,16 +2831,7 @@ async function renderAdmin(vp){
         ${state.closedBulkPending ? renderClosedBulkPreview(state.closedBulkPending) : ''}
       `)}
 
-      ${qcard('master', t.employeeMasterTitle, `
-        <p class="footnote">${t.employeeMasterHelp}</p>
-        <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
-        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:180px;">${escapeHtml(state.employeeMasterText)}</textarea>
-        <div class="btnrow">
-          <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
-        </div>
-        <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
-        ${state.masterPending ? renderMasterDiff(state.masterPending) : ''}
-      `)}
+      ${qcard('master', t.employeeMasterTitle, masterCardBody(master, t))}
 
       ${pausedList.length ? qcard('paused', t.pausedListTitle.replace('{n}', pausedList.length), `
         <div class="daylist">
@@ -2893,7 +3070,149 @@ async function renderAdmin(vp){
       setTimeout(()=>{ state.pwMsg=null; drawAdmin(); },4000);
     };
 
-    /* --- 従業員マスタ：確認 → 保存 --- */
+    /* --- 従業員マスタ：新規登録 --- */
+    const bind = (id, fn, ev) => { const el = vp.querySelector('#'+id); if(el) el[ev||'oninput'] = fn; };
+    bind('mn-id',   e=>{ state.masterNew.id = e.target.value; });
+    bind('mn-name', e=>{ state.masterNew.name = e.target.value; });
+    bind('mn-ps',   e=>{ state.masterNew.pauseStart = e.target.value; }, 'onchange');
+    bind('mn-pe',   e=>{ state.masterNew.pauseEnd = e.target.value; }, 'onchange');
+    vp.querySelectorAll('[data-mn-type]').forEach(b=>{
+      b.onclick = ()=>{ state.masterNew.mealType = b.dataset.mnType; state.masterNewMsg = null; drawAdmin(); };
+    });
+    const mnAdd = vp.querySelector('#mn-add');
+    if(mnAdd) mnAdd.onclick = async ()=>{
+      const n = state.masterNew;
+      const id = String(n.id||'').trim(), name = String(n.name||'').trim();
+      if(!id){ state.masterNewMsg = {text:t.masterNeedId, ok:false}; drawAdmin(); return; }
+      if(!name){ state.masterNewMsg = {text:t.masterNeedName, ok:false}; drawAdmin(); return; }
+      if(n.mealType !== 'set' && n.mealType !== 'okazu'){ state.masterNewMsg = {text:t.masterNeedType, ok:false}; drawAdmin(); return; }
+      if(master.some(e=>String(e.id)===id)){
+        state.masterNewMsg = {text:t.masterDupId.replace('{id}', id), ok:false}; drawAdmin(); return;
+      }
+      const ps = normDate(n.pauseStart||''), pe = normDate(n.pauseEnd||'');
+      if(ps===null || pe===null || (ps && pe && pe < ps)){
+        state.masterNewMsg = {text:t.masterBadPause, ok:false}; drawAdmin(); return;
+      }
+      const entry = {id:id, name:name, mealType:n.mealType};
+      if(ps) entry.pauseStart = ps;
+      if(pe) entry.pauseEnd = pe;
+      mnAdd.disabled = true;
+      await kvRequest('kvSet', {key:'master:'+id, value: JSON.stringify(entry)});
+      state.masterNew = {id:'', name:'', mealType:'', pauseStart:'', pauseEnd:''};
+      state.masterNewMsg = {text:t.masterAdded.replace('{name}', name), ok:true};
+      state.employeeMasterText = '';   // 一括欄は次に開いたとき最新から作り直す
+      await reload();
+      autoClear('masterNewMsg');
+    };
+
+    /* --- 従業員マスタ：検索して変更・削除 --- */
+    bind('mm-search', e=>{
+      state.masterSearch = e.target.value;
+      state.masterEditId = null; state.masterDeleteId = null;
+      state.masterEditMsg = null; state.employeeMasterMsg = null;
+      drawAdmin();
+    });
+    vp.querySelectorAll('[data-edit-emp]').forEach(b=>{
+      b.onclick = ()=>{
+        const e = master.find(x=>String(x.id)===b.dataset.editEmp);
+        if(!e) return;
+        state.masterEditId = String(e.id);
+        state.masterEditDraft = {id:String(e.id), name:e.name||'', mealType:e.mealType||'',
+                                pauseStart:e.pauseStart||'', pauseEnd:e.pauseEnd||''};
+        state.masterDeleteId = null; state.masterEditMsg = null;
+        drawAdmin();
+      };
+    });
+    bind('me-id',   e=>{
+      state.masterEditDraft.id = e.target.value;
+      const warn = vp.querySelector('#me-idwarn');
+      if(warn){
+        const oldId = warn.dataset.oldid;
+        const newId = String(e.target.value||'').trim();
+        if(newId && newId !== oldId){
+          warn.textContent = t.masterIdChangeWarn.replace('{from}', oldId).replace('{to}', newId);
+          warn.style.display = '';
+        } else {
+          warn.style.display = 'none';
+        }
+      }
+    });
+    bind('me-name', e=>{ state.masterEditDraft.name = e.target.value; });
+    bind('me-ps',   e=>{ state.masterEditDraft.pauseStart = e.target.value; }, 'onchange');
+    bind('me-pe',   e=>{ state.masterEditDraft.pauseEnd = e.target.value; }, 'onchange');
+    vp.querySelectorAll('[data-me-type]').forEach(b=>{
+      b.onclick = ()=>{ state.masterEditDraft.mealType = b.dataset.meType; state.masterEditMsg = null; drawAdmin(); };
+    });
+    const meCancel = vp.querySelector('#me-cancel');
+    if(meCancel) meCancel.onclick = ()=>{
+      state.masterEditId = null; state.masterEditDraft = null; state.masterEditMsg = null; drawAdmin();
+    };
+    const meSave = vp.querySelector('#me-save');
+    if(meSave) meSave.onclick = async ()=>{
+      const oldId = state.masterEditId;
+      const dr = state.masterEditDraft || {};
+      const newId = String(dr.id||'').trim(), name = String(dr.name||'').trim();
+      if(!newId){ state.masterEditMsg = t.masterNeedId; drawAdmin(); return; }
+      if(!name){ state.masterEditMsg = t.masterNeedName; drawAdmin(); return; }
+      if(dr.mealType !== 'set' && dr.mealType !== 'okazu'){ state.masterEditMsg = t.masterNeedType; drawAdmin(); return; }
+      if(newId !== oldId && master.some(e=>String(e.id)===newId)){
+        state.masterEditMsg = t.masterDupId.replace('{id}', newId); drawAdmin(); return;
+      }
+      const ps = normDate(dr.pauseStart||''), pe = normDate(dr.pauseEnd||'');
+      if(ps===null || pe===null || (ps && pe && pe < ps)){
+        state.masterEditMsg = t.masterBadPause; drawAdmin(); return;
+      }
+      const entry = {id:newId, name:name, mealType:dr.mealType};
+      if(ps) entry.pauseStart = ps;
+      if(pe) entry.pauseEnd = pe;
+      meSave.disabled = true;
+      if(newId !== oldId){
+        await kvRequest('kvDelete', {key:'master:'+oldId});
+        await migrateEmployeeId(oldId, newId);
+      }
+      await kvRequest('kvSet', {key:'master:'+newId, value: JSON.stringify(entry)});
+      state.masterEditId = null; state.masterEditDraft = null; state.masterEditMsg = null;
+      state.employeeMasterMsg = {text:t.masterUpdated.replace('{name}', name), ok:true};
+      state.masterNewMsg = null;
+      state.employeeMasterText = '';
+      await reload();
+      autoClear('employeeMasterMsg');
+    };
+    vp.querySelectorAll('[data-del-emp]').forEach(b=>{
+      b.onclick = ()=>{
+        state.masterDeleteId = b.dataset.delEmp;
+        state.masterEditId = null; state.masterEditDraft = null;
+        drawAdmin();
+      };
+    });
+    const mdNo = vp.querySelector('#md-no');
+    if(mdNo) mdNo.onclick = ()=>{ state.masterDeleteId = null; drawAdmin(); };
+    const mdYes = vp.querySelector('#md-yes');
+    if(mdYes) mdYes.onclick = async ()=>{
+      const id = state.masterDeleteId;
+      const e = master.find(x=>String(x.id)===id);
+      mdYes.disabled = true;
+      await kvRequest('kvDelete', {key:'master:'+id});
+      state.masterDeleteId = null;
+      state.employeeMasterMsg = {text:t.masterDeleted.replace('{name}', (e&&e.name)||id), ok:true};
+      state.masterNewMsg = null;
+      state.employeeMasterText = '';
+      await reload();
+      autoClear('employeeMasterMsg');
+    };
+
+    /* --- 従業員マスタ：まとめて書き換え（貼り付け） --- */
+    const bulkOpen = vp.querySelector('#adm-master-bulk-open');
+    if(bulkOpen) bulkOpen.onclick = ()=>{
+      state.masterBulkOpen = true;
+      if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
+      drawAdmin();
+    };
+    const bulkClose = vp.querySelector('#adm-master-bulk-close');
+    if(bulkClose) bulkClose.onclick = ()=>{
+      state.masterBulkOpen = false; state.masterPending = null; drawAdmin();
+    };
+
     const _el_adm_master_text = vp.querySelector('#adm-master-text');
     if(_el_adm_master_text) _el_adm_master_text.oninput = e=>{
       state.employeeMasterText = e.target.value;
