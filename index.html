@@ -633,7 +633,8 @@ const T = {
     recurringToggle:"曜日を指定して定期的にキャンセルする", recurringWd:"曜日を選択",
     recurringStart:"開始日", recurringEnd:"終了日（任意・空欄なら継続）",
     submit:"キャンセルを送信", submitting:"送信中…",
-    needIdName:"社員番号と名前を入力してください。", needDates:"日付を1つ以上選択するか、定期キャンセルを設定してください。",
+    needIdName:"社員番号と名前を入力してください。",
+    saveFailed:"保存できませんでした。通信が混み合っている可能性があります。少し待ってからもう一度お試しください。", needDates:"日付を1つ以上選択するか、定期キャンセルを設定してください。",
     masterNotFound:"社員番号が名簿に登録されていません。番号を確認してください。",
     masterMismatch:"社員番号と名前が一致しません。入力内容を確認してください。",
     successTitle:"受付済", successBody:"キャンセルを受け付けました。社員食堂にて集計されます。",
@@ -812,7 +813,8 @@ const T = {
     recurringToggle:"Cancel automatically on a recurring weekday", recurringWd:"Choose weekday(s)",
     recurringStart:"Start date", recurringEnd:"End date (optional, leave blank for ongoing)",
     submit:"Submit cancellation", submitting:"Submitting…",
-    needIdName:"Please enter your employee ID and name.", needDates:"Please select at least one date, or set up a recurring cancellation.",
+    needIdName:"Please enter your employee ID and name.",
+    saveFailed:"Could not save. The connection may be busy. Please wait a moment and try again.", needDates:"Please select at least one date, or set up a recurring cancellation.",
     masterNotFound:"This employee ID is not in the roster. Please check the number.",
     masterMismatch:"The employee ID and name do not match. Please check your input.",
     successTitle:"Received", successBody:"Your cancellation has been received and will be counted by the cafeteria.",
@@ -973,11 +975,17 @@ function warnBackendNotConfigured(){
   console.error('BACKEND_URL が設定されていません。ファイル内の BACKEND_URL 定数にApps ScriptのURLを貼り付けてください。');
 }
 
-async function kvRequest(action, extra){
+async function kvRequest(action, extra, attempt){
   if(!BACKEND_URL || BACKEND_URL.indexOf('PASTE_YOUR_') === 0){
     warnBackendNotConfigured();
     return null;
   }
+  attempt = attempt || 0;
+  const retry = async ()=>{
+    if(attempt >= 2) return null;
+    await new Promise(r=>setTimeout(r, 700 * (attempt + 1)));
+    return kvRequest(action, extra, attempt + 1);
+  };
   try{
     const params = new URLSearchParams();
     params.set('action', action);
@@ -988,10 +996,14 @@ async function kvRequest(action, extra){
       if(extra.payload !== undefined) params.set('payload', JSON.stringify(extra.payload));
     }
     const res = await fetch(BACKEND_URL + '?' + params.toString(), { method:'GET' });
-    return await res.json();
+    const data = await res.json();
+    // 書き込みが混み合っていた場合は少し待ってやり直す。
+    // 同じ内容を書き直すだけなので、二重に登録されることはない。
+    if(data && data.error === 'busy') return await retry();
+    return data;
   }catch(e){
     console.error('kvRequest failed:', action, e);
-    return null;
+    return await retry();
   }
 }
 
@@ -1055,6 +1067,9 @@ async function kvSetManyChunked(items, chunkSize){
 }
 
 async function ensureEmployeeMasterSeeded(){
+  // 初期投入は済んでいるので、通常は何もしない。
+  // （毎回ここで名簿を全件読み込むと、人数分の無駄な通信になる）
+  if(!SEED_EMPLOYEE_MASTER.length) return;
   try{
     const existing = await getEmployeeMaster();
     const existingIds = new Set(existing.map(e=>String(e.id)));
@@ -1099,23 +1114,37 @@ async function setEmployeeMaster(list){
   return true;
 }
 
-async function getSpecialPriceDays(){
+// 休業日とセット料金指定日は、開いている間に何度も使う。
+// 1回読んだら覚えておき、書き換えたときだけ読み直す。
+let settingsCache = {};
+async function getSpecialPriceDays(force){
+  if(!force && settingsCache.specialPriceDays) return settingsCache.specialPriceDays;
   try{
     const raw = await getSetting('specialPriceDays');
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return []; }
+    settingsCache.specialPriceDays = raw ? JSON.parse(raw) : [];
+  }catch(e){ settingsCache.specialPriceDays = []; }
+  return settingsCache.specialPriceDays;
 }
 // 休業日（祝日・会社休業日）
-async function getClosedDays(){
+async function getClosedDays(force){
+  if(!force && settingsCache.closedDays) return settingsCache.closedDays;
   try{
     const raw = await getSetting('closedDays');
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return []; }
+    settingsCache.closedDays = raw ? JSON.parse(raw) : [];
+  }catch(e){ settingsCache.closedDays = []; }
+  return settingsCache.closedDays;
 }
 async function setClosedDays(list){
   const uniq = Array.from(new Set(list)).sort();
   await setSetting('closedDays', JSON.stringify(uniq));
+  settingsCache.closedDays = uniq;
   state.closedDays = uniq;
+  return uniq;
+}
+async function setSpecialPriceDays(list){
+  const uniq = Array.from(new Set(list)).sort();
+  await setSetting('specialPriceDays', JSON.stringify(uniq));
+  settingsCache.specialPriceDays = uniq;
   return uniq;
 }
 
@@ -1280,12 +1309,16 @@ function pauseLabel(emp, lang){
 
 // returns null (no master configured => skip check), or {ok, reason, emp}
 async function checkAgainstMaster(id, name){
+  // まずその社員1名分だけを読む（名簿全件を読まないので速い）
+  const one = await getMasterEmp(id);
+  if(one){
+    if(normName(one.name) !== normName(name)) return {ok:false, reason:'mismatch'};
+    return {ok:true, emp:one};
+  }
+  // 見つからないときだけ、名簿そのものが未登録かどうかを確かめる
   const master = await getEmployeeMaster();
-  if(!master || master.length===0) return null; // no roster uploaded yet: don't block
-  const found = master.find(e=>String(e.id)===String(id));
-  if(!found) return {ok:false, reason:'not_found'};
-  if(normName(found.name) !== normName(name)) return {ok:false, reason:'mismatch'};
-  return {ok:true, emp:found};
+  if(!master || master.length===0) return null; // 名簿が空なら照合しない
+  return {ok:false, reason:'not_found'};
 }
 
 /* ===================== date logic ===================== */
@@ -1738,7 +1771,10 @@ async function submitPurchase(){
     state.msg = t.needQty; render(); return;
   }
   const id = state.empId.trim();
-  const masterCheck = await checkAgainstMaster(id, state.empName.trim());
+  const [masterCheck, pinRecFirst] = await Promise.all([
+    checkAgainstMaster(id, state.empName.trim()),
+    state.purchaseConfirm ? Promise.resolve(null) : getPinRecord(id)
+  ]);
   if(masterCheck && !masterCheck.ok){
     state.msg = masterCheck.reason==='not_found' ? t.masterNotFound : t.masterMismatch;
     render(); return;
@@ -1746,7 +1782,7 @@ async function submitPurchase(){
 
   // 1回目は最終確認とPIN入力を出して止める。2回目で送信する。
   if(!state.purchaseConfirm){
-    const pinRec = await getPinRecord(id);
+    const pinRec = pinRecFirst;
     if(!pinRec){
       state.purchasePinMode = 'set';
     } else {
@@ -1813,7 +1849,12 @@ async function submitPurchase(){
   existing.purchases = existing.purchases || [];
   existing.purchases.push(entry);
   existing.updatedAt = new Date().toISOString();
-  await setEmp(id, existing);
+  const savedPurchase = await setEmp(id, existing);
+  if(!savedPurchase){
+    state.submitting = false;
+    state.msg = t.saveFailed;
+    render(); return;
+  }
 
   // fire-and-forget push to Google Sheets if configured
   kvRequest('logPurchase', {payload:{
@@ -1844,7 +1885,11 @@ async function submitCancellation(){
 
   const id = state.empId.trim();
 
-  const masterCheck = await checkAgainstMaster(id, state.empName.trim());
+  // 名簿の照合と既存記録の取得は互いに関係ないので同時に投げる
+  const [masterCheck, current] = await Promise.all([
+    checkAgainstMaster(id, state.empName.trim()),
+    getEmp(id)
+  ]);
   if(masterCheck && !masterCheck.ok){
     state.msg = masterCheck.reason==='not_found' ? t.masterNotFound : t.masterMismatch;
     render(); return;
@@ -1852,7 +1897,7 @@ async function submitCancellation(){
 
   state.submitting = true; render();
 
-  const existing = (await getEmp(id)) || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
+  const existing = current || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
   existing.name = state.empName.trim();
   const singleSet = new Set(existing.singleDates || []);
   pickedDates.forEach(d=>singleSet.add(d));
@@ -1869,7 +1914,12 @@ async function submitCancellation(){
   }
   existing.updatedAt = new Date().toISOString();
 
-  await setEmp(id, existing);
+  const saved = await setEmp(id, existing);
+  if(!saved){
+    state.submitting = false;
+    state.msg = t.saveFailed;
+    render(); return;
+  }
 
   // fire-and-forget push to Google Sheets if configured
   pushToSheet({
@@ -1969,7 +2019,7 @@ async function runMineSearch(){
 
   if(!id || !name){ state.mineError = t.mineNeedIdName; return; }
 
-  const [master, rec] = await Promise.all([getMasterEmp(id), getEmp(id)]);
+  const [master, rec, pinRec] = await Promise.all([getMasterEmp(id), getEmp(id), getPinRecord(id)]);
   if(master){
     if(normName(master.name) !== normName(name)){ state.mineError = t.mineNameMismatch; return; }
   } else if(rec){
@@ -1980,8 +2030,7 @@ async function runMineSearch(){
   state.mineMaster = master;
   state.mineRecord = rec;
 
-  // ここからPINによる本人確認
-  const pinRec = await getPinRecord(id);
+  // ここからPINによる本人確認（上でまとめて取得済み）
   if(!pinRec){                       // まだPINを設定していない人
     state.mineStage = 'setPin';
     return;
@@ -2599,7 +2648,7 @@ async function renderAdmin(vp){
   // 折りたたみの開閉や検索は、この読み込み済みデータから描き直すので通信しない。
   async function loadAll(){
     const [recs, master, specialDays, closedDays, pinMap] = await Promise.all([
-      listAllEmpRecords(), getEmployeeMaster(), getSpecialPriceDays(), getClosedDays(), listPinRecords()
+      listAllEmpRecords(), getEmployeeMaster(), getSpecialPriceDays(true), getClosedDays(true), listPinRecords()
     ]);
     records = recs;
     state.adminAllRecords = recs;
@@ -2999,14 +3048,14 @@ async function renderAdmin(vp){
       if(specialDays.includes(d)){
         state.specialDaysMsg = {text:t.specialDaysAlready, ok:false}; drawAdmin(); return;
       }
-      await setSetting('specialPriceDays', JSON.stringify(specialDays.concat([d])));
+      await setSpecialPriceDays(specialDays.concat([d]));
       state.specialDaysMsg = null;
       await reload();
     };
     vp.querySelectorAll('[data-remove-special]').forEach(btn=>{
       btn.onclick = async ()=>{
         const d = btn.dataset.removeSpecial;
-        await setSetting('specialPriceDays', JSON.stringify(specialDays.filter(x=>x!==d)));
+        await setSpecialPriceDays(specialDays.filter(x=>x!==d));
         await reload();
       };
     });
