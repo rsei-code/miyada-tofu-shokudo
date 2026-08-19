@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -733,6 +732,7 @@ const T = {
     rcptDays:"{n}日", rcptPieces:"{n}点",
     rcptLunchSub:"給食のある日 {serving}日 ／ キャンセル {cancel}日",
     rcptPausedSub:" ／ 停止期間 {n}日",
+    rcptBeforeHireSub:" ／ 入社前 {n}日",
     rcptProductsNone:"この月の購入はありません",
     singleDatesMonth:"{m}月の個別キャンセル", minePurchaseMonth:"{m}月の割引商品の購入",
     mineExtraEatMonth:"{m}月の臨時ランチ",
@@ -764,6 +764,7 @@ const T = {
     boardToday:"今日", boardBackToday:"今日に戻る", eatingToday:"食べる人", cancelToday:"キャンセル",
     setLabel:"セット", okazuLabel:"おかず", peopleUnit:"人", unknownLabel:"未設定",
     pausedLabel:"停止中",
+    notHiredYetLabel:"未入社",
     boardClosedToday:"この日は休業日です（給食なし）",
     masterNeededForBoard:"内訳（セット・おかず）を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
     searchTitle:"個別検索", searchByDate:"日付で検索", searchByEmp:"従業員で検索",
@@ -793,6 +794,9 @@ const T = {
     masterSearchPh:"社員番号または名前で検索",
     mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）", typeNone:"利用なし（¥0）",
     mealTypeChangeNote:"※ 変更は月の途中からは受け付けられません。その月のCSVをまだ出力していなければ、変更した時点でその月全体に反映されます（すでに出力済みの月の金額は変わりません）。",
+    hireDateLabel:"入社日（任意・中途入社の場合）",
+    hireDateHelp:"入社日より前の日付は、給食の日であっても金額計算・「本日の状況」の人数から自動的に除外されます。中途入社でない場合は空欄のままで構いません。",
+    hireDateBad:"入社日の形式を確認してください。",
     pauseOptional:"停止期間（任意・休職や長期出張で給食を止める場合）",
     pauseFrom:"停止開始日", pauseTo:"再開日（空欄なら継続）",
     masterAddBtn:"この内容で登録する", masterEditBtn:"変更", masterDeleteBtn:"削除",
@@ -818,8 +822,8 @@ const T = {
     rosterImportAlready:"すでに登録済み：{n}名（リスト内）",
     rosterImportRun:"この内容で追加する",
     rosterImportDone:"{n}名を「利用なし」として追加しました。",
-    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日」の順で貼り付けてください。お食事タイプは「セット」「おかず」「利用なし」のいずれか。ランチを食べず割引商品の購入だけする人は「利用なし」を登録してください（ランチ代は発生しません）。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。",
-    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01\n4,テスト四郎,利用なし",
+    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日」の順で貼り付けてください。お食事タイプは「セット」「おかず」「利用なし」のいずれか。ランチを食べず割引商品の購入だけする人は「利用なし」を登録してください（ランチ代は発生しません）。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。入社日（省略可）を入れると、その日より前は中途入社として金額計算・人数集計から除きます。停止期間を使わず入社日だけ入れる場合は、停止開始日・再開日の列を空欄のままにしてください。",
+    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01\n4,テスト四郎,利用なし\n5,テスト五郎,セット,,,2026-08-15",
     employeeMasterCheck:"内容を確認する", employeeMasterConfirm:"この内容で保存する", employeeMasterCancel:"やめる",
     employeeMasterSaved:"名簿を保存しました（{n}件）", employeeMasterCount:"現在 {n} 件登録されています。",
     employeeMasterInvalid:"{line}行目の形式が正しくありません（社員番号,氏名,お食事タイプ,停止開始日,再開日）。",
@@ -937,6 +941,7 @@ const T = {
     rcptDays:"{n} day(s)", rcptPieces:"{n} item(s)",
     rcptLunchSub:"{serving} serving days / {cancel} cancelled",
     rcptPausedSub:" / {n} paused",
+    rcptBeforeHireSub:" / {n} before hire date",
     rcptProductsNone:"No purchases this month",
     singleDatesMonth:"Individual cancellations in month {m}", minePurchaseMonth:"Purchases in month {m}",
     mineExtraEatMonth:"Extra lunches in month {m}",
@@ -1305,7 +1310,7 @@ let state = {
   urlSavedMsg:'',
   csvMonth: currentMonthValue(),
   employeeMasterText:'', employeeMasterMsg:null,
-  masterNew:{id:'', name:'', mealType:'', pauseStart:'', pauseEnd:''}, masterNewMsg:null,
+  masterNew:{id:'', name:'', mealType:'', pauseStart:'', pauseEnd:'', hireDate:''}, masterNewMsg:null,
   masterSearch:'', masterEditId:null, masterEditDraft:null, masterEditMsg:null,
   masterDeleteId:null, masterBulkOpen:false,
   masterPending:null,      // 保存前の確認内容
@@ -1684,6 +1689,10 @@ function pauseLabel(emp, lang){
   const end = emp.pauseEnd ? emp.pauseEnd : (lang==='en' ? 'ongoing' : '未定');
   return (lang==='en' ? 'Paused ' : '停止 ') + emp.pauseStart + '〜' + end;
 }
+// 入社日より前の日付か（中途入社の人を、入社日より前は計算・人数から除外するため）
+function isBeforeHireDate(emp, dateStr){
+  return !!(emp && emp.hireDate && dateStr < emp.hireDate);
+}
 
 // returns null (no master configured => skip check), or {ok, reason, emp}
 async function checkAgainstMaster(id, name){
@@ -1762,22 +1771,24 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
   if(emp && emp.mealType === 'none'){
     let eatDays=0, amount=0;
     servingDays.forEach(d=>{
+      if(isBeforeHireDate(emp, d)) return;   // 入社前は臨時ランチも対象外
       const extraType = extraEatMap && extraEatMap.get(d);
       if(!extraType) return;
       eatDays++;
       amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
     });
-    return {eatDays, amount, pausedDays:0, cancelledDays:0};
+    return {eatDays, amount, pausedDays:0, cancelledDays:0, beforeHireDays:0};
   }
   const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
-  let eatDays=0, amount=0, pausedDays=0, cancelledDays=0;
+  let eatDays=0, amount=0, pausedDays=0, cancelledDays=0, beforeHireDays=0;
   servingDays.forEach(d=>{
+    if(isBeforeHireDate(emp, d)){ beforeHireDays++; return; }
     if(isPausedOn(emp, d)){ pausedDays++; return; }
     if(cancelledSet.has(d)){ cancelledDays++; return; }
     eatDays++;
     amount += (specialSet && specialSet.has(d)) ? PRICE_SET : basePrice;
   });
-  return {eatDays, amount, pausedDays, cancelledDays};
+  return {eatDays, amount, pausedDays, cancelledDays, beforeHireDays};
 }
 // 臨時ランチの登録から、日付 -> 種類 のMapを作る（無ければ空のMap）
 function extraEatMapFromRecord(rec){
@@ -2455,7 +2466,7 @@ async function computeMineSummary(){
     lunchAmount: calc.amount,
     purchaseAmount,
     amount: calc.amount + purchaseAmount,
-    pausedDays: calc.pausedDays, cancelledDays: calc.cancelledDays,
+    pausedDays: calc.pausedDays, cancelledDays: calc.cancelledDays, beforeHireDays: calc.beforeHireDays,
     single, recurring, mealType: emp.mealType,
     purchases, purchaseAgg,
     extraEatInMonth,
@@ -2649,7 +2660,7 @@ function paintMineResult(){
             <span class="a">¥${s.lunchAmount.toLocaleString()}</span>
             <span class="sub">${t.rcptLunchSub.replace('{serving}', s.servingCount).replace('{cancel}', s.cancelledDays)}${
               s.pausedDays ? t.rcptPausedSub.replace('{n}', s.pausedDays) : ''
-            }${cancelBreakdownText(s, t)}</span>
+            }${s.beforeHireDays ? t.rcptBeforeHireSub.replace('{n}', s.beforeHireDays) : ''}${cancelBreakdownText(s, t)}</span>
             <span class="sub">${t.mineUnitNote.replace('{u}', unitText)}</span>
           </div>
           <div class="rcpt-row ${s.purchaseAmount===0?'zero':''}">
@@ -2816,7 +2827,8 @@ function masterToText(list){
     .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
     .map(e=>{
       const cols = [e.id, e.name, e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':e.mealType==='none'?'利用なし':''];
-      if(e.pauseStart || e.pauseEnd) cols.push(e.pauseStart||'', e.pauseEnd||'');
+      if(e.pauseStart || e.pauseEnd || e.hireDate) cols.push(e.pauseStart||'', e.pauseEnd||'');
+      if(e.hireDate) cols.push(e.hireDate);
       return cols.join(',');
     }).join('\n');
 }
@@ -2930,6 +2942,14 @@ function masterPauseFields(prefix, ps, pe, t){
       </div>
     </div>`;
 }
+// 中途入社の人向け：入社日より前は金額計算にも人数にも含めない
+function masterHireDateField(prefix, hireDate, t){
+  return `<div class="field">
+      <label>${t.hireDateLabel}</label>
+      <input type="date" id="${prefix}-hire" value="${escapeHtml(hireDate||'')}">
+      <p class="footnote" style="margin-top:4px;">${t.hireDateHelp}</p>
+    </div>`;
+}
 function masterCardBody(master, t){
   const n = state.masterNew;
   const q = (state.masterSearch||'').trim().toLowerCase();
@@ -2949,6 +2969,7 @@ function masterCardBody(master, t){
         </div>
         <label>${t.mealTypeLabel}</label>
         ${masterTypePick('me', dr.mealType, t)}
+        ${masterHireDateField('me', dr.hireDate, t)}
         ${masterPauseFields('me', dr.pauseStart, dr.pauseEnd, t)}
         <p class="footnote" id="me-idwarn" data-oldid="${escapeHtml(id)}" style="color:var(--danger);${
           (dr.id||'') !== id ? '' : 'display:none;'}">${
@@ -2972,9 +2993,10 @@ function masterCardBody(master, t){
       </div>`;
     }
     const pause = e.pauseStart ? `<span class="pausechip">停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}</span>` : '';
+    const hireChip = e.hireDate ? `<span class="pausechip">入社日 ${e.hireDate}</span>` : '';
     return `<div class="emprow">
       <span class="who">${escapeHtml(e.name)} <span class="small">(${escapeHtml(id)})</span>
-        <span class="statuspill ${e.mealType==='set'?'on':'off'}">${mealTypeJa(e.mealType)}</span>${pause}</span>
+        <span class="statuspill ${e.mealType==='set'?'on':'off'}">${mealTypeJa(e.mealType)}</span>${hireChip}${pause}</span>
       <span class="btns">
         <button class="btn btn-ghost" data-edit-emp="${escapeHtml(id)}">${t.masterEditBtn}</button>
         <button class="btn btn-danger" data-del-emp="${escapeHtml(id)}">${t.masterDeleteBtn}</button>
@@ -2993,6 +3015,7 @@ function masterCardBody(master, t){
       </div>
       <label>${t.mealTypeLabel}</label>
       ${masterTypePick('mn', n.mealType, t)}
+      ${masterHireDateField('mn', n.hireDate, t)}
       ${masterPauseFields('mn', n.pauseStart, n.pauseEnd, t)}
       <div class="btnrow">
         <button class="btn btn-primary" id="mn-add">${t.masterAddBtn}</button>
@@ -3222,13 +3245,14 @@ async function renderAdmin(vp){
     const masterAvailable = master.length > 0;
     let eatingTotal=0, eatingSet=0, eatingOkazu=0, eatingUnknown=0;
     let cancelTotal=0, cancelSet=0, cancelOkazu=0, cancelUnknown=0;
-    let pausedTotal=0;
+    let pausedTotal=0, notHiredYetTotal=0;
     let extraEatToday=0, extraEatSetToday=0, extraEatOkazuToday=0;
     const extraEatNamesToday = [];
     const cancelNamesToday = [];
 
     if(masterAvailable){
       master.forEach(e=>{
+        if(isBeforeHireDate(e, bISO)){ notHiredYetTotal++; return; }   // 入社日がまだ来ていない
         if(e.mealType === 'none'){
           // 普段は対象外だが、その日だけ臨時ランチの登録があればカウントする
           const m = extraEatByEmpAdmin.get(String(e.id));
@@ -3334,6 +3358,7 @@ async function renderAdmin(vp){
           <div class="board-sub-sub">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
           ${cancelNamesToday.length? `<div class="board-sub-sub">${cancelNamesToday.map(escapeHtml).join('、')}</div>`:''}
           ${pausedTotal? `<div class="board-sub-sub">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
+          ${notHiredYetTotal? `<div class="board-sub-sub">${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）</div>`:''}
         </div>
         ` : `
         <div class="board-main">
@@ -3901,16 +3926,22 @@ async function renderAdmin(vp){
       if(master.some(e=>String(e.id)===id)){
         state.masterNewMsg = {text:t.masterDupId.replace('{id}', id), ok:false}; drawAdmin(); return;
       }
+      const hireInput = document.getElementById('mn-hire');
+      const hireDate = normDate(hireInput ? hireInput.value : '');
+      if(hireDate===null){
+        state.masterNewMsg = {text:t.hireDateBad, ok:false}; drawAdmin(); return;
+      }
       const ps = normDate(n.pauseStart||''), pe = normDate(n.pauseEnd||'');
       if(ps===null || pe===null || (ps && pe && pe < ps)){
         state.masterNewMsg = {text:t.masterBadPause, ok:false}; drawAdmin(); return;
       }
       const entry = {id:id, name:name, mealType:n.mealType};
+      if(hireDate) entry.hireDate = hireDate;
       if(ps) entry.pauseStart = ps;
       if(pe) entry.pauseEnd = pe;
       mnAdd.disabled = true;
       await kvRequest('kvSet', {key:'master:'+id, value: JSON.stringify(entry)});
-      state.masterNew = {id:'', name:'', mealType:'', pauseStart:'', pauseEnd:''};
+      state.masterNew = {id:'', name:'', mealType:'', pauseStart:'', pauseEnd:'', hireDate:''};
       state.masterNewMsg = {text:t.masterAdded.replace('{name}', name), ok:true};
       state.employeeMasterText = '';   // 一括欄は次に開いたとき最新から作り直す
       await reload();
@@ -3930,7 +3961,7 @@ async function renderAdmin(vp){
         if(!e) return;
         state.masterEditId = String(e.id);
         state.masterEditDraft = {id:String(e.id), name:e.name||'', mealType:e.mealType||'',
-                                pauseStart:e.pauseStart||'', pauseEnd:e.pauseEnd||''};
+                                pauseStart:e.pauseStart||'', pauseEnd:e.pauseEnd||'', hireDate:e.hireDate||''};
         state.masterDeleteId = null; state.masterEditMsg = null;
         drawAdmin();
       };
@@ -3970,11 +4001,17 @@ async function renderAdmin(vp){
       if(newId !== oldId && master.some(e=>String(e.id)===newId)){
         state.masterEditMsg = t.masterDupId.replace('{id}', newId); drawAdmin(); return;
       }
+      const hireInput = document.getElementById('me-hire');
+      const hireDate = normDate(hireInput ? hireInput.value : (dr.hireDate||''));
+      if(hireDate===null){
+        state.masterEditMsg = t.hireDateBad; drawAdmin(); return;
+      }
       const ps = normDate(dr.pauseStart||''), pe = normDate(dr.pauseEnd||'');
       if(ps===null || pe===null || (ps && pe && pe < ps)){
         state.masterEditMsg = t.masterBadPause; drawAdmin(); return;
       }
       const entry = {id:newId, name:name, mealType:dr.mealType};
+      if(hireDate) entry.hireDate = hireDate;
       if(ps) entry.pauseStart = ps;
       if(pe) entry.pauseEnd = pe;
       meSave.disabled = true;
@@ -4115,7 +4152,8 @@ function parseMasterText(text){
     }
     const pauseStart = normDate(parts[3]||'');
     const pauseEnd = normDate(parts[4]||'');
-    if(pauseStart===null || pauseEnd===null){
+    const hireDate = normDate(parts[5]||'');
+    if(pauseStart===null || pauseEnd===null || hireDate===null){
       return {error: t.employeeMasterBadDate.replace('{line}', lineNo)};
     }
     if(pauseStart && pauseEnd && pauseEnd < pauseStart){
@@ -4126,6 +4164,7 @@ function parseMasterText(text){
     }
     seenIds.add(id);
     const entry = {id, name, mealType};
+    if(hireDate) entry.hireDate = hireDate;
     if(pauseStart) entry.pauseStart = pauseStart;
     if(pauseEnd) entry.pauseEnd = pauseEnd;
     list.push(entry);
@@ -4188,7 +4227,7 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   // base employee list: prefer the uploaded roster (includes people who never cancel);
   // fall back to whoever has cancellation records if no roster has been configured.
   const baseList = master.length
-    ? master.map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd}))
+    ? master.map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd, hireDate:e.hireDate}))
     : Object.keys(cancelledByEmp).map(id=>({id, name:cancelledByEmp[id].name, mealType:undefined}));
 
   const perEmployee = {}; // id -> {name, amount}
