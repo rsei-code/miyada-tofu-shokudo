@@ -2968,19 +2968,47 @@ async function renderAdmin(vp){
 
   // スプレッドシートへの問い合わせはここだけ。
   // 折りたたみの開閉や検索は、この読み込み済みデータから描き直すので通信しない。
+  //
+  // 従業員マスタ・全社員の記録・休業日・セット料金指定日は、Apps Script側の
+  // adminBootstrap で「スプレッドシートを1回だけ開いて」まとめて取得する。
+  // （以前は4つを別々に問い合わせており、呼び出し回数分の起動オーバーヘッドが
+  //  乗って遅くなっていたため。バックエンド側の対応が必要。）
+  //
+  // 「閲覧用PINの管理」欄だけは、社員が増えるほど全件スキャンが重くなるため、
+  // ログイン直後には読み込まず、実際にそのカードを開いたときだけ読み込む。
   async function loadAll(){
-    const [recs, master, specialDays, closedDays, pinMap] = await Promise.all([
-      listAllEmpRecords(), getEmployeeMaster(), getSpecialPriceDays(true), getClosedDays(true), listPinRecords()
-    ]);
+    const boot = await kvRequest('adminBootstrap', {}) || {};
+    const recs = [];
+    (boot.emp || []).forEach(item=>{ try{ recs.push(JSON.parse(item.value)); }catch(e){} });
+    const master = [];
+    (boot.master || []).forEach(item=>{ try{ master.push(JSON.parse(item.value)); }catch(e){} });
+    let specialDays = [];
+    try{ specialDays = boot.specialPriceDays ? JSON.parse(boot.specialPriceDays) : []; }catch(e){ specialDays = []; }
+    let closedDays = [];
+    try{ closedDays = boot.closedDays ? JSON.parse(boot.closedDays) : []; }catch(e){ closedDays = []; }
+
     records = recs;
     state.adminAllRecords = recs;
     specialDays.sort(); closedDays.sort();
     state.closedDays = closedDays;
-    cache = {master:master, specialDays:specialDays, closedDays:closedDays, pinMap:pinMap};
+    // 他の画面（社員側カレンダーなど）が使うキャッシュにも反映しておき、二重取得を防ぐ
+    settingsCache.specialPriceDays = specialDays;
+    settingsCache.closedDays = closedDays;
+    const prevPinMap = cache ? cache.pinMap : null;  // 開いたことがあれば引き継ぐ
+    cache = {master:master, specialDays:specialDays, closedDays:closedDays, pinMap:prevPinMap};
     if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
   }
-  // 書き込みのあとは最新の状態を読み直す
-  async function reload(){ await loadAll(); drawAdmin(); }
+  // PIN一覧はここでだけ読み込む（カードを開いたとき・書き込み後の再読み込み時のみ）
+  async function loadPinMap(){
+    cache.pinMap = await listPinRecords();
+  }
+  // 書き込みのあとは最新の状態を読み直す（PINは、すでに開いていた場合だけ一緒に更新）
+  async function reload(){
+    const pinWasLoaded = !!(cache && cache.pinMap);
+    await loadAll();
+    if(pinWasLoaded) await loadPinMap();
+    drawAdmin();
+  }
 
   // 何秒か経ったらメッセージを消す。項目ごとにタイマーを分けて、
   // 別の操作のタイマーに消されないようにする。
@@ -2992,6 +3020,7 @@ async function renderAdmin(vp){
 
   await loadAll();
   drawAdmin();
+
 
   function occurrencesForDate(dateStr){
     const dt = parseISO(dateStr);
@@ -3018,7 +3047,9 @@ async function renderAdmin(vp){
 
   function drawAdmin(){
     const master = cache.master, specialDays = cache.specialDays,
-          closedDays = cache.closedDays, pinMap = cache.pinMap;
+          closedDays = cache.closedDays;
+    const pinMapLoaded = !!cache.pinMap;
+    const pinMap = cache.pinMap || {};   // 未読込のあいだは空扱い（PINカードは「読み込み中」表示にするため実害なし）
     const closedSet = new Set(closedDays);
     const masterById = new Map(master.map(e=>[String(e.id), e]));
 
@@ -3212,7 +3243,9 @@ async function renderAdmin(vp){
         <p class="footnote">停止期間は下の「従業員マスタ」で編集できます。</p>
       `) : ''}
 
-      ${qcard('pin', t.adminPinTitle, `
+      ${qcard('pin', t.adminPinTitle, !pinMapLoaded ? `
+        <p class="small">読み込み中…</p>
+      ` : `
         <p class="footnote">${t.adminPinHelp}</p>
         <p class="small">${t.adminPinSummary
           .replace('{set}', pinStats.set).replace('{unset}', pinStats.unset).replace('{locked}', pinStats.locked)}</p>
@@ -3266,9 +3299,15 @@ async function renderAdmin(vp){
     `;
 
     vp.querySelectorAll('[data-toggle]').forEach(el=>{
-      el.onclick = ()=>{
+      el.onclick = async ()=>{
         const k = el.dataset.toggle;
-        state.adminOpen[k] = !state.adminOpen[k];
+        const opening = !state.adminOpen[k];
+        state.adminOpen[k] = opening;
+        // 「閲覧用PINの管理」は開いたタイミングで初めて読み込む（全社員分の全件スキャンのため）
+        if(k === 'pin' && opening && !cache.pinMap){
+          drawAdmin();   // 先に「読み込み中…」を表示
+          await loadPinMap();
+        }
         drawAdmin();
       };
     });
@@ -3399,7 +3438,7 @@ async function renderAdmin(vp){
     if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
     const _el_adm_csv_export = vp.querySelector('#adm-csv-export');
     if(_el_adm_csv_export) _el_adm_csv_export.onclick = async ()=>{
-      const result = await exportMonthlyCsv(records, state.csvMonth);
+      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth);
       if(result && result.missingMealType > 0){
         state.csvWarning = t.csvMealTypeWarning.replace('{n}', result.missingMealType);
         drawAdmin();
@@ -3706,7 +3745,7 @@ function renderMasterDiff(pending){
 }
 
 /* ---- Monthly payroll-deduction CSV export ---- */
-async function exportMonthlyCsv(records, yyyyMm){
+async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm){
   const [yStr, mStr] = yyyyMm.split('-');
   const y = parseInt(yStr,10);
   const m0 = parseInt(mStr,10) - 1; // 0-indexed month of the DATA (e.g. June => 5)
@@ -3717,9 +3756,6 @@ async function exportMonthlyCsv(records, yyyyMm){
   let payYear = y;
   if(payRound > 12){ payRound = 1; payYear = y + 1; }
 
-  const [specialList, closedList, master] = await Promise.all([
-    getSpecialPriceDays(), getClosedDays(), getEmployeeMaster()
-  ]);
   const specialSet = new Set(specialList);
   const closedSet = new Set(closedList);
   const servingDays = servingDaysInMonth(y, m0, closedSet); // 平日 − 休業日
@@ -3801,3 +3837,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
