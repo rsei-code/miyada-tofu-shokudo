@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -791,6 +792,7 @@ const T = {
     masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
     masterSearchPh:"社員番号または名前で検索",
     mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）", typeNone:"利用なし（¥0）",
+    mealTypeChangeNote:"※ 変更は月の途中からは受け付けられません。その月のCSVをまだ出力していなければ、変更した時点でその月全体に反映されます（すでに出力済みの月の金額は変わりません）。",
     pauseOptional:"停止期間（任意・休職や長期出張で給食を止める場合）",
     pauseFrom:"停止開始日", pauseTo:"再開日（空欄なら継続）",
     masterAddBtn:"この内容で登録する", masterEditBtn:"変更", masterDeleteBtn:"削除",
@@ -855,6 +857,8 @@ const T = {
     extraEatTitle:"臨時ランチ登録（利用なしの人）",
     extraEatHelp:"普段は「利用なし」で登録している社員が、その日だけ臨時でランチを食べる場合にここから登録してください。登録した日は月次CSVの金額計算にも反映され、「本日の状況」の人数にも加算されます。社員番号または氏名で検索して選んでください。",
     extraEatDate:"食べる日", extraEatSelect:"選ぶ", extraEatSelected:"選択中",
+    extraEatAllTitle:"登録されている臨時ランチ（全員・{n}件）", extraEatAllNone:"登録されている臨時ランチはありません。",
+    extraEatLockedLabel:"削除できません",
     extraEatAdd:"この内容で登録する",
     extraEatAdded:"登録しました。",
     extraEatNeedDate:"日付を選んでください。",
@@ -2910,7 +2914,8 @@ function masterTypePick(prefix, current, t){
       <button type="button" class="${current==='set'?'active':''}" data-${prefix}-type="set">${t.typeSet}</button>
       <button type="button" class="${current==='okazu'?'active':''}" data-${prefix}-type="okazu">${t.typeOkazu}</button>
       <button type="button" class="${current==='none'?'active':''}" data-${prefix}-type="none">${t.typeNone}</button>
-    </div>`;
+    </div>
+    <p class="footnote" style="margin-top:-4px;">${t.mealTypeChangeNote}</p>`;
 }
 function masterPauseFields(prefix, ps, pe, t){
   return `<p class="footnote" style="margin-top:0;">${t.pauseOptional}</p>
@@ -3063,6 +3068,20 @@ async function renderAdmin(vp){
   let records = [];
   let cache = null;
 
+  // 日本語入力(IME)中に1文字打つたびに画面全体を作り直すと、変換中の状態ごと
+  // DOMが壊れて変換が崩れてしまう。検索欄はこのヘルパーで束縛し、変換が
+  // 確定してから（compositionend）だけ再描画するようにする。
+  function bindLiveSearch(el, apply){
+    if(!el) return;
+    let composing = false;
+    el.addEventListener('compositionstart', ()=>{ composing = true; });
+    el.addEventListener('compositionend', ()=>{ composing = false; apply(el.value); });
+    el.addEventListener('input', e=>{
+      if(composing || e.isComposing) return;
+      apply(el.value);
+    });
+  }
+
   // スプレッドシートへの問い合わせはここだけ。
   // 折りたたみの開閉や検索は、この読み込み済みデータから描き直すので通信しない。
   //
@@ -3073,6 +3092,23 @@ async function renderAdmin(vp){
   //
   // 「閲覧用PINの管理」欄だけは、社員が増えるほど全件スキャンが重くなるため、
   // ログイン直後には読み込まず、実際にそのカードを開いたときだけ読み込む。
+  // 月をまたいだ臨時ランチ登録（先月以前の分）は不要になるので自動的に削除する
+  async function purgeOldExtraEatDates(recs){
+    const curYm = currentMonthValue(); // 例: '2026-08'
+    const toSave = [];
+    recs.forEach(rec=>{
+      if(!rec.extraEatDates || !rec.extraEatDates.length) return;
+      const kept = rec.extraEatDates.filter(e=> String(e.date).slice(0,7) >= curYm);
+      if(kept.length !== rec.extraEatDates.length){
+        rec.extraEatDates = kept;
+        toSave.push(rec);
+      }
+    });
+    if(toSave.length){
+      const items = toSave.map(rec=>({key:'emp:'+rec.employeeId, value: JSON.stringify(rec)}));
+      await kvSetManyChunked(items);
+    }
+  }
   async function loadAll(){
     const boot = await kvRequest('adminBootstrap', {}) || {};
     const recs = [];
@@ -3085,6 +3121,8 @@ async function renderAdmin(vp){
     try{ closedDays = boot.closedDays ? JSON.parse(boot.closedDays) : []; }catch(e){ closedDays = []; }
     let guestLunches = [];
     try{ guestLunches = boot.guestLunches ? JSON.parse(boot.guestLunches) : []; }catch(e){ guestLunches = []; }
+
+    await purgeOldExtraEatDates(recs);   // 先月以前の臨時ランチ登録をここで整理する
 
     records = recs;
     state.adminAllRecords = recs;
@@ -3387,10 +3425,38 @@ async function renderAdmin(vp){
             <div class="btnrow"><button class="btn btn-primary" id="adm-extraeat-add">${t.extraEatAdd}</button></div>
             <div class="status-msg">${state.extraEatMsg ? `<span style="color:${state.extraEatMsg.ok?'var(--good)':'var(--danger)'}">${state.extraEatMsg.text}</span>` : ''}</div>
             <div class="daylist" style="margin-top:10px;">
-              ${list.length ? list.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(e=>`<div class="item"><span>${e.date}（${dowLabel(e.date,'ja')}）</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat="${e.date}">${t.delete}</button></div>`).join('') : `<p class="small">${t.none}</p>`}
+              ${list.length ? list.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(e=>{
+                const locked = e.date < todayISO();
+                return `<div class="item"><span>${e.date}（${dowLabel(e.date,'ja')}）</span>${
+                  locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
+                         : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat="${e.date}">${t.delete}</button>`
+                }</div>`;
+              }).join('') : `<p class="small">${t.none}</p>`}
             </div>
           </div>`;
         })() : ''}
+        ${(function(){
+          const all = [];
+          records.forEach(rec=>{
+            (rec.extraEatDates||[]).forEach(e=>{
+              all.push({employeeId:String(rec.employeeId), name:rec.name, date:e.date});
+            });
+          });
+          all.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+          return `
+          <div class="daylist" style="margin-top:16px;">
+            <label>${t.extraEatAllTitle.replace('{n}', all.length)}</label>
+            <div style="margin-top:8px;">
+              ${all.length ? all.map(x=>{
+                const locked = x.date < todayISO();
+                return `<div class="item"><span>${x.date}（${dowLabel(x.date,'ja')}） ${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span></span>${
+                  locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
+                         : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat-all="${escapeHtml(x.employeeId)}|${x.date}">${t.delete}</button>`
+                }</div>`;
+              }).join('') : `<p class="small">${t.extraEatAllNone}</p>`}
+            </div>
+          </div>`;
+        })()}
         ` : `
         <p class="footnote">${t.guestLunchHelp}</p>
         <div class="row2">
@@ -3661,11 +3727,10 @@ async function renderAdmin(vp){
       drawAdmin();
     };
 
-    const nameSearchInput = vp.querySelector('#adm-name-search');
-    if(nameSearchInput) nameSearchInput.oninput = e=>{
-      state.adminSearch = e.target.value;
+    bindLiveSearch(vp.querySelector('#adm-name-search'), (val)=>{
+      state.adminSearch = val;
       drawAdmin();
-    };
+    });
 
     const _el_adm_csv_month = vp.querySelector('#adm-csv-month');
     if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
@@ -3687,10 +3752,9 @@ async function renderAdmin(vp){
       setTimeout(()=>{ state.urlSavedMsg=''; drawAdmin(); },4000);
     };
 
-    const pinSearchInput = vp.querySelector('#adm-pin-search');
-    if(pinSearchInput) pinSearchInput.oninput = e=>{
-      state.adminPinSearch = e.target.value; state.adminPinMsg = null; drawAdmin();
-    };
+    bindLiveSearch(vp.querySelector('#adm-pin-search'), (val)=>{
+      state.adminPinSearch = val; state.adminPinMsg = null; drawAdmin();
+    });
     vp.querySelectorAll('[data-pin-reset]').forEach(btn=>{
       btn.onclick = async ()=>{
         btn.disabled = true;
@@ -3760,10 +3824,9 @@ async function renderAdmin(vp){
     });
 
     /* --- 臨時ランチ登録（利用なしの人） --- */
-    const extraSearchInput = vp.querySelector('#adm-extraeat-search');
-    if(extraSearchInput) extraSearchInput.oninput = e=>{
-      state.extraEatSearch = e.target.value; drawAdmin();
-    };
+    bindLiveSearch(vp.querySelector('#adm-extraeat-search'), (val)=>{
+      state.extraEatSearch = val; drawAdmin();
+    });
     vp.querySelectorAll('[data-select-extraeat]').forEach(btn=>{
       btn.onclick = ()=>{
         state.extraEatSelectedId = btn.dataset.selectExtraeat;
@@ -3793,9 +3856,23 @@ async function renderAdmin(vp){
     };
     vp.querySelectorAll('[data-remove-extraeat]').forEach(btn=>{
       btn.onclick = async ()=>{
-        btn.disabled = true;
         const d = btn.dataset.removeExtraeat;
+        if(d < todayISO()) return;   // 二重の安全確認（登録日を過ぎたものは削除できない）
+        btn.disabled = true;
         const id = state.extraEatSelectedId;
+        const rec = await getEmp(id);
+        if(rec){
+          rec.extraEatDates = (rec.extraEatDates||[]).filter(e=>e.date!==d);
+          await setEmp(id, rec);
+        }
+        await reload();
+      };
+    });
+    vp.querySelectorAll('[data-remove-extraeat-all]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        const [id, d] = btn.dataset.removeExtraeatAll.split('|');
+        if(d < todayISO()) return;   // 二重の安全確認（登録日を過ぎたものは削除できない）
+        btn.disabled = true;
         const rec = await getEmp(id);
         if(rec){
           rec.extraEatDates = (rec.extraEatDates||[]).filter(e=>e.date!==d);
@@ -3841,8 +3918,8 @@ async function renderAdmin(vp){
     };
 
     /* --- 従業員マスタ：検索して変更・削除 --- */
-    bind('mm-search', e=>{
-      state.masterSearch = e.target.value;
+    bindLiveSearch(vp.querySelector('#mm-search'), (val)=>{
+      state.masterSearch = val;
       state.masterEditId = null; state.masterDeleteId = null;
       state.masterEditMsg = null; state.employeeMasterMsg = null;
       drawAdmin();
@@ -4176,4 +4253,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
