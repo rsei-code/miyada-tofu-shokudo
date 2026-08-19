@@ -341,48 +341,68 @@ textarea.csvbox{
   box-shadow:var(--shadow);z-index:60;
 }
 .board{
-  background:var(--ink);
+  background:var(--surface);
+  border:1px solid var(--line);
   border-radius:var(--radius);
   padding:22px 22px 18px;
   margin-bottom:16px;
-  color:#fff;
   box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.board::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:8px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-deeper));
 }
 .boardnav{
   display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;
 }
 .boardnav .navbtn{
-  border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.06);
-  color:#F7EDD2;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;
+  border:1px solid var(--line);background:#fff;
+  color:var(--ink);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;
   flex-shrink:0;font-family:inherit;
 }
-.boardnav .navbtn:hover{background:rgba(255,255,255,0.16);}
+.boardnav .navbtn:hover{background:var(--accent-soft);border-color:var(--accent-mid);}
 .boardnav .d{
-  font-size:13.5px;letter-spacing:0.04em;color:#E4CE8B;font-weight:700;
+  font-size:13.5px;letter-spacing:0.04em;color:var(--ink);font-weight:700;
 }
 .boardnav .todaypill{
-  background:rgba(242,215,94,0.26);color:#F7E9A8;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent-deep);border-radius:999px;
   padding:2px 9px;font-size:11px;font-weight:700;
 }
 .boardnav .backtoday{
-  border:1px solid rgba(255,255,255,0.28);background:transparent;color:#EBDCAE;
+  border:1px solid var(--line);background:transparent;color:var(--ink-soft);
   border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
 }
-.boardnav .backtoday:hover{background:rgba(255,255,255,0.12);}
-.board-date{font-size:12.5px;letter-spacing:0.04em;color:#E4CE8B;margin-bottom:16px;font-weight:600;}
-.board-main{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.14);}
+.boardnav .backtoday:hover{background:var(--accent-soft);border-color:var(--accent-mid);color:var(--ink);}
+.board-date{font-size:12.5px;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:16px;font-weight:600;}
+.board-main{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px dashed var(--line);}
 .board-main-num{
-  font-family:'Shippori Mincho',serif;font-weight:800;font-size:58px;color:var(--accent);line-height:1;
+  font-family:'Shippori Mincho',serif;font-weight:800;font-size:58px;color:var(--accent-deeper);line-height:1;
 }
-.board-main-lbl{font-size:14px;margin-top:8px;color:#F7EDD2;font-weight:600;}
-.board-main-sub{font-size:13px;margin-top:8px;color:#EBDCAE;}
+.board-main-lbl{font-size:14px;margin-top:8px;color:var(--ink);font-weight:700;}
+.board-main-sub{font-size:13px;margin-top:8px;color:var(--ink-soft);}
 .board-sub{text-align:center;}
 .board-sub-num{
-  font-family:'Shippori Mincho',serif;font-weight:700;font-size:26px;color:#E6A08E;line-height:1;
+  font-family:'Shippori Mincho',serif;font-weight:700;font-size:26px;color:var(--danger);line-height:1;
 }
-.board-sub-lbl{font-size:12px;margin-top:4px;color:#D6C79A;}
-.board-sub-sub{font-size:11.5px;margin-top:4px;color:#C6B48A;}
+.board-sub-lbl{font-size:12px;margin-top:4px;color:var(--ink-soft);font-weight:700;}
+.board-sub-sub{font-size:11.5px;margin-top:4px;color:var(--ink-soft);}
 .status-msg{font-size:12.5px;color:var(--ink-soft);min-height:16px;margin-top:6px;}
+
+/* 管理者メニューの区分けラベル（厨房担当者向け／システム管理者向け） */
+.section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 16px;}
+.section-divider::before, .section-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+.section-divider-label{
+  font-family:'Shippori Mincho',serif;
+  font-size:16px;font-weight:800;color:var(--accent-deeper);letter-spacing:0.05em;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  padding:7px 18px;border-radius:999px;
+}
+@media (max-width:480px){
+  .section-divider-label{font-size:14px;padding:6px 14px;}
+}
 
 /* ---- Mobile tuning (phones) ---- */
 @media (max-width:480px){
@@ -743,7 +763,6 @@ const T = {
     boardToday:"今日", boardBackToday:"今日に戻る", eatingToday:"食べる人", cancelToday:"キャンセル",
     setLabel:"セット", okazuLabel:"おかず", peopleUnit:"人", unknownLabel:"未設定",
     pausedLabel:"停止中",
-    extraEatTodayLabel:"臨時ランチ", guestTodayLabel:"来客",
     boardClosedToday:"この日は休業日です（給食なし）",
     masterNeededForBoard:"内訳（セット・おかず）を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
     searchTitle:"個別検索", searchByDate:"日付で検索", searchByEmp:"従業員で検索",
@@ -823,8 +842,10 @@ const T = {
 
     guestLunchTitle:"来客用ランチ",
     extraLunchTitle:"臨時ランチ登録", extraLunchGuestTab:"来客", extraLunchEmployeeTab:"社員",
+    kitchenSectionLabel:"厨房担当者向け", adminSectionLabel:"システム管理者向け",
     guestLunchHelp:"来客などで急にランチの数が増える場合、日付ごとに人数を登録できます。ここで登録した人数は「本日の状況」に加算されますが、社員ではないため給与や部門への請求には一切関係しません（厨房が作る数を把握するためだけの人数カウンターです）。",
     guestLunchDate:"日付", guestLunchNote:"メモ（任意）", guestLunchNotePh:"例）○○様ご来社",
+    guestLunchCount:"人数",
     guestLunchAdd:"この人数を追加する", guestLunchRemove:"削除",
     guestLunchNone:"登録されている来客予定はありません。",
     guestLunchNeedDate:"日付を選んでください。",
@@ -1292,7 +1313,7 @@ let state = {
   guestDate:'', guestSetCount:0, guestOkazuCount:0, guestNote:'', guestMsg:null,
   // 臨時ランチ（来客／普段「利用なし」の社員が、特定の日だけ食べる場合。同じメニュー内でタブ切り替え）
   extraLunchMode:'guest',
-  extraEatSearch:'', extraEatSelectedId:null, extraEatDate:'', extraEatType:'okazu', extraEatMsg:null,
+  extraEatSearch:'', extraEatSelectedId:null, extraEatDate:'', extraEatMsg:null,
 };
 
 /* ===================== storage helpers ===================== */
@@ -3126,6 +3147,20 @@ async function renderAdmin(vp){
   }
 
   function drawAdmin(){
+    // 検索欄などに入力中の場合、再描画で画面全体を作り直すとフォーカスが外れて
+    // ブラウザが先頭までスクロールし直してしまう。ここで入力位置とスクロール位置を
+    // 保存しておき、描画し終わったあとに復元する。
+    const activeEl = document.activeElement;
+    let focusRestore = null;
+    if(activeEl && activeEl.id && vp.contains(activeEl)){
+      focusRestore = {
+        id: activeEl.id,
+        selStart: (typeof activeEl.selectionStart === 'number') ? activeEl.selectionStart : null,
+        selEnd: (typeof activeEl.selectionEnd === 'number') ? activeEl.selectionEnd : null,
+        scrollX: window.scrollX, scrollY: window.scrollY,
+      };
+    }
+
     const master = cache.master, specialDays = cache.specialDays,
           closedDays = cache.closedDays, guestLunches = cache.guestLunches || [];
     const pinMapLoaded = !!cache.pinMap;
@@ -3151,6 +3186,8 @@ async function renderAdmin(vp){
     let cancelTotal=0, cancelSet=0, cancelOkazu=0, cancelUnknown=0;
     let pausedTotal=0;
     let extraEatToday=0, extraEatSetToday=0, extraEatOkazuToday=0;
+    const extraEatNamesToday = [];
+    const cancelNamesToday = [];
 
     if(masterAvailable){
       master.forEach(e=>{
@@ -3160,12 +3197,14 @@ async function renderAdmin(vp){
           const extraType = m && m.get(bISO);
           if(!extraType) return;
           extraEatToday++;
+          extraEatNamesToday.push(e.name);
           if(extraType==='set') extraEatSetToday++; else extraEatOkazuToday++;
           return;
         }
         if(isPausedOn(e, bISO)){ pausedTotal++; return; }
         if(cancelledIdsToday.has(String(e.id))){
           cancelTotal++;
+          cancelNamesToday.push(e.name);
           if(e.mealType==='set') cancelSet++; else if(e.mealType==='okazu') cancelOkazu++; else cancelUnknown++;
         }else{
           eatingTotal++;
@@ -3180,6 +3219,19 @@ async function renderAdmin(vp){
     // 来客用ランチ（表示中の日付の分。給与や請求には一切関与しない）
     const guestToday = guestLunches.find(g=>g.date === bISO) || null;
     const guestTotalToday = guestToday ? Number(guestToday.set||0) + Number(guestToday.okazu||0) : 0;
+
+    // 臨時（来客＋社員）をまとめて1行で表示するためのテキストを組み立てる
+    // 例：「臨時：計3人、内訳：エビデント2人、増田雅敏（上の人数に含む）」
+    const extraCombinedTotal = guestTotalToday + extraEatToday;
+    let extraCombinedLine = '';
+    if(extraCombinedTotal > 0){
+      const parts = [];
+      if(guestTotalToday > 0){
+        parts.push(`${guestToday.note ? escapeHtml(guestToday.note) : '来客'}${guestTotalToday}${t.peopleUnit}`);
+      }
+      extraEatNamesToday.forEach(name=> parts.push(escapeHtml(name)));
+      extraCombinedLine = `臨時：計${extraCombinedTotal}${t.peopleUnit}、内訳：${parts.join('、')}（上の人数に含む）`;
+    }
 
     const searchDate = state.adminDateSearch || tISO;
     const dateList = occurrencesForDate(searchDate);
@@ -3236,14 +3288,14 @@ async function renderAdmin(vp){
           <div class="board-main-num">${eatingTotal}</div>
           <div class="board-main-lbl">${t.eatingToday}</div>
           <div class="board-main-sub">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}</div>
+          ${extraCombinedLine? `<div class="board-main-sub">${extraCombinedLine}</div>`:''}
         </div>
         <div class="board-sub">
           <div class="board-sub-num">${cancelTotal}</div>
           <div class="board-sub-lbl">${t.cancelToday}</div>
           <div class="board-sub-sub">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
+          ${cancelNamesToday.length? `<div class="board-sub-sub">${cancelNamesToday.map(escapeHtml).join('、')}</div>`:''}
           ${pausedTotal? `<div class="board-sub-sub">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
-          ${extraEatToday? `<div class="board-sub-sub">${t.extraEatTodayLabel} ${extraEatToday}${t.peopleUnit}（${t.setLabel} ${extraEatSetToday}${t.peopleUnit} ・ ${t.okazuLabel} ${extraEatOkazuToday}${t.peopleUnit}・上の人数に含む）</div>`:''}
-          ${guestTotalToday? `<div class="board-sub-sub">${t.guestTodayLabel} ${guestTotalToday}${t.peopleUnit}（${t.setLabel} ${guestToday.set||0}${t.peopleUnit} ・ ${t.okazuLabel} ${guestToday.okazu||0}${t.peopleUnit}${guestToday.note?'・'+escapeHtml(guestToday.note):''}）</div>`:''}
         </div>
         ` : `
         <div class="board-main">
@@ -3253,6 +3305,8 @@ async function renderAdmin(vp){
         <p class="board-sub-sub" style="text-align:center;">${t.masterNeededForBoard}</p>
         `}
       </div>
+
+      <div class="section-divider"><span class="section-divider-label">🍚 ${t.kitchenSectionLabel}</span></div>
 
       ${qcard('search', t.searchTitle, `
         <div class="modeswitch" style="margin-bottom:14px;">
@@ -3326,23 +3380,14 @@ async function renderAdmin(vp){
           return `
           <div class="subsec" style="margin-top:12px;">
             <p class="sublabel">${escapeHtml(emp?emp.name:'')}（${escapeHtml(state.extraEatSelectedId)}）</p>
-            <div class="row2">
-              <div class="field" style="margin-bottom:0;">
-                <label>${t.extraEatDate}</label>
-                <input type="date" id="adm-extraeat-date">
-              </div>
-              <div class="field" style="margin-bottom:0;">
-                <label>${t.mealTypeLabel}</label>
-                <div class="typepick" style="margin-bottom:0;">
-                  <button type="button" class="${state.extraEatType==='set'?'active':''}" data-extraeat-type="set">${t.typeSet}</button>
-                  <button type="button" class="${state.extraEatType==='okazu'?'active':''}" data-extraeat-type="okazu">${t.typeOkazu}</button>
-                </div>
-              </div>
+            <div class="field">
+              <label>${t.extraEatDate}</label>
+              <input type="date" id="adm-extraeat-date">
             </div>
             <div class="btnrow"><button class="btn btn-primary" id="adm-extraeat-add">${t.extraEatAdd}</button></div>
             <div class="status-msg">${state.extraEatMsg ? `<span style="color:${state.extraEatMsg.ok?'var(--good)':'var(--danger)'}">${state.extraEatMsg.text}</span>` : ''}</div>
             <div class="daylist" style="margin-top:10px;">
-              ${list.length ? list.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(e=>`<div class="item"><span>${e.date}（${dowLabel(e.date,'ja')}） ${e.mealType==='set'?t.typeSet:t.typeOkazu}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat="${e.date}">${t.delete}</button></div>`).join('') : `<p class="small">${t.none}</p>`}
+              ${list.length ? list.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(e=>`<div class="item"><span>${e.date}（${dowLabel(e.date,'ja')}）</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat="${e.date}">${t.delete}</button></div>`).join('') : `<p class="small">${t.none}</p>`}
             </div>
           </div>`;
         })() : ''}
@@ -3358,22 +3403,16 @@ async function renderAdmin(vp){
             <input type="text" id="adm-guest-note" placeholder="${t.guestLunchNotePh}">
           </div>
         </div>
-        <div class="row2">
-          <div class="field" style="margin-bottom:0;">
-            <label>${t.setLabel}</label>
-            <input type="number" min="0" step="1" id="adm-guest-set" value="0">
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label>${t.okazuLabel}</label>
-            <input type="number" min="0" step="1" id="adm-guest-okazu" value="0">
-          </div>
+        <div class="field">
+          <label>${t.guestLunchCount}</label>
+          <input type="number" min="0" step="1" id="adm-guest-set" value="0">
         </div>
         <div class="btnrow"><button class="btn btn-primary" id="adm-guest-add">${t.guestLunchAdd}</button></div>
         <div class="status-msg">${state.guestMsg ? `<span style="color:${state.guestMsg.ok?'var(--good)':'var(--danger)'}">${state.guestMsg.text}</span>` : ''}</div>
         <div class="daylist" style="margin-top:10px;">
           ${guestLunches.length ? guestLunches.map(g=>{
             const total = Number(g.set||0)+Number(g.okazu||0);
-            return `<div class="item"><span>${g.date}（${dowLabel(g.date,'ja')}） ${t.setLabel}${g.set||0}・${t.okazuLabel}${g.okazu||0}（計${total}${t.peopleUnit}）${g.note?' － '+escapeHtml(g.note):''}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-guest="${g.date}">${t.guestLunchRemove}</button></div>`;
+            return `<div class="item"><span>${g.date}（${dowLabel(g.date,'ja')}） ${total}${t.peopleUnit}${g.note?' － '+escapeHtml(g.note):''}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-guest="${g.date}">${t.guestLunchRemove}</button></div>`;
           }).join('') : `<p class="small">${t.guestLunchNone}</p>`}
         </div>
         `}
@@ -3422,6 +3461,8 @@ async function renderAdmin(vp){
         <div class="status-msg">${state.closedBulkMsg ? `<span style="color:${state.closedBulkMsg.ok?'var(--good)':'var(--danger)'}">${state.closedBulkMsg.text}</span>` : ''}</div>
         ${state.closedBulkPending ? renderClosedBulkPreview(state.closedBulkPending) : ''}
       `)}
+
+      <div class="section-divider"><span class="section-divider-label">⚙ ${t.adminSectionLabel}</span></div>
 
       ${qcard('master', t.employeeMasterTitle, masterCardBody(master, t))}
 
@@ -3687,9 +3728,9 @@ async function renderAdmin(vp){
       const d = document.getElementById('adm-guest-date').value;
       const noteVal = document.getElementById('adm-guest-note').value.trim();
       const addSet = Math.max(0, Math.floor(Number(document.getElementById('adm-guest-set').value)||0));
-      const addOkazu = Math.max(0, Math.floor(Number(document.getElementById('adm-guest-okazu').value)||0));
+      const addOkazu = 0;   // 臨時ランチは来客・社員とも全てセット固定のため、おかずは常に0
       if(!d){ state.guestMsg = {text:t.guestLunchNeedDate, ok:false}; drawAdmin(); return; }
-      if(addSet===0 && addOkazu===0){ state.guestMsg = {text:t.guestLunchNeedCount, ok:false}; drawAdmin(); return; }
+      if(addSet===0){ state.guestMsg = {text:t.guestLunchNeedCount, ok:false}; drawAdmin(); return; }
       guestAddBtn.disabled = true;
       const list = guestLunches.slice();
       const idx = list.findIndex(g=>g.date===d);
@@ -3726,12 +3767,9 @@ async function renderAdmin(vp){
     vp.querySelectorAll('[data-select-extraeat]').forEach(btn=>{
       btn.onclick = ()=>{
         state.extraEatSelectedId = btn.dataset.selectExtraeat;
-        state.extraEatDate = ''; state.extraEatType = 'okazu'; state.extraEatMsg = null;
+        state.extraEatDate = ''; state.extraEatMsg = null;
         drawAdmin();
       };
-    });
-    vp.querySelectorAll('[data-extraeat-type]').forEach(btn=>{
-      btn.onclick = ()=>{ state.extraEatType = btn.dataset.extraeatType; drawAdmin(); };
     });
     const extraAddBtn = vp.querySelector('#adm-extraeat-add');
     if(extraAddBtn) extraAddBtn.onclick = async ()=>{
@@ -3744,8 +3782,9 @@ async function renderAdmin(vp){
       rec.name = (emp && emp.name) || rec.name;
       rec.extraEatDates = rec.extraEatDates || [];
       const idx = rec.extraEatDates.findIndex(e=>e.date===d);
-      if(idx===-1) rec.extraEatDates.push({date:d, mealType: state.extraEatType});
-      else rec.extraEatDates[idx].mealType = state.extraEatType;
+      // 臨時ランチは来客・社員とも全てセット固定
+      if(idx===-1) rec.extraEatDates.push({date:d, mealType: 'set'});
+      else rec.extraEatDates[idx].mealType = 'set';
       await setEmp(id, rec);
       state.extraEatDate = '';
       state.extraEatMsg = {text:t.extraEatAdded, ok:true};
@@ -3961,6 +4000,18 @@ async function renderAdmin(vp){
     };
     const cancelBtn = vp.querySelector('#adm-master-cancel');
     if(cancelBtn) cancelBtn.onclick = ()=>{ state.masterPending = null; drawAdmin(); };
+
+    // 保存しておいたフォーカス・カーソル位置・スクロール位置を復元する
+    if(focusRestore){
+      const el = document.getElementById(focusRestore.id);
+      if(el){
+        el.focus({preventScroll:true});
+        if(focusRestore.selStart !== null && el.setSelectionRange){
+          try{ el.setSelectionRange(focusRestore.selStart, focusRestore.selEnd); }catch(e){}
+        }
+      }
+      window.scrollTo(focusRestore.scrollX, focusRestore.scrollY);
+    }
   }
 }
 
@@ -4125,3 +4176,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
