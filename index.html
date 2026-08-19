@@ -125,13 +125,19 @@ body{
 }
 .stafflink:hover{color:var(--ink-soft);text-decoration:underline;}
 
-.mine-card{background:#FDFBF4;}
+.card.mine-card{
+  background:transparent;
+  border:1px dashed var(--accent-line);
+  box-shadow:none;
+  margin-top:32px;
+  padding:16px 22px;
+}
 .mine-toggle{
   display:flex;align-items:center;justify-content:space-between;cursor:pointer;
   user-select:none;
 }
 .mine-toggle .chev{color:var(--ink-soft);font-size:14px;}
-.mine-toggle h2{font-size:16px;color:var(--ink-soft);}
+.mine-toggle h2{font-size:14px;font-weight:600;color:var(--ink-soft);font-family:'Noto Sans JP',sans-serif;}
 
 .card{
   background:var(--surface);
@@ -251,12 +257,13 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus{
 .btn-accent{background:var(--accent-deep);color:#fff;}
 .btn-accent:hover{background:var(--accent-deeper);}
 .btn-submit{
-  background:var(--accent-deep);color:#fff;
-  width:100%;padding:16px 20px;font-size:16.5px;font-weight:800;
-  border-radius:12px;letter-spacing:0.02em;
-  box-shadow:0 6px 16px -4px rgba(0,0,0,0.35);
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent-deeper));
+  color:#fff;
+  width:100%;padding:17px 20px;font-size:17px;font-weight:800;
+  border-radius:999px;letter-spacing:0.03em;
+  box-shadow:0 10px 22px -6px rgba(69,47,41,0.5), 0 2px 6px rgba(69,47,41,0.25);
 }
-.btn-submit:hover{background:var(--accent-deeper);box-shadow:0 8px 20px -4px rgba(0,0,0,0.4);}
+.btn-submit:hover{box-shadow:0 12px 26px -6px rgba(69,47,41,0.55), 0 2px 6px rgba(69,47,41,0.3);}
 .btn-submit:disabled{opacity:0.6;box-shadow:none;}
 .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
 .btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
@@ -673,7 +680,7 @@ const T = {
     purPinSet:"初めての方は4桁のPINを設定してください。「自分の記録」を見るときにも同じPINを使います。",
     purPinLocked:"PINを続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者にPINのリセットを依頼してください。",
     mineDeductNote:"{m}月の給与から天引き",
-    submitPurchase:"購入を登録", needQty:"個数を1つ以上入力してください。",
+    submitPurchase:"購入登録に進む", needQty:"個数を1つ以上入力してください。",
     purchaseSuccessBody:"割引商品の購入を登録しました。給与控除に反映されます。",
     minePurchaseTitle:"割引商品の購入", minePurchaseNone:"この月の購入はありません。",
     adminPurchaseLabel:"商品購入",
@@ -681,7 +688,7 @@ const T = {
     selected:"選択中の日付", noneSelected:"まだ日付が選択されていません",
     recurringToggle:"曜日を指定して定期的にキャンセルする", recurringWd:"曜日を選択",
     recurringStart:"開始日", recurringEnd:"終了日（任意・空欄なら継続）",
-    submit:"キャンセルを送信", submitting:"送信中…",
+    submit:"キャンセル確定", submitting:"送信中…",
     needIdName:"社員番号と名前を入力してください。",
     saveFailed:"保存できませんでした。通信が混み合っている可能性があります。少し待ってからもう一度お試しください。", needDates:"日付を1つ以上選択するか、定期キャンセルを設定してください。",
     masterNotFound:"社員番号が名簿に登録されていません。番号を確認してください。",
@@ -848,7 +855,7 @@ const T = {
 
     guestLunchTitle:"来客用ランチ",
     extraLunchTitle:"臨時ランチ登録", extraLunchGuestTab:"来客", extraLunchEmployeeTab:"社員",
-    kitchenSectionLabel:"厨房担当者向けメニュー", adminSectionLabel:"システム管理者向けメニュー",
+    kitchenSectionLabel:"社食スタッフ向けメニュー", adminSectionLabel:"システム管理者向けメニュー",
     guestLunchHelp:"来客などで急にランチの数が増える場合、日付ごとに人数を登録できます。ここで登録した人数は「本日の状況」に加算されますが、社員ではないため給与や部門への請求には一切関係しません（厨房が作る数を把握するためだけの人数カウンターです）。",
     guestLunchDate:"日付", guestLunchNote:"メモ（任意）", guestLunchNotePh:"例）○○様ご来社",
     guestLunchCount:"人数",
@@ -4292,3 +4299,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
