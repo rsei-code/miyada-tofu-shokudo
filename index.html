@@ -698,7 +698,7 @@ const T = {
     mineServingDays:"給食のある日 {n}日（土日・休業日を除く）",
     minePausedNote:"停止期間により {n}日 は対象外です。",
     mineUnitNote:"単価：{u}（セット料金指定日は1食300円）",
-    mineUnitSet:"セット 300円", mineUnitOkazu:"おかず 200円", mineUnitUnknown:"未設定（おかず200円で計算）",
+    mineUnitSet:"セット 300円", mineUnitOkazu:"おかず 200円", mineUnitNone:"利用なし（ランチ代の対象外）", mineUnitUnknown:"未設定（おかず200円で計算）",
     mineEstimateNote:"金額は「給食のある日 − キャンセル日 − 停止期間」で計算した見込み額です。実際の控除額は給与明細をご確認ください。",
 
     adminLoginTitle:"管理画面ログイン", adminLoginDesc:"社員食堂スタッフ用。パスワードを入力してください。",
@@ -734,13 +734,13 @@ const T = {
 
     csvExportTitle:"月次CSV出力", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
     csvExportBtn:"CSVをダウンロード",
-    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間を差し引いた日数 × 単価）。単価は従業員マスタのお食事タイプ（セット¥300／おかず¥200）を使い、「セット料金指定日」は全員¥300で計算します。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
-    csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず）を登録してください。",
+    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間を差し引いた日数 × 単価）。単価は従業員マスタのお食事タイプ（セット¥300／おかず¥200／利用なし¥0）を使い、「セット料金指定日」は全員¥300で計算します（利用なしの人は対象外）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
+    csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず／利用なし）を登録してください。",
 
     employeeMasterTitle:"従業員マスタ",
     masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
     masterSearchPh:"社員番号または名前で検索",
-    mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）",
+    mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）", typeNone:"利用なし（¥0）",
     pauseOptional:"停止期間（任意・休職や長期出張で給食を止める場合）",
     pauseFrom:"停止開始日", pauseTo:"再開日（空欄なら継続）",
     masterAddBtn:"この内容で登録する", masterEditBtn:"変更", masterDeleteBtn:"削除",
@@ -758,8 +758,16 @@ const T = {
     masterIdChangeWarn:"社員番号を {from} → {to} に変更します。キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
     masterSearchHint:"社員番号か氏名で検索すると、変更・削除ができます。",
     masterBulkOpen:"まとめて書き換える（貼り付け）", masterBulkClose:"閉じる",
-    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日」の順で貼り付けてください。お食事タイプは「セット」または「おかず」。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。",
-    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01",
+    rosterImportTitle:"社員リストからの一括登録（利用なしとして追加）",
+    rosterImportHelp:"2026年8月にお預かりした全社員リスト（268名）をもとに、まだ従業員マスタに登録されていない社員だけを「利用なし」として追加します。すでに登録されている社員（お食事タイプ・停止期間など）はいっさい変更されません。追加後は、入社・退社などの変更を通常どおり「新規登録」「検索して変更・削除」から行ってください。",
+    rosterImportCheck:"照合して確認する",
+    rosterImportNew:"新しく追加する社員（利用なし・{n}名）",
+    rosterImportNone:"追加できる社員はいませんでした（リストの社員は全員すでに登録済みです）。",
+    rosterImportAlready:"すでに登録済み：{n}名（リスト内）",
+    rosterImportRun:"この内容で追加する",
+    rosterImportDone:"{n}名を「利用なし」として追加しました。",
+    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日」の順で貼り付けてください。お食事タイプは「セット」「おかず」「利用なし」のいずれか。ランチを食べず割引商品の購入だけする人は「利用なし」を登録してください（ランチ代は発生しません）。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。",
+    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01\n4,テスト四郎,利用なし",
     employeeMasterCheck:"内容を確認する", employeeMasterConfirm:"この内容で保存する", employeeMasterCancel:"やめる",
     employeeMasterSaved:"名簿を保存しました（{n}件）", employeeMasterCount:"現在 {n} 件登録されています。",
     employeeMasterInvalid:"{line}行目の形式が正しくありません（社員番号,氏名,お食事タイプ,停止開始日,再開日）。",
@@ -870,7 +878,7 @@ const T = {
     mineServingDays:"{n} serving days (weekends and closed days excluded)",
     minePausedNote:"{n} day(s) excluded by your pause period.",
     mineUnitNote:"Unit price: {u} (set-price days are ¥300 for everyone)",
-    mineUnitSet:"Set ¥300", mineUnitOkazu:"Okazu ¥200", mineUnitUnknown:"Not set (calculated as Okazu ¥200)",
+    mineUnitSet:"Set ¥300", mineUnitOkazu:"Okazu ¥200", mineUnitNone:"Not using lunch service (not charged)", mineUnitUnknown:"Not set (calculated as Okazu ¥200)",
     mineEstimateNote:"This is an estimate: serving days − cancelled days − pause period. Please check your payslip for the final amount.",
     weekdayShort:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
   }
@@ -892,6 +900,279 @@ const CALENDAR_PRESET_2026 = [
   "2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14",
   "2026-09-21","2026-10-12","2026-11-23",
   "2026-12-28","2026-12-29","2026-12-30","2026-12-31","2027-01-01",
+];
+
+// 2026-08-19に社員共通情報登録リスト.csvから一括インポートした全社員リスト（268名）。
+// 「利用なし」の一括追加機能でのみ使用。既に従業員マスタに登録済みの社員番号はスキップされる。
+const FULL_ROSTER_IMPORT_20260819 = [
+{id:"1",name:"増田 清"},
+{id:"2",name:"増田 好子"},
+{id:"28",name:"宮澤 基夫"},
+{id:"42",name:"山崎 淳"},
+{id:"46",name:"平澤 幸司"},
+{id:"47",name:"渡邉 匡章"},
+{id:"52",name:"下嶋 隆幸"},
+{id:"57",name:"竹村 真治"},
+{id:"58",name:"酒井 聡"},
+{id:"60",name:"稲垣 裕一"},
+{id:"61",name:"山崎 勉"},
+{id:"62",name:"沖村 千代子"},
+{id:"68",name:"北島 敏紀"},
+{id:"69",name:"毛利 久美子"},
+{id:"70",name:"吉澤 毅志"},
+{id:"71",name:"滝澤 和喜"},
+{id:"72",name:"林 寛道"},
+{id:"75",name:"代田 浩房"},
+{id:"76",name:"小松原 美幸"},
+{id:"77",name:"中村 光延"},
+{id:"78",name:"赤羽 学"},
+{id:"80",name:"増田 英樹"},
+{id:"83",name:"古河原 真里子"},
+{id:"90",name:"松崎 昌純"},
+{id:"98",name:"大槻 真由子"},
+{id:"99",name:"中谷 絵美"},
+{id:"111",name:"増田 博"},
+{id:"112",name:"増田 真弓"},
+{id:"115",name:"井上 大助"},
+{id:"126",name:"内川 正幸"},
+{id:"137",name:"倉田 由理子"},
+{id:"144",name:"黒塚 穂高"},
+{id:"146",name:"小田切 真司"},
+{id:"148",name:"細田 裕"},
+{id:"154",name:"梶野 郁彦"},
+{id:"155",name:"笠原 正"},
+{id:"156",name:"友野 正明"},
+{id:"157",name:"水田 憲二"},
+{id:"159",name:"小松 一弘"},
+{id:"160",name:"三澤 誠"},
+{id:"161",name:"丸山 悦子"},
+{id:"162",name:"佐藤 潔威"},
+{id:"163",name:"湯澤 すみ子"},
+{id:"165",name:"中村 きよ子"},
+{id:"167",name:"伊藤 隆"},
+{id:"170",name:"岸 由美子"},
+{id:"171",name:"北澤 俊明"},
+{id:"173",name:"松井 義裕"},
+{id:"179",name:"小平 雅子"},
+{id:"180",name:"松田 一良"},
+{id:"184",name:"伊藤 健司"},
+{id:"185",name:"竹村 博"},
+{id:"186",name:"増田 雅敏"},
+{id:"190",name:"諏訪部 知佳"},
+{id:"191",name:"植田 朋子"},
+{id:"192",name:"清水 美佳"},
+{id:"194",name:"中原 由紀"},
+{id:"201",name:"関 亮太"},
+{id:"202",name:"伊東 千裕"},
+{id:"203",name:"宮下 千年"},
+{id:"206",name:"鹿野 成明"},
+{id:"208",name:"木下 真紀"},
+{id:"210",name:"林 賢一郎"},
+{id:"213",name:"神山 万由美"},
+{id:"214",name:"渡邉 啓子"},
+{id:"216",name:"小松 勇介"},
+{id:"220",name:"川手 哲弘"},
+{id:"223",name:"伊東 敬貴"},
+{id:"224",name:"保科 昭久"},
+{id:"226",name:"下島 健"},
+{id:"231",name:"鈴木 洋一"},
+{id:"234",name:"有賀 恵理"},
+{id:"239",name:"足立 美穂"},
+{id:"242",name:"伊藤 徹哉"},
+{id:"246",name:"田畑 ゆかり"},
+{id:"247",name:"佐藤 哲也"},
+{id:"250",name:"久保田 健一郎"},
+{id:"254",name:"大矢 あゆみ"},
+{id:"257",name:"林 篤人"},
+{id:"258",name:"田中 佐千恵"},
+{id:"259",name:"稲垣 ほづみ"},
+{id:"260",name:"宮越 清忠"},
+{id:"263",name:"林 朋生"},
+{id:"266",name:"有賀 圭佑"},
+{id:"267",name:"中塚 若美"},
+{id:"268",name:"三浦 憲和"},
+{id:"275",name:"吉澤 一真"},
+{id:"276",name:"伊藤 茜"},
+{id:"280",name:"市瀬 真吾"},
+{id:"281",name:"久保田 明"},
+{id:"282",name:"川島 孝太"},
+{id:"293",name:"福沢 亮馬"},
+{id:"307",name:"鹿野 直美"},
+{id:"309",name:"山岸 健一"},
+{id:"314",name:"田畑 翔汰"},
+{id:"323",name:"上久保 順美"},
+{id:"325",name:"澤田 栄司"},
+{id:"330",name:"原 幸弘"},
+{id:"331",name:"堀田 直弥"},
+{id:"333",name:"下平 育美"},
+{id:"334",name:"平澤 さやか"},
+{id:"343",name:"加藤 光"},
+{id:"346",name:"竹村 昌典"},
+{id:"348",name:"西尾 真由美"},
+{id:"349",name:"西尾 史也"},
+{id:"351",name:"野澤 政樹"},
+{id:"361",name:"奥原 志津雄"},
+{id:"362",name:"田原 将貴"},
+{id:"363",name:"藤川 一樹"},
+{id:"364",name:"伊東 理恵子"},
+{id:"366",name:"向山 博子"},
+{id:"376",name:"伊井島 秀人"},
+{id:"378",name:"ﾅｷｰﾈｽ ﾗﾈﾙﾋｱｶﾞﾝ"},
+{id:"379",name:"中村 慎二"},
+{id:"383",name:"澤井 喜哉"},
+{id:"391",name:"下田 裕"},
+{id:"396",name:"細田 由貴"},
+{id:"402",name:"村上 寛樹"},
+{id:"403",name:"秋山 龍男"},
+{id:"405",name:"小林 文隆"},
+{id:"408",name:"中山 亮太"},
+{id:"409",name:"丹治 由次"},
+{id:"416",name:"千代 勧"},
+{id:"418",name:"丸茂 理絵"},
+{id:"419",name:"後藤 夢乃"},
+{id:"420",name:"冨永 龍飛"},
+{id:"421",name:"廣田 奈子"},
+{id:"422",name:"北原 いづみ"},
+{id:"425",name:"小池 聡"},
+{id:"426",name:"松崎 里美"},
+{id:"427",name:"湊 純也"},
+{id:"429",name:"溝口 瑠美香"},
+{id:"437",name:"木下 美代子"},
+{id:"439",name:"小出 雄平"},
+{id:"441",name:"飯島 秀静"},
+{id:"448",name:"手塚 正彦"},
+{id:"450",name:"藤川 汐美"},
+{id:"452",name:"春日 大和"},
+{id:"453",name:"保科 新一郎"},
+{id:"455",name:"清水 綾子"},
+{id:"456",name:"中山 佳祐"},
+{id:"459",name:"木下 竜介"},
+{id:"460",name:"酒井 美香"},
+{id:"465",name:"加藤 匠"},
+{id:"466",name:"中原 俊和"},
+{id:"467",name:"石井 明香"},
+{id:"468",name:"小野 満"},
+{id:"472",name:"成田 眞吾"},
+{id:"474",name:"伊藤 ﾚｲﾔ　ｴﾝﾘｹｽ"},
+{id:"479",name:"青木 崇"},
+{id:"488",name:"宮下 明久"},
+{id:"491",name:"林 史子"},
+{id:"497",name:"中田 周作"},
+{id:"500",name:"利根川 久"},
+{id:"502",name:"西澤 将史"},
+{id:"506",name:"目黒 道裕"},
+{id:"507",name:"宮下 柚輝"},
+{id:"508",name:"田中 翔太"},
+{id:"510",name:"濱 正喜"},
+{id:"513",name:"清水 悦雄"},
+{id:"514",name:"平岡 八千代"},
+{id:"515",name:"足立 浩二"},
+{id:"516",name:"杉山 こころ"},
+{id:"517",name:"平沢 ゆかり"},
+{id:"518",name:"矢野 聖子"},
+{id:"520",name:"海野 蓮"},
+{id:"523",name:"森 和広"},
+{id:"525",name:"馬場 今朝勇"},
+{id:"526",name:"林 利恵"},
+{id:"532",name:"渡邊 康平"},
+{id:"533",name:"武内 明美"},
+{id:"534",name:"酒井 美紗"},
+{id:"536",name:"唐木 好昭"},
+{id:"538",name:"遠山 さくら"},
+{id:"539",name:"宮澤 佑生"},
+{id:"541",name:"宮澤 信之介"},
+{id:"542",name:"ｺﾞﾒｽ ﾊﾞｽｹｽ ｱｳｸﾞｽﾄ ﾅｵｷ"},
+{id:"543",name:"林 諒大"},
+{id:"544",name:"南崎 栄治"},
+{id:"546",name:"浦上 円香"},
+{id:"548",name:"小田切 広樹"},
+{id:"549",name:"秋山 麻美"},
+{id:"550",name:"山田 潤也"},
+{id:"552",name:"伊藤 健太郎"},
+{id:"554",name:"寺久保 羚斗"},
+{id:"557",name:"佐藤 めぐみ"},
+{id:"560",name:"田中 聡"},
+{id:"562",name:"平沢 菜摘"},
+{id:"564",name:"松原 敏夫"},
+{id:"565",name:"北原 浩二"},
+{id:"566",name:"尾名高 沙織"},
+{id:"567",name:"岩波 鷹也"},
+{id:"568",name:"唐澤 美結"},
+{id:"569",name:"菊池 空"},
+{id:"570",name:"ドーン 真菜"},
+{id:"571",name:"田中 千穂"},
+{id:"572",name:"宮澤 早苗"},
+{id:"573",name:"河村 拓也"},
+{id:"574",name:"久保田 陽菜"},
+{id:"575",name:"小平 藍花"},
+{id:"577",name:"舘前 流星"},
+{id:"578",name:"保科 和希"},
+{id:"579",name:"三浦 研太"},
+{id:"580",name:"小島 千歩"},
+{id:"581",name:"平松 美穂"},
+{id:"582",name:"福沢 慶太"},
+{id:"583",name:"黒澤 亜理沙"},
+{id:"585",name:"辻 治之"},
+{id:"586",name:"増澤 亜由美"},
+{id:"587",name:"吉田 陽輔"},
+{id:"588",name:"細田 唯"},
+{id:"590",name:"大草 三樹"},
+{id:"591",name:"小田切 梁"},
+{id:"592",name:"酒井 優愛"},
+{id:"593",name:"村上 杏花"},
+{id:"594",name:"池上 毅"},
+{id:"595",name:"中原 ﾏﾘｶﾞｰ　ｻﾝﾁｪｽ"},
+{id:"597",name:"薄田 琳流"},
+{id:"598",name:"勝 沙月"},
+{id:"599",name:"市原 慎吾"},
+{id:"600",name:"小原 隆二"},
+{id:"601",name:"ｶﾊﾞﾝｸﾞ ｱｲｺ　ｴｽﾞﾗ"},
+{id:"602",name:"岩永 喜孝"},
+{id:"604",name:"酒井 薫"},
+{id:"605",name:"大木島 衣俐"},
+{id:"606",name:"北川 涼晴"},
+{id:"607",name:"佐藤 晶子"},
+{id:"608",name:"堀内 伊知郎"},
+{id:"609",name:"堀米 昭彦"},
+{id:"610",name:"菅原 卓"},
+{id:"611",name:"耳塚 博人"},
+{id:"5013",name:"ﾍﾞﾄﾞﾔ ｼﾞｮｾﾙ ｶﾌﾟﾝｶﾞﾝ"},
+{id:"5014",name:"ﾃｨﾛ ﾏｰｸ ｸﾘｽﾃﾙ ｲﾉｯﾄ"},
+{id:"5045",name:"ﾙｾﾛ ｼﾞｬﾝ ﾎﾟｰﾙｾｶﾝﾄﾞｱﾙﾋﾞﾃ"},
+{id:"5055",name:"ﾏﾅﾀｯﾄﾞ ﾏﾙﾘﾝ ﾙｽﾞ ｱﾘﾝｸﾞｶﾞﾗﾝ"},
+{id:"5056",name:"ｶﾞﾗｳﾗ ｼﾞｬﾅﾘｰ ﾙｾｽ"},
+{id:"5057",name:"ﾀﾝﾀｲ ﾗｲﾓﾝﾄﾞ ｺﾙﾃｽ"},
+{id:"5058",name:"ﾍﾟﾆｬｽ ﾚｲﾗﾝ ﾌﾟｴﾌﾞﾗ"},
+{id:"5063",name:"ﾊﾞﾝｶﾚ ﾌｪﾙｸﾘｽ ﾊﾞﾘﾝｸﾞ"},
+{id:"5064",name:"ﾛﾏﾉ ｱﾙｾﾞｲ ｵﾗｼｵﾝ"},
+{id:"5065",name:"ｽﾙﾀﾝ ﾒﾙ ｱﾝﾄﾆｰ ﾃﾞﾎﾞﾀ"},
+{id:"5069",name:"ｾﾐﾘｱ ｱﾘｴﾙ ﾇﾆｪｽﾞ"},
+{id:"5070",name:"ﾅﾊﾞﾚｽﾞ ﾕﾚﾘｰ ｻﾙﾊﾞﾄﾞﾙ"},
+{id:"5071",name:"ｴﾚﾆｮ ｼﾞｬｰｿﾝ ｿｹﾆｮ"},
+{id:"5072",name:"ﾎﾞﾙﾎﾞﾝ ｶﾙﾛ ｶﾌﾞｺｽ"},
+{id:"5073",name:"ﾌﾛﾚｽ ｼﾞｭﾘｰ ﾃﾞｶﾞﾓ"},
+{id:"5079",name:"ｱﾚｶﾞﾄﾞ ﾘﾃﾞｨｱ　ﾀﾝｶﾞﾛ"},
+{id:"5080",name:"ﾊﾞﾛﾝｸﾞ ﾁｪﾘｰ　ｼﾙﾊﾞ"},
+{id:"5081",name:"ﾍﾟﾘｱｿﾞ ﾛﾘﾅ　ｶｽﾙ"},
+{id:"5082",name:"ｾﾉ ﾏﾘｱ　ｼﾞｮｱﾝ　ｶﾊﾞﾌｸﾞ"},
+{id:"5084",name:"ｸﾘﾏｺ ﾁｬｰﾘｰﾄ　ｶﾞﾚｺﾞ"},
+{id:"5085",name:"ｿﾛﾝﾀﾞ ｼﾞｪﾆｳﾞｪﾌﾞ　ｶｽﾃｨﾛﾝ"},
+{id:"5086",name:"ﾍﾉﾋﾞｻ ﾅﾈｯﾄ　ｶﾆｬﾚｽ"},
+{id:"5087",name:"ﾋﾞﾗﾜﾝ ﾏﾘﾘﾝ　ﾍﾞﾅﾛ"},
+{id:"5088",name:"ｴﾝﾄﾏ ﾛﾄﾞﾘｺﾞ　ｼﾞｭﾆｱ　ｱｲﾝ"},
+{id:"5089",name:"ﾎﾞﾚｽ ﾗﾐﾙ　ｱﾊﾞｻ"},
+{id:"5090",name:"ｱﾐｯﾄ ﾎﾞﾈﾌｨｱｰ　ｱﾓﾘﾝ"},
+{id:"5091",name:"ﾌﾝﾃｨﾘｱ ｴﾙｼﾞｪｲｸ　ｳｸﾞｻﾝ"},
+{id:"5092",name:"ﾇｶﾞﾛｯﾄ ｽﾃﾜｰﾄﾞ　ｶﾞﾘｱﾏｿ"},
+{id:"5093",name:"ﾎﾞﾗﾝﾊﾞｵ ﾙｯﾁｪ ｲﾅﾋｯﾄﾞ"},
+{id:"5094",name:"ﾙｱﾙﾊﾃｨ ﾁｪ ｱｰﾙ ﾐﾗﾝﾀﾞ"},
+{id:"5095",name:"ﾚｶﾞﾙﾄﾞ ﾙﾅ ｲﾊﾞﾆｪｽ"},
+{id:"5096",name:"ﾘﾍﾞﾗ ﾗﾓﾝ ｼﾞｭﾆｱ ｱﾊﾞﾖﾝ"},
+{id:"5097",name:"ﾀﾌﾟﾀﾞｻﾝ ﾏｲｹﾙ ｶﾍﾞﾘｽ"},
+{id:"5098",name:"ｴｽｷｰﾘｬ ｼﾞｮﾝｼﾞｰ ﾎﾞﾝﾄｸﾞ"},
+{id:"5099",name:"ﾋﾟｱ ｳｪﾝﾃﾞﾙ ｶﾄﾞｩｺﾞｸﾞ"},
+{id:"5100",name:"ﾋﾞﾀﾞﾙ ｼﾞｮｱﾝ ﾃﾞﾒｼｰﾘｮ"},
+{id:"5101",name:"ｱﾙﾌﾞﾙ ｸﾘｽﾃｨﾝ ｼﾞｮｲ ﾑﾆｪｽ"}
 ];
 
 /* ===================== state ===================== */
@@ -953,6 +1234,7 @@ let state = {
   masterSearch:'', masterEditId:null, masterEditDraft:null, masterEditMsg:null,
   masterDeleteId:null, masterBulkOpen:false,
   masterPending:null,      // 保存前の確認内容
+  rosterImportPending:null, rosterImportMsg:null,   // 社員リストからの一括追加（利用なし）
   specialDaysMsg:null,
   closedDaysMsg:null,
   csvWarning:'',
@@ -1379,6 +1661,10 @@ function servingDaysInMonth(y, m0, closedSet){
 }
 // その社員が実際に食べた日と金額（社員側の見込み表示・CSV出力の両方で使う）
 function calcForEmployee(emp, cancelledSet, servingDays, specialSet){
+  // ランチを利用しない人（利用なし）は、給食日があっても金額計算の対象にしない
+  if(emp && emp.mealType === 'none'){
+    return {eatDays:0, amount:0, pausedDays:0, cancelledDays:0};
+  }
   const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
   let eatDays=0, amount=0, pausedDays=0, cancelledDays=0;
   servingDays.forEach(d=>{
@@ -2197,7 +2483,10 @@ function paintMineResult(){
   const master = state.mineMaster;
   const s = state.mineSummary;
   const displayName = (master && master.name) || (rec && rec.name) || state.mineName;
-  const unitText = s.mealType==='set' ? t.mineUnitSet : (s.mealType==='okazu' ? t.mineUnitOkazu : t.mineUnitUnknown);
+  const unitText = s.mealType==='set' ? t.mineUnitSet
+    : s.mealType==='okazu' ? t.mineUnitOkazu
+    : s.mealType==='none' ? t.mineUnitNone
+    : t.mineUnitUnknown;
 
   const lockedDates = (s.singleDatesInMonth||[]).filter(d=>isPastCutoff(d));
   const singleRows = (s.singleDatesInMonth||[]).length
@@ -2419,13 +2708,13 @@ function renderAdminLogin(vp){
 }
 
 /* ---------- 従業員マスタのテキスト変換 ---------- */
-function mealTypeJa(v){ return v==='set' ? 'セット' : (v==='okazu' ? 'おかず' : '未設定'); }
+function mealTypeJa(v){ return v==='set' ? 'セット' : (v==='okazu' ? 'おかず' : (v==='none' ? '利用なし' : '未設定')); }
 function masterToText(list){
   return list
     .slice()
     .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
     .map(e=>{
-      const cols = [e.id, e.name, e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':''];
+      const cols = [e.id, e.name, e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':e.mealType==='none'?'利用なし':''];
       if(e.pauseStart || e.pauseEnd) cols.push(e.pauseStart||'', e.pauseEnd||'');
       return cols.join(',');
     }).join('\n');
@@ -2451,6 +2740,28 @@ function diffMaster(oldList, newList){
   });
   oldMap.forEach((o, id)=>{ if(!newMap.has(id)) removed.push(o); });
   return {added, removed, changed};
+}
+
+/* 社員リスト一括追加：現在の名簿にまだいない社員番号だけを拾う（既存分には一切触れない） */
+function computeRosterImportDiff(master){
+  const existingIds = new Set(master.map(e=>String(e.id)));
+  const toAdd = FULL_ROSTER_IMPORT_20260819.filter(e=>!existingIds.has(String(e.id)));
+  return { toAdd, alreadyCount: FULL_ROSTER_IMPORT_20260819.length - toAdd.length };
+}
+function renderRosterImportPreview(pv){
+  const t = T.ja;
+  return `
+    <div class="diffbox">
+      <h3>${t.diffTitle}</h3>
+      ${pv.toAdd.length ? `<div class="diffsec"><div class="t">${t.rosterImportNew.replace('{n}', pv.toAdd.length)}</div>
+        <div class="scrolllist" style="margin-top:6px;"><p class="small" style="margin:0;line-height:1.9;">${escapeHtml(pv.toAdd.map(e=>`${e.id} ${e.name}`).join('、'))}</p></div></div>`
+        : `<p class="small">${t.rosterImportNone}</p>`}
+      <p class="small">${t.rosterImportAlready.replace('{n}', pv.alreadyCount)}</p>
+      <div class="btnrow">
+        ${pv.toAdd.length ? `<button class="btn btn-accent" id="adm-roster-run">${t.rosterImportRun}</button>` : ''}
+        <button class="btn btn-ghost" id="adm-roster-cancel">${t.masterCancelBtn}</button>
+      </div>
+    </div>`;
 }
 
 /* 貼り付けられた日付を読み取って、登録できるものに振り分ける */
@@ -2501,6 +2812,7 @@ function masterTypePick(prefix, current, t){
   return `<div class="typepick">
       <button type="button" class="${current==='set'?'active':''}" data-${prefix}-type="set">${t.typeSet}</button>
       <button type="button" class="${current==='okazu'?'active':''}" data-${prefix}-type="okazu">${t.typeOkazu}</button>
+      <button type="button" class="${current==='none'?'active':''}" data-${prefix}-type="none">${t.typeNone}</button>
     </div>`;
 }
 function masterPauseFields(prefix, ps, pe, t){
@@ -2593,6 +2905,16 @@ function masterCardBody(master, t){
       <div style="margin-top:6px;">
         ${q ? (rows || `<p class="small">${t.noEmployees}</p>`) : `<p class="small">${t.masterSearchHint}</p>`}
       </div>
+    </div>
+
+    <div class="subsec">
+      <p class="sublabel">${t.rosterImportTitle}</p>
+      <p class="footnote" style="margin-top:0;">${t.rosterImportHelp}</p>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="adm-roster-check">${t.rosterImportCheck}</button>
+      </div>
+      <div class="status-msg">${state.rosterImportMsg ? `<span style="color:${state.rosterImportMsg.ok?'var(--good)':'var(--danger)'}">${state.rosterImportMsg.text}</span>` : ''}</div>
+      ${state.rosterImportPending ? renderRosterImportPreview(state.rosterImportPending) : ''}
     </div>
 
     ${state.masterBulkOpen ? `
@@ -2713,6 +3035,7 @@ async function renderAdmin(vp){
 
     if(masterAvailable){
       master.forEach(e=>{
+        if(e.mealType === 'none') return; // ランチを利用しない人は人数に含めない
         if(isPausedOn(e, bISO)){ pausedTotal++; return; }
         if(cancelledIdsToday.has(String(e.id))){
           cancelTotal++;
@@ -3134,7 +3457,7 @@ async function renderAdmin(vp){
       const id = String(n.id||'').trim(), name = String(n.name||'').trim();
       if(!id){ state.masterNewMsg = {text:t.masterNeedId, ok:false}; drawAdmin(); return; }
       if(!name){ state.masterNewMsg = {text:t.masterNeedName, ok:false}; drawAdmin(); return; }
-      if(n.mealType !== 'set' && n.mealType !== 'okazu'){ state.masterNewMsg = {text:t.masterNeedType, ok:false}; drawAdmin(); return; }
+      if(n.mealType !== 'set' && n.mealType !== 'okazu' && n.mealType !== 'none'){ state.masterNewMsg = {text:t.masterNeedType, ok:false}; drawAdmin(); return; }
       if(master.some(e=>String(e.id)===id)){
         state.masterNewMsg = {text:t.masterDupId.replace('{id}', id), ok:false}; drawAdmin(); return;
       }
@@ -3203,7 +3526,7 @@ async function renderAdmin(vp){
       const newId = String(dr.id||'').trim(), name = String(dr.name||'').trim();
       if(!newId){ state.masterEditMsg = t.masterNeedId; drawAdmin(); return; }
       if(!name){ state.masterEditMsg = t.masterNeedName; drawAdmin(); return; }
-      if(dr.mealType !== 'set' && dr.mealType !== 'okazu'){ state.masterEditMsg = t.masterNeedType; drawAdmin(); return; }
+      if(dr.mealType !== 'set' && dr.mealType !== 'okazu' && dr.mealType !== 'none'){ state.masterEditMsg = t.masterNeedType; drawAdmin(); return; }
       if(newId !== oldId && master.some(e=>String(e.id)===newId)){
         state.masterEditMsg = t.masterDupId.replace('{id}', newId); drawAdmin(); return;
       }
@@ -3249,6 +3572,28 @@ async function renderAdmin(vp){
       await reload();
       autoClear('employeeMasterMsg');
     };
+
+    /* --- 社員リストからの一括追加（利用なし） --- */
+    const rosterCheckBtn = vp.querySelector('#adm-roster-check');
+    if(rosterCheckBtn) rosterCheckBtn.onclick = ()=>{
+      state.rosterImportPending = computeRosterImportDiff(master);
+      state.rosterImportMsg = null;
+      drawAdmin();
+    };
+    const rosterRunBtn = vp.querySelector('#adm-roster-run');
+    if(rosterRunBtn) rosterRunBtn.onclick = async ()=>{
+      rosterRunBtn.disabled = true;
+      const toAdd = state.rosterImportPending.toAdd;
+      const items = toAdd.map(e=>({key:'master:'+e.id, value: JSON.stringify({id:e.id, name:e.name, mealType:'none'})}));
+      await kvSetManyChunked(items);
+      state.rosterImportPending = null;
+      state.rosterImportMsg = {text:t.rosterImportDone.replace('{n}', toAdd.length), ok:true};
+      state.employeeMasterText = '';   // 一括書き換え欄も次回開いたときに最新化されるように
+      await reload();
+      setTimeout(()=>{ state.rosterImportMsg=null; drawAdmin(); }, 8000);
+    };
+    const rosterCancelBtn = vp.querySelector('#adm-roster-cancel');
+    if(rosterCancelBtn) rosterCancelBtn.onclick = ()=>{ state.rosterImportPending = null; drawAdmin(); };
 
     /* --- 従業員マスタ：まとめて書き換え（貼り付け） --- */
     const bulkOpen = vp.querySelector('#adm-master-bulk-open');
@@ -3314,6 +3659,7 @@ function parseMasterText(text){
     if(typeRaw){
       if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
       else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
+      else if(/利用なし|^none$/i.test(typeRaw)) mealType = 'none';
     }
     const pauseStart = normDate(parts[3]||'');
     const pauseEnd = normDate(parts[4]||'');
@@ -3396,7 +3742,7 @@ async function exportMonthlyCsv(records, yyyyMm){
 
   const perEmployee = {}; // id -> {name, amount}
   baseList.forEach(e=>{
-    const mealTypeKnown = e.mealType==='set' || e.mealType==='okazu';
+    const mealTypeKnown = e.mealType==='set' || e.mealType==='okazu' || e.mealType==='none';
     if(!mealTypeKnown) missingMealType++;
     const cancelled = (cancelledByEmp[e.id] && cancelledByEmp[e.id].cancelled) || new Set();
     const calc = calcForEmployee(e, cancelled, servingDays, specialSet);
