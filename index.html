@@ -2057,25 +2057,18 @@ async function submitPurchase(){
     state.msg = t.needQty; render(); return;
   }
   const id = state.empId.trim();
-  const [masterCheck, pinRecFirst] = await Promise.all([
-    checkAgainstMaster(id, state.empName.trim()),
-    state.purchaseConfirm ? Promise.resolve(null) : getPinRecord(id)
-  ]);
-  if(masterCheck && !masterCheck.ok){
-    state.msg = masterCheck.reason==='not_found' ? t.masterNotFound : t.masterMismatch;
-    render(); return;
-  }
+  const name = state.empName.trim();
 
-  // 1回目は最終確認とPIN入力を出して止める。2回目で送信する。
+  // 1回目：名簿照合とPINの状態確認を1回のリクエストにまとめて行い、最終確認画面を出す。
+  // （以前は「名簿照合」と「PIN状態確認」で別々に2回問い合わせていた）
   if(!state.purchaseConfirm){
-    const pinRec = pinRecFirst;
-    if(!pinRec){
-      state.purchasePinMode = 'set';
-    } else {
-      const lock = pinLockRemainMinutes(pinRec);
-      state.purchasePinMode = lock > 0 ? 'locked' : 'enter';
-      state.purchaseLockMin = lock;
+    const check = await kvRequest('checkPurchaseStart', {payload:{employeeId:id, name:name}});
+    if(!check || check.status === 'mismatch' || check.status === 'not_found'){
+      state.msg = (check && check.status==='mismatch') ? t.masterMismatch : t.masterNotFound;
+      render(); return;
     }
+    state.purchasePinMode = !check.hasPin ? 'set' : (check.lockedMinutes > 0 ? 'locked' : 'enter');
+    state.purchaseLockMin = check.lockedMinutes || 0;
     state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
     state.purchaseConfirm = true;
     render();
@@ -2084,73 +2077,69 @@ async function submitPurchase(){
     return;
   }
 
-  // 2回目：PINで本人確認する
   if(state.purchasePinMode === 'locked'){
-    state.purchaseLockMin = pinLockRemainMinutes(await getPinRecord(id));
-    if(state.purchaseLockMin > 0){ render(); return; }
-    state.purchasePinMode = 'enter';   // ロックが明けた
+    render(); return;   // ボタンは無効化されているはずだが念のため
   }
-  if(state.purchasePinMode === 'set'){
-    if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
-    if(state.purchasePin !== state.purchasePin2){ state.purchasePinMsg = t.pinNotMatch; render(); return; }
-    const already = await getPinRecord(id);
-    if(already){                        // 途中で誰かが設定した場合
-      state.purchasePinMode = 'enter'; state.purchasePin = ''; state.purchasePin2 = '';
-      state.purchasePinMsg = null; render(); return;
-    }
-    await savePin(id, state.purchasePin);
-  } else {
-    if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
-    const res = await verifyPin(id, state.purchasePin);
-    if(res.status === 'locked'){
-      state.purchasePinMode = 'locked'; state.purchaseLockMin = res.minutes;
-      state.purchasePin = ''; render(); return;
-    }
-    if(res.status === 'none'){         // 担当者がリセットした直後
-      state.purchasePinMode = 'set'; state.purchasePin = ''; state.purchasePin2 = '';
-      state.purchasePinMsg = null; render(); return;
-    }
-    if(res.status !== 'ok'){
-      state.purchasePin = '';
-      state.purchasePinMsg = t.pinWrong.replace('{n}', res.left);
-      render(); return;
-    }
+  if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
+  if(state.purchasePinMode === 'set' && state.purchasePin !== state.purchasePin2){
+    state.purchasePinMsg = t.pinNotMatch; render(); return;
   }
 
-  state.purchaseConfirm = false;
-  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
   state.submitting = true; render();
 
-  const total = items.reduce((s,it)=> s + it.price*it.qty, 0);
-  const entry = {
-    id: 'p'+Date.now(),
-    date: todayISO(),                 // 集計に使う日付（送信日）
-    submittedAt: nowLocalStamp(),     // 送信した日付と時刻（記録用）
-    items, total,
-    createdAt: new Date().toISOString(),
-  };
+  // 2回目：PINの検証（または新規設定）・購入の保存・購入ログへの記録を1回のリクエストにまとめる。
+  // （以前はPIN確認だけで2〜3回、購入の保存・ログ記録でさらに2回、合計5回前後に分かれていた）
+  const res = await kvRequest('commitPurchase', {payload:{
+    employeeId:id, name:name,
+    pin: state.purchasePin, pinMode: state.purchasePinMode,
+    items: items,
+    date: todayISO(), submittedAt: nowLocalStamp(),
+  }});
 
-  const existing = (await getEmp(id)) || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
-  existing.name = state.empName.trim();
-  existing.purchases = existing.purchases || [];
-  existing.purchases.push(entry);
-  existing.updatedAt = new Date().toISOString();
-  const savedPurchase = await setEmp(id, existing);
-  if(!savedPurchase){
+  if(!res){
+    state.submitting = false;
+    state.msg = t.saveFailed;
+    render(); return;
+  }
+  if(res.status === 'mismatch' || res.status === 'not_found'){
+    state.submitting = false;
+    state.purchaseConfirm = false;
+    state.msg = res.status==='mismatch' ? t.masterMismatch : t.masterNotFound;
+    render(); return;
+  }
+  if(res.status === 'locked'){
+    state.submitting = false;
+    state.purchasePinMode = 'locked'; state.purchaseLockMin = res.minutes;
+    state.purchasePin = ''; render(); return;
+  }
+  if(res.status === 'wrong'){
+    state.submitting = false;
+    state.purchasePin = '';
+    state.purchasePinMsg = t.pinWrong.replace('{n}', res.left);
+    render(); return;
+  }
+  if(res.status === 'none' || res.status === 'already_set'){
+    // 担当者によるPINリセットや、別画面での同時設定などでフロント側の認識とズレた場合
+    state.submitting = false;
+    state.purchasePinMode = res.status === 'none' ? 'set' : 'enter';
+    state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+    render(); return;
+  }
+  if(res.status === 'pin_format'){
+    state.submitting = false;
+    state.purchasePinMsg = t.pinNeed4;
+    render(); return;
+  }
+  if(res.status !== 'ok'){
     state.submitting = false;
     state.msg = t.saveFailed;
     render(); return;
   }
 
-  // fire-and-forget push to Google Sheets if configured
-  kvRequest('logPurchase', {payload:{
-    employeeId:id, name:existing.name, date:entry.date, items:entry.items, total:entry.total,
-    submittedAt:entry.submittedAt, timestamp:entry.createdAt,
-  }});
-
   state.submitting = false;
-  state.purchaseQty = {};
+  state.purchaseConfirm = false;
   state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  state.purchaseQty = {};
   if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
   render();
   showStamp(t.successTitle, t.purchaseSuccessBody);
@@ -2170,54 +2159,39 @@ async function submitCancellation(){
   }
 
   const id = state.empId.trim();
-
-  // 名簿の照合と既存記録の取得は互いに関係ないので同時に投げる
-  const [masterCheck, current] = await Promise.all([
-    checkAgainstMaster(id, state.empName.trim()),
-    getEmp(id)
-  ]);
-  if(masterCheck && !masterCheck.ok){
-    state.msg = masterCheck.reason==='not_found' ? t.masterNotFound : t.masterMismatch;
-    render(); return;
-  }
+  const name = state.empName.trim();
+  const recurringRule = hasRecurring ? {
+    id: 'r'+Date.now(),
+    weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6).sort(),
+    start: state.recurringStart || todayISO(),
+    end: state.recurringEnd || null,
+  } : null;
 
   state.submitting = true; render();
 
-  const existing = current || {employeeId:id, name:state.empName.trim(), singleDates:[], recurring:[]};
-  existing.name = state.empName.trim();
-  const singleSet = new Set(existing.singleDates || []);
-  pickedDates.forEach(d=>singleSet.add(d));
-  existing.singleDates = Array.from(singleSet).sort();
+  // 名簿照合・既存記録の取得・保存・ログ記録を1回のリクエストにまとめて行う。
+  // （以前は「名簿照合」「既存記録の取得」「保存」「ログ記録」の4回に分かれていた）
+  const res = await kvRequest('submitCancellation', {payload:{
+    employeeId: id, name: name,
+    singleDates: pickedDates,
+    recurringRule: recurringRule,
+  }});
 
-  if(hasRecurring){
-    existing.recurring = existing.recurring || [];
-    existing.recurring.push({
-      id: 'r'+Date.now(),
-      weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6).sort(),
-      start: state.recurringStart || todayISO(),
-      end: state.recurringEnd || null,
-    });
-  }
-  existing.updatedAt = new Date().toISOString();
-
-  const saved = await setEmp(id, existing);
-  if(!saved){
+  if(!res){
     state.submitting = false;
     state.msg = t.saveFailed;
     render(); return;
   }
-
-  // fire-and-forget push to Google Sheets if configured
-  pushToSheet({
-    employeeId: id, name: existing.name,
-    singleDates: pickedDates,
-    recurring: hasRecurring ? [{
-      weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6),
-      start: state.recurringStart || todayISO(),
-      end: state.recurringEnd || null,
-    }] : [],
-    timestamp: new Date().toISOString(),
-  });
+  if(res.status === 'mismatch' || res.status === 'not_found'){
+    state.submitting = false;
+    state.msg = res.status==='mismatch' ? t.masterMismatch : t.masterNotFound;
+    render(); return;
+  }
+  if(res.status !== 'ok'){
+    state.submitting = false;
+    state.msg = t.saveFailed;
+    render(); return;
+  }
 
   state.submitting = false;
   state.selectedDates = new Set();
@@ -2226,10 +2200,6 @@ async function submitCancellation(){
   if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
   render();
   showStamp(t.successTitle, t.successBody);
-}
-
-async function pushToSheet(payload){
-  await kvRequest('logCancellation', {payload: payload});
 }
 
 function showStamp(title, body){
