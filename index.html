@@ -293,6 +293,34 @@ tr:hover td{background:#FBF8F0;}
 .stamp-card h3{margin:0 0 6px;font-family:'Shippori Mincho',serif;font-size:19px;}
 .stamp-card p{margin:0 0 18px;color:var(--ink-soft);font-size:13.5px;line-height:1.6;}
 
+/* 割引商品：送信前の最終確認（画面全体に出す。小さいと「もう送信済み」と誤解されるため） */
+.confirm-overlay{
+  position:fixed;inset:0;background:rgba(59,46,36,0.6);
+  display:flex;align-items:center;justify-content:center;z-index:70;
+  padding:16px;overflow-y:auto;
+  animation:fadeIn .15s ease;
+}
+.confirm-card{
+  background:var(--surface);border-radius:18px;padding:26px 24px;
+  max-width:420px;width:100%;margin:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,0.35);
+}
+.confirm-card .icon{font-size:30px;text-align:center;margin-bottom:6px;}
+.confirm-card h3{
+  margin:0 0 8px;font-family:'Shippori Mincho',serif;font-size:19px;text-align:center;color:var(--accent-deeper);
+}
+.confirm-card .body{margin:0 0 16px;color:var(--ink-soft);font-size:13.5px;line-height:1.65;text-align:center;}
+.confirm-summary{
+  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:12px;
+  padding:14px 16px;margin-bottom:16px;text-align:center;
+}
+.confirm-summary .v{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:800;color:var(--accent-deeper);}
+.confirm-summary .items{font-size:12.5px;color:var(--accent-deep);margin-top:4px;line-height:1.6;}
+@media (max-width:480px){
+  .confirm-card{padding:22px 18px;}
+  .confirm-summary .v{font-size:22px;}
+}
+
 .searchrow{display:flex;gap:8px;}
 .searchrow input{flex:1;}
 
@@ -620,6 +648,7 @@ const T = {
     purchaseConfirmBody:"内容をもう一度ご確認のうえ、下のボタンを押してお進みください。",
     purchaseConfirmBtn:"この内容で送信する",
     purchaseConfirmSummary:"合計 ¥{n}（{items}）",
+    purchaseConfirmBack:"内容を修正する",
     purPinEnter:"本人確認のため、4桁のPINを入力してください。",
     purPinSet:"初めての方は4桁のPINを設定してください。「自分の記録」を見るときにも同じPINを使います。",
     purPinLocked:"PINを続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者にPINのリセットを依頼してください。",
@@ -685,6 +714,7 @@ const T = {
     rcptPausedSub:" ／ 停止期間 {n}日",
     rcptProductsNone:"この月の購入はありません",
     singleDatesMonth:"{m}月の個別キャンセル", minePurchaseMonth:"{m}月の割引商品の購入",
+    mineExtraEatMonth:"{m}月の臨時ランチ",
     recurringRulesNote:"曜日で指定した設定です。期間内の各月に自動で適用されます。",
     recurringAppliedThisMonth:"この月 {n}日",
     outOfScopeBadge:"対象外",
@@ -713,6 +743,7 @@ const T = {
     boardToday:"今日", boardBackToday:"今日に戻る", eatingToday:"食べる人", cancelToday:"キャンセル",
     setLabel:"セット", okazuLabel:"おかず", peopleUnit:"人", unknownLabel:"未設定",
     pausedLabel:"停止中",
+    extraEatTodayLabel:"臨時ランチ", guestTodayLabel:"来客",
     boardClosedToday:"この日は休業日です（給食なし）",
     masterNeededForBoard:"内訳（セット・おかず）を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
     searchTitle:"個別検索", searchByDate:"日付で検索", searchByEmp:"従業員で検索",
@@ -789,6 +820,23 @@ const T = {
     closedDaysNone:"登録されている休業日はありません。", closedDaysRemove:"削除",
     closedDaysAdded:"{n}日を追加しました。", closedDaysAlready:"すでに登録されています。",
     closedDaysBadRange:"終了日は開始日より後の日付を選んでください。",
+
+    guestLunchTitle:"来客用ランチ",
+    extraLunchTitle:"臨時ランチ登録", extraLunchGuestTab:"来客", extraLunchEmployeeTab:"社員",
+    guestLunchHelp:"来客などで急にランチの数が増える場合、日付ごとに人数を登録できます。ここで登録した人数は「本日の状況」に加算されますが、社員ではないため給与や部門への請求には一切関係しません（厨房が作る数を把握するためだけの人数カウンターです）。",
+    guestLunchDate:"日付", guestLunchNote:"メモ（任意）", guestLunchNotePh:"例）○○様ご来社",
+    guestLunchAdd:"この人数を追加する", guestLunchRemove:"削除",
+    guestLunchNone:"登録されている来客予定はありません。",
+    guestLunchNeedDate:"日付を選んでください。",
+    guestLunchNeedCount:"セットまたはおかずの人数を1人以上入力してください。",
+    guestLunchAdded:"追加しました。同じ日付にすでに登録がある場合は人数を積み増しています。",
+
+    extraEatTitle:"臨時ランチ登録（利用なしの人）",
+    extraEatHelp:"普段は「利用なし」で登録している社員が、その日だけ臨時でランチを食べる場合にここから登録してください。登録した日は月次CSVの金額計算にも反映され、「本日の状況」の人数にも加算されます。社員番号または氏名で検索して選んでください。",
+    extraEatDate:"食べる日", extraEatSelect:"選ぶ", extraEatSelected:"選択中",
+    extraEatAdd:"この内容で登録する",
+    extraEatAdded:"登録しました。",
+    extraEatNeedDate:"日付を選んでください。",
     weekdayShort:["日","月","火","水","木","金","土"],
   },
   en:{
@@ -808,6 +856,7 @@ const T = {
     purchaseConfirmBody:"Please check your entry once more, then press the button below to continue.",
     purchaseConfirmBtn:"Submit this entry",
     purchaseConfirmSummary:"Total ¥{n} ({items})",
+    purchaseConfirmBack:"Edit my order",
     purPinEnter:"Please enter your 4-digit PIN to confirm it is you.",
     purPinSet:"If this is your first time, please set a 4-digit PIN. The same PIN is used to view your records.",
     purPinLocked:"Too many incorrect attempts. You cannot register a purchase for about {n} minutes. Please ask the cafeteria staff to reset your PIN.",
@@ -865,6 +914,7 @@ const T = {
     rcptPausedSub:" / {n} paused",
     rcptProductsNone:"No purchases this month",
     singleDatesMonth:"Individual cancellations in month {m}", minePurchaseMonth:"Purchases in month {m}",
+    mineExtraEatMonth:"Extra lunches in month {m}",
     recurringRulesNote:"Weekday-based settings, applied automatically in each month within the period.",
     recurringAppliedThisMonth:"{n} day(s) this month",
     outOfScopeBadge:"Not counted",
@@ -1238,6 +1288,11 @@ let state = {
   specialDaysMsg:null,
   closedDaysMsg:null,
   csvWarning:'',
+  // 来客用ランチ（人数カウンターのみ。給与や請求には関与しない）
+  guestDate:'', guestSetCount:0, guestOkazuCount:0, guestNote:'', guestMsg:null,
+  // 臨時ランチ（来客／普段「利用なし」の社員が、特定の日だけ食べる場合。同じメニュー内でタブ切り替え）
+  extraLunchMode:'guest',
+  extraEatSearch:'', extraEatSelectedId:null, extraEatDate:'', extraEatType:'okazu', extraEatMsg:null,
 };
 
 /* ===================== storage helpers ===================== */
@@ -1428,6 +1483,22 @@ async function setSpecialPriceDays(list){
   await setSetting('specialPriceDays', JSON.stringify(uniq));
   settingsCache.specialPriceDays = uniq;
   return uniq;
+}
+// 来客用ランチ（日付ごとの人数カウンター。給与や請求には一切関与しない）
+// [{date:'2026-08-20', set:2, okazu:1, note:'○○様ご来社'}, ...]
+async function getGuestLunches(force){
+  if(!force && settingsCache.guestLunches) return settingsCache.guestLunches;
+  try{
+    const raw = await getSetting('guestLunches');
+    settingsCache.guestLunches = raw ? JSON.parse(raw) : [];
+  }catch(e){ settingsCache.guestLunches = []; }
+  return settingsCache.guestLunches;
+}
+async function setGuestLunches(list){
+  const sorted = list.slice().sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+  await setSetting('guestLunches', JSON.stringify(sorted));
+  settingsCache.guestLunches = sorted;
+  return sorted;
 }
 
 /* ============================================================
@@ -1660,10 +1731,18 @@ function servingDaysInMonth(y, m0, closedSet){
   return out;
 }
 // その社員が実際に食べた日と金額（社員側の見込み表示・CSV出力の両方で使う）
-function calcForEmployee(emp, cancelledSet, servingDays, specialSet){
-  // ランチを利用しない人（利用なし）は、給食日があっても金額計算の対象にしない
+// extraEatMap: Map(日付 -> 'set'|'okazu')。普段「利用なし」の人が、その日だけ臨時で食べる場合の登録。
+function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap){
+  // ランチを利用しない人（利用なし）は、臨時ランチの登録がある日だけカウントする
   if(emp && emp.mealType === 'none'){
-    return {eatDays:0, amount:0, pausedDays:0, cancelledDays:0};
+    let eatDays=0, amount=0;
+    servingDays.forEach(d=>{
+      const extraType = extraEatMap && extraEatMap.get(d);
+      if(!extraType) return;
+      eatDays++;
+      amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
+    });
+    return {eatDays, amount, pausedDays:0, cancelledDays:0};
   }
   const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
   let eatDays=0, amount=0, pausedDays=0, cancelledDays=0;
@@ -1674,6 +1753,12 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet){
     amount += (specialSet && specialSet.has(d)) ? PRICE_SET : basePrice;
   });
   return {eatDays, amount, pausedDays, cancelledDays};
+}
+// 臨時ランチの登録から、日付 -> 種類 のMapを作る（無ければ空のMap）
+function extraEatMapFromRecord(rec){
+  const m = new Map();
+  ((rec && rec.extraEatDates) || []).forEach(e=>{ if(e && e.date) m.set(e.date, e.mealType); });
+  return m;
 }
 // 割引商品の購入：その月の分だけ取り出す
 function purchasesInMonth(rec, y, m0){
@@ -1894,44 +1979,47 @@ function renderForm(vp){
 
     ${state.msg ? `<div class="notice danger">${state.msg}</div>` : ''}
 
-    ${(state.formMode==='purchase' && state.purchaseConfirm) ? `
-      <div class="notice danger" id="pur-confirm-note">
-        <div>⚠️</div>
-        <div><b>${t.purchaseConfirmTitle}</b>${t.purchaseConfirmBody}
-          <div style="margin-top:6px;font-weight:700;">${t.purchaseConfirmSummary
-            .replace('{n}', purchaseSumFromState().toLocaleString())
-            .replace('{items}', purchaseItemsFromState().map(it=>`¥${it.price}×${it.qty}`).join('、'))}</div>
-        </div>
-      </div>
-      ${state.purchasePinMode==='locked' ? `
-        <div class="notice danger"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
-      ` : `
-        <div class="gate" style="padding:15px;margin-bottom:14px;">
-          <p style="margin:0 0 12px;">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
-          <div class="field pinfield" style="margin-bottom:${state.purchasePinMode==='set'?'12px':'0'};">
-            <label>${t.pinLabel}</label>
-            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}">
-          </div>
-          ${state.purchasePinMode==='set' ? `
-          <div class="field pinfield" style="margin-bottom:0;">
-            <label>${t.pinLabel2}</label>
-            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}">
-          </div>` : ''}
-          <div class="status-msg">${state.purchasePinMsg ? `<span style="color:var(--danger)">${state.purchasePinMsg}</span>` : ''}</div>
-        </div>
-      `}
-    ` : ''}
-
+    ${(state.formMode!=='purchase' || !state.purchaseConfirm) ? `
     <div class="btnrow">
-      <button class="btn btn-submit" id="submit-btn" ${
-        state.submitting || (state.formMode==='purchase' && state.purchaseConfirm && state.purchasePinMode==='locked') ? 'disabled' : ''
-      }>${
+      <button class="btn btn-submit" id="submit-btn" ${state.submitting ? 'disabled' : ''}>${
         state.submitting ? t.submitting
-          : (state.formMode==='purchase'
-              ? (state.purchaseConfirm ? '✓ ' + t.purchaseConfirmBtn : '✓ ' + t.submitPurchase)
-              : '✓ ' + t.submit)
+          : (state.formMode==='purchase' ? '✓ ' + t.submitPurchase : '✓ ' + t.submit)
       }</button>
     </div>
+    ` : `
+    <div class="confirm-overlay" id="pur-confirm-overlay">
+      <div class="confirm-card">
+        <div class="icon">⚠️</div>
+        <h3>${t.purchaseConfirmTitle}</h3>
+        <p class="body">${t.purchaseConfirmBody}</p>
+        <div class="confirm-summary">
+          <div class="v">¥${purchaseSumFromState().toLocaleString()}</div>
+          <div class="items">${escapeHtml(purchaseItemsFromState().map(it=>`¥${it.price}×${it.qty}`).join('、'))}</div>
+        </div>
+        ${state.purchasePinMode==='locked' ? `
+          <div class="notice danger"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
+        ` : `
+          <p style="margin:0 0 12px;font-size:13.5px;text-align:center;">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
+          <div class="field pinfield" style="margin:0 auto ${state.purchasePinMode==='set'?'12px':'0'};text-align:center;">
+            <label style="text-align:center;">${t.pinLabel}</label>
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}" style="margin:0 auto;display:block;">
+          </div>
+          ${state.purchasePinMode==='set' ? `
+          <div class="field pinfield" style="margin:0 auto;text-align:center;">
+            <label style="text-align:center;">${t.pinLabel2}</label>
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}" style="margin:0 auto;display:block;">
+          </div>` : ''}
+          <div class="status-msg" style="text-align:center;">${state.purchasePinMsg ? `<span style="color:var(--danger)">${state.purchasePinMsg}</span>` : ''}</div>
+        `}
+        <div class="btnrow" style="flex-direction:column;margin-top:18px;">
+          <button class="btn btn-submit" id="submit-btn" style="width:100%;" ${
+            state.submitting || state.purchasePinMode==='locked' ? 'disabled' : ''
+          }>${state.submitting ? t.submitting : '✓ ' + t.purchaseConfirmBtn}</button>
+          <button class="btn btn-ghost" id="pur-confirm-cancel" style="width:100%;" ${state.submitting ? 'disabled' : ''}>${t.purchaseConfirmBack}</button>
+        </div>
+      </div>
+    </div>
+    `}
   `;
 
   vp.querySelector('#f-empid').oninput = e=>{ state.empId = e.target.value; persistEmpProfile(); resetPurchaseConfirm(); };
@@ -1951,6 +2039,8 @@ function renderForm(vp){
     if(purPin) purPin.oninput = e=>{ state.purchasePin = digits4(e.target.value); e.target.value = state.purchasePin; };
     const purPin2 = vp.querySelector('#pur-pin2');
     if(purPin2) purPin2.oninput = e=>{ state.purchasePin2 = digits4(e.target.value); e.target.value = state.purchasePin2; };
+    const purCancelBtn = vp.querySelector('#pur-confirm-cancel');
+    if(purCancelBtn) purCancelBtn.onclick = ()=>{ resetPurchaseConfirm(); };
 
     vp.querySelectorAll('.qtyctl button[data-step]').forEach(btn=>{
       btn.onclick = ()=>{
@@ -2072,8 +2162,6 @@ async function submitPurchase(){
     state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
     state.purchaseConfirm = true;
     render();
-    const note = document.getElementById('pur-confirm-note');
-    if(note && note.scrollIntoView) note.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
 
@@ -2313,7 +2401,8 @@ async function computeMineSummary(){
   const serving = servingDaysInMonth(y, m0, closedSet);
   const sets = cancelledSetsForMonth(state.mineRecord, y, m0);
   const emp = state.mineMaster || {};
-  const calc = calcForEmployee(emp, sets.all, serving, specialSet);
+  const extraMap = extraEatMapFromRecord(state.mineRecord);
+  const calc = calcForEmployee(emp, sets.all, serving, specialSet, extraMap);
 
   let single = 0, recurring = 0;
   serving.forEach(d=>{
@@ -2329,6 +2418,10 @@ async function computeMineSummary(){
   // その月に登録されている個別キャンセル日（金額に入らない日も一覧には出す）
   const singleDatesInMonth = Array.from(sets.single).sort();
   const servingSet = new Set(serving);
+  // その月の臨時ランチ（普段「利用なし」の人が、その日だけ食べる登録）
+  const extraEatInMonth = ((state.mineRecord && state.mineRecord.extraEatDates) || [])
+    .filter(e=>{ const dt = parseISO(e.date); return dt.getFullYear()===y && dt.getMonth()===m0; })
+    .sort((a,b)=> a.date.localeCompare(b.date));
 
   state.mineSummary = {
     y, m0, servingCount: serving.length,
@@ -2340,6 +2433,7 @@ async function computeMineSummary(){
     pausedDays: calc.pausedDays, cancelledDays: calc.cancelledDays,
     single, recurring, mealType: emp.mealType,
     purchases, purchaseAgg,
+    extraEatInMonth,
   };
 }
 
@@ -2498,6 +2592,13 @@ function paintMineResult(){
         </div>`).join('')
     : `<p class="small">${t.minePurchaseNone}</p>`;
 
+  const extraRows = (s.extraEatInMonth && s.extraEatInMonth.length)
+    ? s.extraEatInMonth.map(e=>`
+        <div class="item"><span>${e.date}（${dowLabel(e.date,state.lang)}）　<span class="small">${e.mealType==='set'?t.mineUnitSet:t.mineUnitOkazu}</span></span>
+          <b>¥${(e.mealType==='set'?PRICE_SET:PRICE_OKAZU).toLocaleString()}</b>
+        </div>`).join('')
+    : `<p class="small">${t.none}</p>`;
+
   box.innerHTML = `
     <div class="card">
       <h2 style="margin-bottom:6px;">${escapeHtml(displayName)} <span class="small">(${escapeHtml(state.mineId.trim())})</span>
@@ -2539,6 +2640,11 @@ function paintMineResult(){
       <div style="height:18px"></div>
       <label>${t.singleDatesMonth.replace('{m}', s.m0+1)}</label>
       <div class="daylist">${singleRows}</div>
+      ${s.mealType === 'none' ? `
+      <div style="height:14px"></div>
+      <label>${t.mineExtraEatMonth.replace('{m}', s.m0+1)}</label>
+      <div class="daylist">${extraRows}</div>
+      ` : ''}
       <div style="height:14px"></div>
       <label>${t.minePurchaseMonth.replace('{m}', s.m0+1)}</label>
       <div class="daylist">${purRows}</div>
@@ -2956,16 +3062,20 @@ async function renderAdmin(vp){
     try{ specialDays = boot.specialPriceDays ? JSON.parse(boot.specialPriceDays) : []; }catch(e){ specialDays = []; }
     let closedDays = [];
     try{ closedDays = boot.closedDays ? JSON.parse(boot.closedDays) : []; }catch(e){ closedDays = []; }
+    let guestLunches = [];
+    try{ guestLunches = boot.guestLunches ? JSON.parse(boot.guestLunches) : []; }catch(e){ guestLunches = []; }
 
     records = recs;
     state.adminAllRecords = recs;
     specialDays.sort(); closedDays.sort();
+    guestLunches.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
     state.closedDays = closedDays;
     // 他の画面（社員側カレンダーなど）が使うキャッシュにも反映しておき、二重取得を防ぐ
     settingsCache.specialPriceDays = specialDays;
     settingsCache.closedDays = closedDays;
+    settingsCache.guestLunches = guestLunches;
     const prevPinMap = cache ? cache.pinMap : null;  // 開いたことがあれば引き継ぐ
-    cache = {master:master, specialDays:specialDays, closedDays:closedDays, pinMap:prevPinMap};
+    cache = {master:master, specialDays:specialDays, closedDays:closedDays, guestLunches:guestLunches, pinMap:prevPinMap};
     if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
   }
   // PIN一覧はここでだけ読み込む（カードを開いたとき・書き込み後の再読み込み時のみ）
@@ -3017,15 +3127,22 @@ async function renderAdmin(vp){
 
   function drawAdmin(){
     const master = cache.master, specialDays = cache.specialDays,
-          closedDays = cache.closedDays;
+          closedDays = cache.closedDays, guestLunches = cache.guestLunches || [];
     const pinMapLoaded = !!cache.pinMap;
     const pinMap = cache.pinMap || {};   // 未読込のあいだは空扱い（PINカードは「読み込み中」表示にするため実害なし）
     const closedSet = new Set(closedDays);
     const masterById = new Map(master.map(e=>[String(e.id), e]));
+    // 従業員番号 -> 臨時ランチのMap（日付->セット/おかず）
+    const extraEatByEmpAdmin = new Map();
+    records.forEach(rec=>{
+      const m = extraEatMapFromRecord(rec);
+      if(m.size) extraEatByEmpAdmin.set(String(rec.employeeId), m);
+    });
 
     const tISO = todayISO();
     const bISO = state.boardDate || tISO;          // 上部の表示対象日（前後に移動できる）
-    const todayIsClosed = closedSet.has(bISO);
+    const bWd = parseISO(bISO).getDay();
+    const todayIsClosed = closedSet.has(bISO) || bWd===0 || bWd===6;  // 土日はもともと休業扱い
     const todayCancelList = occurrencesForDate(bISO);
     const cancelledIdsToday = new Set(todayCancelList.map(x=>String(x.employeeId)));
 
@@ -3033,10 +3150,19 @@ async function renderAdmin(vp){
     let eatingTotal=0, eatingSet=0, eatingOkazu=0, eatingUnknown=0;
     let cancelTotal=0, cancelSet=0, cancelOkazu=0, cancelUnknown=0;
     let pausedTotal=0;
+    let extraEatToday=0, extraEatSetToday=0, extraEatOkazuToday=0;
 
     if(masterAvailable){
       master.forEach(e=>{
-        if(e.mealType === 'none') return; // ランチを利用しない人は人数に含めない
+        if(e.mealType === 'none'){
+          // 普段は対象外だが、その日だけ臨時ランチの登録があればカウントする
+          const m = extraEatByEmpAdmin.get(String(e.id));
+          const extraType = m && m.get(bISO);
+          if(!extraType) return;
+          extraEatToday++;
+          if(extraType==='set') extraEatSetToday++; else extraEatOkazuToday++;
+          return;
+        }
         if(isPausedOn(e, bISO)){ pausedTotal++; return; }
         if(cancelledIdsToday.has(String(e.id))){
           cancelTotal++;
@@ -3046,9 +3172,14 @@ async function renderAdmin(vp){
           if(e.mealType==='set') eatingSet++; else if(e.mealType==='okazu') eatingOkazu++; else eatingUnknown++;
         }
       });
+      eatingTotal += extraEatToday; eatingSet += extraEatSetToday; eatingOkazu += extraEatOkazuToday;
     } else {
       cancelTotal = todayCancelList.length;
     }
+
+    // 来客用ランチ（表示中の日付の分。給与や請求には一切関与しない）
+    const guestToday = guestLunches.find(g=>g.date === bISO) || null;
+    const guestTotalToday = guestToday ? Number(guestToday.set||0) + Number(guestToday.okazu||0) : 0;
 
     const searchDate = state.adminDateSearch || tISO;
     const dateList = occurrencesForDate(searchDate);
@@ -3111,6 +3242,8 @@ async function renderAdmin(vp){
           <div class="board-sub-lbl">${t.cancelToday}</div>
           <div class="board-sub-sub">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
           ${pausedTotal? `<div class="board-sub-sub">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
+          ${extraEatToday? `<div class="board-sub-sub">${t.extraEatTodayLabel} ${extraEatToday}${t.peopleUnit}（${t.setLabel} ${extraEatSetToday}${t.peopleUnit} ・ ${t.okazuLabel} ${extraEatOkazuToday}${t.peopleUnit}・上の人数に含む）</div>`:''}
+          ${guestTotalToday? `<div class="board-sub-sub">${t.guestTodayLabel} ${guestTotalToday}${t.peopleUnit}（${t.setLabel} ${guestToday.set||0}${t.peopleUnit} ・ ${t.okazuLabel} ${guestToday.okazu||0}${t.peopleUnit}${guestToday.note?'・'+escapeHtml(guestToday.note):''}）</div>`:''}
         </div>
         ` : `
         <div class="board-main">
@@ -3156,6 +3289,92 @@ async function renderAdmin(vp){
               return `<div class="item"><span>${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span>${paused?`<span class="pausechip">停止期間中</span>`:''}</span><span class="badge ${x.type}">${x.type==='recurring'?'定期':'個別'}</span></div>`;
             }).join('') : `<p class="small">${t.noResults}</p>`}
           </div>
+        </div>
+        `}
+      `)}
+
+      ${qcard('extraLunch', t.extraLunchTitle, `
+        <div class="modeswitch" style="margin-bottom:14px;">
+          <button type="button" class="${state.extraLunchMode!=='employee'?'active':''}" data-extralunch-mode="guest">${t.extraLunchGuestTab}</button>
+          <button type="button" class="${state.extraLunchMode==='employee'?'active':''}" data-extralunch-mode="employee">${t.extraLunchEmployeeTab}</button>
+        </div>
+        ${state.extraLunchMode==='employee' ? `
+        <p class="footnote">${t.extraEatHelp}</p>
+        <input type="text" id="adm-extraeat-search" placeholder="${t.masterSearchPh}" value="${escapeHtml(state.extraEatSearch||'')}">
+        <div style="margin-top:8px;">
+          ${(function(){
+            const q = (state.extraEatSearch||'').trim().toLowerCase();
+            if(!q) return `<p class="small">${t.masterSearchHint}</p>`;
+            const results = master.filter(e=> String(e.id).toLowerCase().includes(q) || String(e.name||'').toLowerCase().includes(q))
+              .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}));
+            if(!results.length) return `<p class="small">${t.noEmployees}</p>`;
+            return results.map(e=>{
+              const idStr = String(e.id);
+              const selected = state.extraEatSelectedId === idStr;
+              return `<div class="emprow">
+                <span class="who">${escapeHtml(e.name)} <span class="small">(${escapeHtml(idStr)})</span>
+                  <span class="statuspill ${e.mealType==='none'?'off':'on'}">${mealTypeJa(e.mealType)}</span></span>
+                <span class="btns"><button class="btn ${selected?'btn-primary':'btn-ghost'}" data-select-extraeat="${escapeHtml(idStr)}">${selected?t.extraEatSelected:t.extraEatSelect}</button></span>
+              </div>`;
+            }).join('');
+          })()}
+        </div>
+        ${state.extraEatSelectedId ? (function(){
+          const emp = masterById.get(state.extraEatSelectedId);
+          const rec = records.find(r=>String(r.employeeId)===state.extraEatSelectedId);
+          const list = (rec && rec.extraEatDates) || [];
+          return `
+          <div class="subsec" style="margin-top:12px;">
+            <p class="sublabel">${escapeHtml(emp?emp.name:'')}（${escapeHtml(state.extraEatSelectedId)}）</p>
+            <div class="row2">
+              <div class="field" style="margin-bottom:0;">
+                <label>${t.extraEatDate}</label>
+                <input type="date" id="adm-extraeat-date">
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label>${t.mealTypeLabel}</label>
+                <div class="typepick" style="margin-bottom:0;">
+                  <button type="button" class="${state.extraEatType==='set'?'active':''}" data-extraeat-type="set">${t.typeSet}</button>
+                  <button type="button" class="${state.extraEatType==='okazu'?'active':''}" data-extraeat-type="okazu">${t.typeOkazu}</button>
+                </div>
+              </div>
+            </div>
+            <div class="btnrow"><button class="btn btn-primary" id="adm-extraeat-add">${t.extraEatAdd}</button></div>
+            <div class="status-msg">${state.extraEatMsg ? `<span style="color:${state.extraEatMsg.ok?'var(--good)':'var(--danger)'}">${state.extraEatMsg.text}</span>` : ''}</div>
+            <div class="daylist" style="margin-top:10px;">
+              ${list.length ? list.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).map(e=>`<div class="item"><span>${e.date}（${dowLabel(e.date,'ja')}） ${e.mealType==='set'?t.typeSet:t.typeOkazu}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat="${e.date}">${t.delete}</button></div>`).join('') : `<p class="small">${t.none}</p>`}
+            </div>
+          </div>`;
+        })() : ''}
+        ` : `
+        <p class="footnote">${t.guestLunchHelp}</p>
+        <div class="row2">
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.guestLunchDate}</label>
+            <input type="date" id="adm-guest-date">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.guestLunchNote}</label>
+            <input type="text" id="adm-guest-note" placeholder="${t.guestLunchNotePh}">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.setLabel}</label>
+            <input type="number" min="0" step="1" id="adm-guest-set" value="0">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>${t.okazuLabel}</label>
+            <input type="number" min="0" step="1" id="adm-guest-okazu" value="0">
+          </div>
+        </div>
+        <div class="btnrow"><button class="btn btn-primary" id="adm-guest-add">${t.guestLunchAdd}</button></div>
+        <div class="status-msg">${state.guestMsg ? `<span style="color:${state.guestMsg.ok?'var(--good)':'var(--danger)'}">${state.guestMsg.text}</span>` : ''}</div>
+        <div class="daylist" style="margin-top:10px;">
+          ${guestLunches.length ? guestLunches.map(g=>{
+            const total = Number(g.set||0)+Number(g.okazu||0);
+            return `<div class="item"><span>${g.date}（${dowLabel(g.date,'ja')}） ${t.setLabel}${g.set||0}・${t.okazuLabel}${g.okazu||0}（計${total}${t.peopleUnit}）${g.note?' － '+escapeHtml(g.note):''}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-guest="${g.date}">${t.guestLunchRemove}</button></div>`;
+          }).join('') : `<p class="small">${t.guestLunchNone}</p>`}
         </div>
         `}
       `)}
@@ -3283,8 +3502,11 @@ async function renderAdmin(vp){
     });
     vp.querySelectorAll('[data-board-shift]').forEach(b=>{
       b.onclick = ()=>{
+        const dir = Number(b.dataset.boardShift);
         const base = parseISO(state.boardDate || todayISO());
-        base.setDate(base.getDate() + Number(b.dataset.boardShift));
+        do{
+          base.setDate(base.getDate() + dir);
+        } while(base.getDay()===0 || base.getDay()===6);   // 土日は営業していないためスキップする
         state.boardDate = iso(base.getFullYear(), base.getMonth(), base.getDate());
         drawAdmin();
       };
@@ -3450,6 +3672,99 @@ async function renderAdmin(vp){
       drawAdmin();
       setTimeout(()=>{ state.pwMsg=null; drawAdmin(); },4000);
     };
+
+    /* --- 臨時ランチ登録：来客／社員のタブ切り替え --- */
+    vp.querySelectorAll('[data-extralunch-mode]').forEach(btn=>{
+      btn.onclick = ()=>{
+        state.extraLunchMode = btn.dataset.extralunchMode;
+        drawAdmin();
+      };
+    });
+
+    /* --- 来客用ランチ --- */
+    const guestAddBtn = vp.querySelector('#adm-guest-add');
+    if(guestAddBtn) guestAddBtn.onclick = async ()=>{
+      const d = document.getElementById('adm-guest-date').value;
+      const noteVal = document.getElementById('adm-guest-note').value.trim();
+      const addSet = Math.max(0, Math.floor(Number(document.getElementById('adm-guest-set').value)||0));
+      const addOkazu = Math.max(0, Math.floor(Number(document.getElementById('adm-guest-okazu').value)||0));
+      if(!d){ state.guestMsg = {text:t.guestLunchNeedDate, ok:false}; drawAdmin(); return; }
+      if(addSet===0 && addOkazu===0){ state.guestMsg = {text:t.guestLunchNeedCount, ok:false}; drawAdmin(); return; }
+      guestAddBtn.disabled = true;
+      const list = guestLunches.slice();
+      const idx = list.findIndex(g=>g.date===d);
+      if(idx===-1){
+        list.push({date:d, set:addSet, okazu:addOkazu, note:noteVal});
+      } else {
+        list[idx] = {
+          date:d,
+          set: Number(list[idx].set||0)+addSet,
+          okazu: Number(list[idx].okazu||0)+addOkazu,
+          note: noteVal || list[idx].note || '',
+        };
+      }
+      await setGuestLunches(list);
+      state.guestMsg = {text:t.guestLunchAdded, ok:true};
+      await reload();
+      setTimeout(()=>{ state.guestMsg=null; drawAdmin(); }, 6000);
+    };
+    vp.querySelectorAll('[data-remove-guest]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        btn.disabled = true;
+        const d = btn.dataset.removeGuest;
+        const list = guestLunches.filter(g=>g.date!==d);
+        await setGuestLunches(list);
+        await reload();
+      };
+    });
+
+    /* --- 臨時ランチ登録（利用なしの人） --- */
+    const extraSearchInput = vp.querySelector('#adm-extraeat-search');
+    if(extraSearchInput) extraSearchInput.oninput = e=>{
+      state.extraEatSearch = e.target.value; drawAdmin();
+    };
+    vp.querySelectorAll('[data-select-extraeat]').forEach(btn=>{
+      btn.onclick = ()=>{
+        state.extraEatSelectedId = btn.dataset.selectExtraeat;
+        state.extraEatDate = ''; state.extraEatType = 'okazu'; state.extraEatMsg = null;
+        drawAdmin();
+      };
+    });
+    vp.querySelectorAll('[data-extraeat-type]').forEach(btn=>{
+      btn.onclick = ()=>{ state.extraEatType = btn.dataset.extraeatType; drawAdmin(); };
+    });
+    const extraAddBtn = vp.querySelector('#adm-extraeat-add');
+    if(extraAddBtn) extraAddBtn.onclick = async ()=>{
+      const d = document.getElementById('adm-extraeat-date').value;
+      if(!d){ state.extraEatMsg = {text:t.extraEatNeedDate, ok:false}; drawAdmin(); return; }
+      const id = state.extraEatSelectedId;
+      extraAddBtn.disabled = true;
+      const emp = masterById.get(id);
+      const rec = (await getEmp(id)) || {employeeId:id, name:(emp&&emp.name)||'', singleDates:[], recurring:[]};
+      rec.name = (emp && emp.name) || rec.name;
+      rec.extraEatDates = rec.extraEatDates || [];
+      const idx = rec.extraEatDates.findIndex(e=>e.date===d);
+      if(idx===-1) rec.extraEatDates.push({date:d, mealType: state.extraEatType});
+      else rec.extraEatDates[idx].mealType = state.extraEatType;
+      await setEmp(id, rec);
+      state.extraEatDate = '';
+      state.extraEatMsg = {text:t.extraEatAdded, ok:true};
+      await reload();
+      setTimeout(()=>{ state.extraEatMsg=null; drawAdmin(); }, 6000);
+    };
+    vp.querySelectorAll('[data-remove-extraeat]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        btn.disabled = true;
+        const d = btn.dataset.removeExtraeat;
+        const id = state.extraEatSelectedId;
+        const rec = await getEmp(id);
+        if(rec){
+          rec.extraEatDates = (rec.extraEatDates||[]).filter(e=>e.date!==d);
+          await setEmp(id, rec);
+        }
+        await reload();
+      };
+    });
 
     /* --- 従業員マスタ：新規登録 --- */
     const bind = (id, fn, ev) => { const el = vp.querySelector('#'+id); if(el) el[ev||'oninput'] = fn; };
@@ -3734,10 +4049,12 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   // cancelled-day set per employee id, built from records (only source of cancellation data)
   const cancelledByEmp = {};
   const purchaseByEmp = {}; // 割引商品の購入額（その月分）
+  const extraEatByEmp = {}; // 臨時ランチ（普段「利用なし」の人が、その日だけ食べる登録）
   records.forEach(rec=>{
     const sets = cancelledSetsForMonth(rec, y, m0);
     cancelledByEmp[rec.employeeId] = {name:rec.name, cancelled:sets.all};
     purchaseByEmp[rec.employeeId] = purchaseTotal(purchasesInMonth(rec, y, m0));
+    extraEatByEmp[rec.employeeId] = extraEatMapFromRecord(rec);
   });
 
   // base employee list: prefer the uploaded roster (includes people who never cancel);
@@ -3751,7 +4068,8 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
     const mealTypeKnown = e.mealType==='set' || e.mealType==='okazu' || e.mealType==='none';
     if(!mealTypeKnown) missingMealType++;
     const cancelled = (cancelledByEmp[e.id] && cancelledByEmp[e.id].cancelled) || new Set();
-    const calc = calcForEmployee(e, cancelled, servingDays, specialSet);
+    const extraMap = extraEatByEmp[e.id] || new Map();
+    const calc = calcForEmployee(e, cancelled, servingDays, specialSet, extraMap);
     const purchase = Number(purchaseByEmp[e.id]||0);
     perEmployee[e.id] = {name:e.name, amount:calc.amount + purchase, lunch:calc.amount, purchase};
   });
