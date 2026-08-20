@@ -389,6 +389,11 @@ textarea.csvbox{
 }
 .board-tot.sub .n{color:var(--danger);font-size:30px;}
 .board-tot .l{display:block;font-size:12px;margin-top:6px;color:var(--ink);font-weight:700;}
+.board-detailrow{display:flex;gap:10px;align-items:flex-start;}
+.board-detail-col{
+  flex:1;font-size:12px;color:var(--ink-soft);line-height:1.6;padding:0 4px;text-align:center;
+}
+.board-detail-col.cancel{color:var(--ink-soft);}
 .board-detail{font-size:12px;color:var(--ink-soft);margin-bottom:6px;line-height:1.6;}
 .board-detail.cancel{margin-bottom:0;}
 .status-msg{font-size:12.5px;color:var(--ink-soft);min-height:16px;margin-top:6px;}
@@ -3449,12 +3454,10 @@ async function renderAdmin(vp){
             <span class="l">${t.cancelToday}</span>
           </div>
         </div>
-        <div class="board-detail">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}</div>
-        ${extraCombinedLine? `<div class="board-detail">${extraCombinedLine}</div>`:''}
-        <div class="board-detail cancel">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
-        ${cancelNamesToday.length? `<div class="board-detail cancel">${cancelNamesToday.map(escapeHtml).join('、')}</div>`:''}
-        ${pausedTotal? `<div class="board-detail cancel">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
-        ${notHiredYetTotal? `<div class="board-detail cancel">${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）</div>`:''}
+        <div class="board-detailrow">
+          <div class="board-detail-col">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}${extraCombinedLine? `<br>${extraCombinedLine}`:''}</div>
+          <div class="board-detail-col cancel">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}${cancelNamesToday.length? `<br>${cancelNamesToday.map(escapeHtml).join('、')}`:''}${pausedTotal? `<br>${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）`:''}${notHiredYetTotal? `<br>${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）`:''}</div>
+        </div>
         ` : `
         <div class="board-totrow">
           <div class="board-tot main">
@@ -4425,3 +4428,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
