@@ -348,54 +348,95 @@ textarea.csvbox{
   box-shadow:var(--shadow);z-index:60;
 }
 .board{
-  background:var(--surface);
-  border:1px solid var(--line);
+  background:var(--accent-soft);
+  border:1px solid var(--accent-line);
   border-radius:var(--radius);
-  padding:22px 22px 18px;
+  padding:16px 18px;
   margin-bottom:16px;
-  box-shadow:var(--shadow);
-  position:relative;
-  overflow:hidden;
-}
-.board::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:8px;
-  background:linear-gradient(180deg,var(--accent),var(--accent-deeper));
 }
 .boardnav{
-  display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;
 }
 .boardnav .navbtn{
-  border:1px solid var(--line);background:#fff;
+  border:1px solid var(--accent-line);background:#fff;
   color:var(--ink);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;
   flex-shrink:0;font-family:inherit;
 }
 .boardnav .navbtn:hover{background:var(--accent-soft);border-color:var(--accent-mid);}
 .boardnav .d{
-  font-size:13.5px;letter-spacing:0.04em;color:var(--ink);font-weight:700;
+  font-size:13px;font-weight:800;color:var(--accent-deeper);letter-spacing:0.02em;
 }
 .boardnav .todaypill{
-  background:var(--accent-soft);color:var(--accent-deep);border-radius:999px;
+  background:#fff;color:var(--accent-deep);border:1px solid var(--accent-line);border-radius:999px;
   padding:2px 9px;font-size:11px;font-weight:700;
 }
 .boardnav .backtoday{
-  border:1px solid var(--line);background:transparent;color:var(--ink-soft);
+  border:1px solid var(--accent-line);background:#fff;color:var(--ink-soft);
   border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
 }
 .boardnav .backtoday:hover{background:var(--accent-soft);border-color:var(--accent-mid);color:var(--ink);}
-.board-date{font-size:12.5px;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:16px;font-weight:600;}
-.board-main{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px dashed var(--line);}
-.board-main-num{
-  font-family:'Shippori Mincho',serif;font-weight:800;font-size:58px;color:var(--accent-deeper);line-height:1;
+.board-closed-msg{
+  text-align:center;font-size:18px;font-family:'Shippori Mincho',serif;font-weight:700;color:var(--ink-soft);
+  padding:18px 0;
 }
-.board-main-lbl{font-size:14px;margin-top:8px;color:var(--ink);font-weight:700;}
-.board-main-sub{font-size:13px;margin-top:8px;color:var(--ink-soft);}
-.board-sub{text-align:center;}
-.board-sub-num{
-  font-family:'Shippori Mincho',serif;font-weight:700;font-size:26px;color:var(--danger);line-height:1;
+.board-totrow{display:flex;gap:10px;margin-bottom:10px;}
+.board-tot{
+  flex:1;background:#fff;border:1px solid var(--accent-line);border-radius:10px;
+  padding:14px 8px;text-align:center;
 }
-.board-sub-lbl{font-size:12px;margin-top:4px;color:var(--ink-soft);font-weight:700;}
-.board-sub-sub{font-size:11.5px;margin-top:4px;color:var(--ink-soft);}
+.board-tot .n{
+  display:block;font-family:'Shippori Mincho',serif;font-weight:800;font-size:38px;line-height:1;color:var(--accent-deeper);
+}
+.board-tot.sub .n{color:var(--danger);font-size:30px;}
+.board-tot .l{display:block;font-size:12px;margin-top:6px;color:var(--ink);font-weight:700;}
+.board-detail{font-size:12px;color:var(--ink-soft);margin-bottom:6px;line-height:1.6;}
+.board-detail.cancel{margin-bottom:0;}
 .status-msg{font-size:12.5px;color:var(--ink-soft);min-height:16px;margin-top:6px;}
+
+/* 発注参考用：翌週サマリー */
+.weekfc{
+  background:var(--accent-soft);
+  border:1px solid var(--accent-line);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:16px;
+}
+.weekfc-head{
+  font-size:13px;font-weight:800;color:var(--accent-deeper);margin-bottom:12px;letter-spacing:0.02em;
+}
+.weekfc-head-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;
+}
+.weekfc-head-row .weekfc-head{margin-bottom:0;}
+.weekfc-nav{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.weekfc-nav .navbtn{width:28px;height:28px;font-size:14px;}
+.weekfc-totals{
+  display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;
+}
+.weekfc-tot{
+  flex:1;min-width:88px;background:#fff;border:1px solid var(--accent-line);border-radius:10px;
+  padding:10px 8px;text-align:center;
+}
+.weekfc-tot .n{
+  display:block;font-family:'Shippori Mincho',serif;font-weight:800;font-size:24px;color:var(--accent-deeper);line-height:1;
+}
+.weekfc-tot .l{display:block;font-size:11px;margin-top:4px;color:var(--ink-soft);font-weight:700;}
+.weekfc-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
+.weekfc-table th, .weekfc-table td{
+  text-align:center;padding:7px 4px;font-size:12.5px;border-bottom:1px solid var(--accent-line);
+}
+.weekfc-table th{
+  background:transparent;color:var(--ink-soft);font-weight:700;font-size:11.5px;line-height:1.5;padding-top:9px;
+}
+.weekfc-table th .small{font-size:10px;font-weight:600;color:var(--ink-soft);opacity:0.8;}
+.weekfc-table td.rowlbl{text-align:left;font-weight:700;color:var(--ink);padding-left:10px;white-space:nowrap;}
+.weekfc-table td.closed{color:var(--ink-soft);font-size:11px;}
+.weekfc-table tr:last-child td{border-bottom:none;}
+@media (max-width:480px){
+  .weekfc{padding:13px 12px;}
+  .weekfc-tot .n{font-size:20px;}
+  .weekfc-table th, .weekfc-table td{font-size:11px;padding:6px 2px;}
+}
 
 /* 管理者メニューの区分けラベル（厨房担当者向け／システム管理者向け） */
 .section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 16px;}
@@ -425,8 +466,8 @@ textarea.csvbox{
   .btn-submit{padding:15px 18px;font-size:16px;}
   .wdbtn{width:36px;padding:10px 0;font-size:12px;}
   .calcell{min-height:38px;}
-  .board-main-num{font-size:46px;}
-  .board-sub-num{font-size:22px;}
+  .board-tot .n{font-size:30px;}
+  .board-tot.sub .n{font-size:24px;}
   .notice{font-size:13px;padding:11px 12px;}
 }
 
@@ -1309,6 +1350,7 @@ let state = {
   adminSearch:'', adminPinSearch:'', adminPinMsg:null,
   adminSearchMode:'date',
   boardDate: todayISO(),
+  forecastWeekOffset: 0,
   adminOpen:{closed:false, paused:false, conn:false, pw:false},
   closedBulkText:'', closedBulkPending:null, closedBulkMsg:null,
   adminDateSearch: todayISO(),
@@ -3243,6 +3285,52 @@ async function renderAdmin(vp){
     });
 
     const tISO = todayISO();
+
+    // ---- 翌週（月〜金）の発注参考用サマリー ----
+    function computeWeekdayStats(dateStr){
+      const wd = parseISO(dateStr).getDay();
+      if(closedSet.has(dateStr) || wd===0 || wd===6){
+        return {closed:true};
+      }
+      if(master.length===0) return {closed:false, noMaster:true};
+      const cancelList = occurrencesForDate(dateStr);
+      const cancelledIds = new Set(cancelList.map(x=>String(x.employeeId)));
+      let setCount=0, okazuCount=0, extraCount=0;
+      master.forEach(e=>{
+        if(isBeforeHireDate(e, dateStr)) return;
+        if(e.mealType === 'none'){
+          const m = extraEatByEmpAdmin.get(String(e.id));
+          const extraType = m && m.get(dateStr);
+          if(extraType) extraCount++;
+          return;
+        }
+        if(isPausedOn(e, dateStr)) return;
+        if(cancelledIds.has(String(e.id))) return;
+        if(e.mealType==='set') setCount++; else if(e.mealType==='okazu') okazuCount++;
+      });
+      const guest = guestLunches.find(g=>g.date===dateStr) || null;
+      if(guest) extraCount += Number(guest.set||0) + Number(guest.okazu||0);
+      return {closed:false, noMaster:false, setCount, okazuCount, extraCount};
+    }
+    const todayWd = parseISO(tISO).getDay();
+    const daysSinceMonday = (todayWd + 6) % 7;
+    const thisMondayDt = parseISO(tISO); thisMondayDt.setDate(thisMondayDt.getDate() - daysSinceMonday);
+    const weekOffset = state.forecastWeekOffset || 0;   // 0=来週, +1=再来週, -1=今週 ...
+    const targetMondayDt = new Date(thisMondayDt); targetMondayDt.setDate(targetMondayDt.getDate() + 7*(1+weekOffset));
+    const weekDates = [0,1,2,3,4].map(i=>{
+      const d = new Date(targetMondayDt); d.setDate(d.getDate()+i);
+      return iso(d.getFullYear(), d.getMonth(), d.getDate());
+    });
+    const weekLabel = weekOffset===0 ? '来週' : weekOffset===-1 ? '今週' : (weekOffset>0 ? `${weekOffset+1}週間後` : `${-weekOffset}週間前`);
+    const weekStats = weekDates.map(d=>({date:d, ...computeWeekdayStats(d)}));
+    const weekTotals = weekStats.reduce((acc,s)=>{
+      if(!s.closed && !s.noMaster){
+        acc.set += s.setCount; acc.okazu += s.okazuCount; acc.extra += s.extraCount;
+      }
+      return acc;
+    }, {set:0, okazu:0, extra:0});
+
+
     const bISO = state.boardDate || tISO;          // 上部の表示対象日（前後に移動できる）
     const bWd = parseISO(bISO).getDay();
     const todayIsClosed = closedSet.has(bISO) || bWd===0 || bWd===6;  // 土日はもともと休業扱い
@@ -3349,31 +3437,60 @@ async function renderAdmin(vp){
                         : `<button type="button" class="backtoday" id="board-today">${t.boardBackToday}</button>`}
         </div>
         ${todayIsClosed ? `
-        <div class="board-main">
-          <div class="board-main-lbl" style="font-size:20px;font-family:'Shippori Mincho',serif;">${t.boardClosedToday}</div>
-        </div>
+        <div class="board-closed-msg">${t.boardClosedToday}</div>
         ` : masterAvailable ? `
-        <div class="board-main">
-          <div class="board-main-num">${eatingTotal}</div>
-          <div class="board-main-lbl">${t.eatingToday}</div>
-          <div class="board-main-sub">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}</div>
-          ${extraCombinedLine? `<div class="board-main-sub">${extraCombinedLine}</div>`:''}
+        <div class="board-totrow">
+          <div class="board-tot main">
+            <span class="n">${eatingTotal}</span>
+            <span class="l">${t.eatingToday}</span>
+          </div>
+          <div class="board-tot sub">
+            <span class="n">${cancelTotal}</span>
+            <span class="l">${t.cancelToday}</span>
+          </div>
         </div>
-        <div class="board-sub">
-          <div class="board-sub-num">${cancelTotal}</div>
-          <div class="board-sub-lbl">${t.cancelToday}</div>
-          <div class="board-sub-sub">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
-          ${cancelNamesToday.length? `<div class="board-sub-sub">${cancelNamesToday.map(escapeHtml).join('、')}</div>`:''}
-          ${pausedTotal? `<div class="board-sub-sub">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
-          ${notHiredYetTotal? `<div class="board-sub-sub">${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）</div>`:''}
-        </div>
+        <div class="board-detail">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}</div>
+        ${extraCombinedLine? `<div class="board-detail">${extraCombinedLine}</div>`:''}
+        <div class="board-detail cancel">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}</div>
+        ${cancelNamesToday.length? `<div class="board-detail cancel">${cancelNamesToday.map(escapeHtml).join('、')}</div>`:''}
+        ${pausedTotal? `<div class="board-detail cancel">${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）</div>`:''}
+        ${notHiredYetTotal? `<div class="board-detail cancel">${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）</div>`:''}
         ` : `
-        <div class="board-main">
-          <div class="board-main-num">${cancelTotal}</div>
-          <div class="board-main-lbl">${t.cancelToday}</div>
+        <div class="board-totrow">
+          <div class="board-tot main">
+            <span class="n">${cancelTotal}</span>
+            <span class="l">${t.cancelToday}</span>
+          </div>
         </div>
-        <p class="board-sub-sub" style="text-align:center;">${t.masterNeededForBoard}</p>
+        <p class="board-detail" style="text-align:center;">${t.masterNeededForBoard}</p>
         `}
+      </div>
+
+      <div class="weekfc">
+        <div class="weekfc-head-row">
+          <div class="weekfc-head">📦 発注参考：${weekLabel}（${weekDates[0].slice(5).replace('-','/')}〜${weekDates[4].slice(5).replace('-','/')}）の見込み</div>
+          <div class="weekfc-nav">
+            <button type="button" class="navbtn" data-week-shift="-1">‹</button>
+            <button type="button" class="navbtn" data-week-shift="1">›</button>
+            ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
+          </div>
+        </div>
+        <div class="weekfc-totals">
+          <div class="weekfc-tot"><span class="n">${weekTotals.set}</span><span class="l">セット計</span></div>
+          <div class="weekfc-tot"><span class="n">${weekTotals.okazu}</span><span class="l">おかず計</span></div>
+          <div class="weekfc-tot"><span class="n">${weekTotals.extra}</span><span class="l">臨時ランチ計</span></div>
+        </div>
+        <table class="weekfc-table">
+          <thead><tr>
+            <th></th>
+            ${weekStats.map(s=>`<th>${dowLabel(s.date,'ja')}<br><span class="small">${s.date.slice(5).replace('-','/')}</span></th>`).join('')}
+          </tr></thead>
+          <tbody>
+            <tr><td class="rowlbl">セット</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.setCount}</td>`).join('')}</tr>
+            <tr><td class="rowlbl">おかず</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.okazuCount}</td>`).join('')}</tr>
+            <tr><td class="rowlbl">臨時</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.extraCount}</td>`).join('')}</tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="section-divider"><span class="section-divider-label">🍚 ${t.kitchenSectionLabel}</span></div>
@@ -3652,6 +3769,15 @@ async function renderAdmin(vp){
     });
     const backToday = vp.querySelector('#board-today');
     if(backToday) backToday.onclick = ()=>{ state.boardDate = todayISO(); drawAdmin(); };
+
+    vp.querySelectorAll('[data-week-shift]').forEach(b=>{
+      b.onclick = ()=>{
+        state.forecastWeekOffset = (state.forecastWeekOffset||0) + Number(b.dataset.weekShift);
+        drawAdmin();
+      };
+    });
+    const weekReset = vp.querySelector('#week-reset');
+    if(weekReset) weekReset.onclick = ()=>{ state.forecastWeekOffset = 0; drawAdmin(); };
 
     vp.querySelectorAll('[data-search-mode]').forEach(b=>{
       b.onclick = ()=>{ state.adminSearchMode = b.dataset.searchMode; drawAdmin(); };
@@ -4299,4 +4425,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
