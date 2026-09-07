@@ -692,6 +692,31 @@ textarea.csvbox{
 }
 .purtotal .l{font-size:13px;font-weight:700;color:var(--accent-deep);}
 .purtotal .v{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:800;color:var(--accent-deeper);}
+/* 従業員マスタの書き方ガイド（折りたたみ） */
+.helpbox{
+  border:1px dashed var(--accent-line);background:#FDFBF4;
+  border-radius:10px;padding:10px 13px;margin-bottom:12px;
+}
+.helpbox > summary{
+  cursor:pointer;font-size:12.5px;font-weight:800;color:var(--accent-deep);
+  list-style:none;display:flex;align-items:center;gap:6px;
+}
+.helpbox > summary::-webkit-details-marker{display:none;}
+.helpbox > summary::before{content:"▸";font-size:11px;}
+.helpbox[open] > summary::before{content:"▾";}
+.helpbox h4{
+  margin:14px 0 2px;font-size:12.5px;font-weight:800;color:var(--ink);
+}
+.helpbox h4:first-of-type{margin-top:12px;}
+.helpbox p{font-size:12px;color:var(--ink-soft);line-height:1.8;margin:3px 0;}
+.helpbox ul{margin:3px 0;padding-left:17px;font-size:12px;color:var(--ink-soft);line-height:1.8;}
+.helpbox ol{margin:3px 0;padding-left:19px;font-size:12px;color:var(--ink-soft);line-height:1.8;}
+.helpbox code{
+  background:#F2EDE0;border-radius:4px;padding:1px 5px;
+  font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;color:var(--ink);
+  word-break:break-all;
+}
+.helpbox .warn{color:var(--danger);font-weight:700;}
 .pausechip{
   display:inline-block;background:#F0E7D6;color:#7A5A2A;border-radius:999px;
   padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px;
@@ -843,6 +868,11 @@ const T = {
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず／利用なし）を登録してください。",
 
     employeeMasterTitle:"従業員マスタ",
+    masterBulkTitle:"名簿の書き換え（貼り付け）",
+    masterBulkOnlyNote:"この欄の内容が、そのまま従業員マスタになります。行を追加すれば新規登録、行を消せば削除、書き換えれば変更です。「内容を確認する」を押すと、追加・変更・削除の一覧を確認してから保存できます。",
+    masterReloadText:"現在の登録内容に戻す",
+    diffRename:"社員番号の変更（{n}件）",
+    diffRenameNote:"キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
     masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
     masterSearchPh:"社員番号または名前で検索",
     mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）", typeNone:"利用なし（¥0）",
@@ -1035,278 +1065,6 @@ const CALENDAR_PRESET_2026 = [
   "2026-12-28","2026-12-29","2026-12-30","2026-12-31","2027-01-01",
 ];
 
-// 2026-08-19に社員共通情報登録リスト.csvから一括インポートした全社員リスト（268名）。
-// 「利用なし」の一括追加機能でのみ使用。既に従業員マスタに登録済みの社員番号はスキップされる。
-const FULL_ROSTER_IMPORT_20260819 = [
-{id:"1",name:"増田 清"},
-{id:"2",name:"増田 好子"},
-{id:"28",name:"宮澤 基夫"},
-{id:"42",name:"山崎 淳"},
-{id:"46",name:"平澤 幸司"},
-{id:"47",name:"渡邉 匡章"},
-{id:"52",name:"下嶋 隆幸"},
-{id:"57",name:"竹村 真治"},
-{id:"58",name:"酒井 聡"},
-{id:"60",name:"稲垣 裕一"},
-{id:"61",name:"山崎 勉"},
-{id:"62",name:"沖村 千代子"},
-{id:"68",name:"北島 敏紀"},
-{id:"69",name:"毛利 久美子"},
-{id:"70",name:"吉澤 毅志"},
-{id:"71",name:"滝澤 和喜"},
-{id:"72",name:"林 寛道"},
-{id:"75",name:"代田 浩房"},
-{id:"76",name:"小松原 美幸"},
-{id:"77",name:"中村 光延"},
-{id:"78",name:"赤羽 学"},
-{id:"80",name:"増田 英樹"},
-{id:"83",name:"古河原 真里子"},
-{id:"90",name:"松崎 昌純"},
-{id:"98",name:"大槻 真由子"},
-{id:"99",name:"中谷 絵美"},
-{id:"111",name:"増田 博"},
-{id:"112",name:"増田 真弓"},
-{id:"115",name:"井上 大助"},
-{id:"126",name:"内川 正幸"},
-{id:"137",name:"倉田 由理子"},
-{id:"144",name:"黒塚 穂高"},
-{id:"146",name:"小田切 真司"},
-{id:"148",name:"細田 裕"},
-{id:"154",name:"梶野 郁彦"},
-{id:"155",name:"笠原 正"},
-{id:"156",name:"友野 正明"},
-{id:"157",name:"水田 憲二"},
-{id:"159",name:"小松 一弘"},
-{id:"160",name:"三澤 誠"},
-{id:"161",name:"丸山 悦子"},
-{id:"162",name:"佐藤 潔威"},
-{id:"163",name:"湯澤 すみ子"},
-{id:"165",name:"中村 きよ子"},
-{id:"167",name:"伊藤 隆"},
-{id:"170",name:"岸 由美子"},
-{id:"171",name:"北澤 俊明"},
-{id:"173",name:"松井 義裕"},
-{id:"179",name:"小平 雅子"},
-{id:"180",name:"松田 一良"},
-{id:"184",name:"伊藤 健司"},
-{id:"185",name:"竹村 博"},
-{id:"186",name:"増田 雅敏"},
-{id:"190",name:"諏訪部 知佳"},
-{id:"191",name:"植田 朋子"},
-{id:"192",name:"清水 美佳"},
-{id:"194",name:"中原 由紀"},
-{id:"201",name:"関 亮太"},
-{id:"202",name:"伊東 千裕"},
-{id:"203",name:"宮下 千年"},
-{id:"206",name:"鹿野 成明"},
-{id:"208",name:"木下 真紀"},
-{id:"210",name:"林 賢一郎"},
-{id:"213",name:"神山 万由美"},
-{id:"214",name:"渡邉 啓子"},
-{id:"216",name:"小松 勇介"},
-{id:"220",name:"川手 哲弘"},
-{id:"223",name:"伊東 敬貴"},
-{id:"224",name:"保科 昭久"},
-{id:"226",name:"下島 健"},
-{id:"231",name:"鈴木 洋一"},
-{id:"234",name:"有賀 恵理"},
-{id:"239",name:"足立 美穂"},
-{id:"242",name:"伊藤 徹哉"},
-{id:"246",name:"田畑 ゆかり"},
-{id:"247",name:"佐藤 哲也"},
-{id:"250",name:"久保田 健一郎"},
-{id:"254",name:"大矢 あゆみ"},
-{id:"257",name:"林 篤人"},
-{id:"258",name:"田中 佐千恵"},
-{id:"259",name:"稲垣 ほづみ"},
-{id:"260",name:"宮越 清忠"},
-{id:"263",name:"林 朋生"},
-{id:"266",name:"有賀 圭佑"},
-{id:"267",name:"中塚 若美"},
-{id:"268",name:"三浦 憲和"},
-{id:"275",name:"吉澤 一真"},
-{id:"276",name:"伊藤 茜"},
-{id:"280",name:"市瀬 真吾"},
-{id:"281",name:"久保田 明"},
-{id:"282",name:"川島 孝太"},
-{id:"293",name:"福沢 亮馬"},
-{id:"307",name:"鹿野 直美"},
-{id:"309",name:"山岸 健一"},
-{id:"314",name:"田畑 翔汰"},
-{id:"323",name:"上久保 順美"},
-{id:"325",name:"澤田 栄司"},
-{id:"330",name:"原 幸弘"},
-{id:"331",name:"堀田 直弥"},
-{id:"333",name:"下平 育美"},
-{id:"334",name:"平澤 さやか"},
-{id:"343",name:"加藤 光"},
-{id:"346",name:"竹村 昌典"},
-{id:"348",name:"西尾 真由美"},
-{id:"349",name:"西尾 史也"},
-{id:"351",name:"野澤 政樹"},
-{id:"361",name:"奥原 志津雄"},
-{id:"362",name:"田原 将貴"},
-{id:"363",name:"藤川 一樹"},
-{id:"364",name:"伊東 理恵子"},
-{id:"366",name:"向山 博子"},
-{id:"376",name:"伊井島 秀人"},
-{id:"378",name:"ﾅｷｰﾈｽ ﾗﾈﾙﾋｱｶﾞﾝ"},
-{id:"379",name:"中村 慎二"},
-{id:"383",name:"澤井 喜哉"},
-{id:"391",name:"下田 裕"},
-{id:"396",name:"細田 由貴"},
-{id:"402",name:"村上 寛樹"},
-{id:"403",name:"秋山 龍男"},
-{id:"405",name:"小林 文隆"},
-{id:"408",name:"中山 亮太"},
-{id:"409",name:"丹治 由次"},
-{id:"416",name:"千代 勧"},
-{id:"418",name:"丸茂 理絵"},
-{id:"419",name:"後藤 夢乃"},
-{id:"420",name:"冨永 龍飛"},
-{id:"421",name:"廣田 奈子"},
-{id:"422",name:"北原 いづみ"},
-{id:"425",name:"小池 聡"},
-{id:"426",name:"松崎 里美"},
-{id:"427",name:"湊 純也"},
-{id:"429",name:"溝口 瑠美香"},
-{id:"437",name:"木下 美代子"},
-{id:"439",name:"小出 雄平"},
-{id:"441",name:"飯島 秀静"},
-{id:"448",name:"手塚 正彦"},
-{id:"450",name:"藤川 汐美"},
-{id:"452",name:"春日 大和"},
-{id:"453",name:"保科 新一郎"},
-{id:"455",name:"清水 綾子"},
-{id:"456",name:"中山 佳祐"},
-{id:"459",name:"木下 竜介"},
-{id:"460",name:"酒井 美香"},
-{id:"465",name:"加藤 匠"},
-{id:"466",name:"中原 俊和"},
-{id:"467",name:"石井 明香"},
-{id:"468",name:"小野 満"},
-{id:"472",name:"成田 眞吾"},
-{id:"474",name:"伊藤 ﾚｲﾔ　ｴﾝﾘｹｽ"},
-{id:"479",name:"青木 崇"},
-{id:"488",name:"宮下 明久"},
-{id:"491",name:"林 史子"},
-{id:"497",name:"中田 周作"},
-{id:"500",name:"利根川 久"},
-{id:"502",name:"西澤 将史"},
-{id:"506",name:"目黒 道裕"},
-{id:"507",name:"宮下 柚輝"},
-{id:"508",name:"田中 翔太"},
-{id:"510",name:"濱 正喜"},
-{id:"513",name:"清水 悦雄"},
-{id:"514",name:"平岡 八千代"},
-{id:"515",name:"足立 浩二"},
-{id:"516",name:"杉山 こころ"},
-{id:"517",name:"平沢 ゆかり"},
-{id:"518",name:"矢野 聖子"},
-{id:"520",name:"海野 蓮"},
-{id:"523",name:"森 和広"},
-{id:"525",name:"馬場 今朝勇"},
-{id:"526",name:"林 利恵"},
-{id:"532",name:"渡邊 康平"},
-{id:"533",name:"武内 明美"},
-{id:"534",name:"酒井 美紗"},
-{id:"536",name:"唐木 好昭"},
-{id:"538",name:"遠山 さくら"},
-{id:"539",name:"宮澤 佑生"},
-{id:"541",name:"宮澤 信之介"},
-{id:"542",name:"ｺﾞﾒｽ ﾊﾞｽｹｽ ｱｳｸﾞｽﾄ ﾅｵｷ"},
-{id:"543",name:"林 諒大"},
-{id:"544",name:"南崎 栄治"},
-{id:"546",name:"浦上 円香"},
-{id:"548",name:"小田切 広樹"},
-{id:"549",name:"秋山 麻美"},
-{id:"550",name:"山田 潤也"},
-{id:"552",name:"伊藤 健太郎"},
-{id:"554",name:"寺久保 羚斗"},
-{id:"557",name:"佐藤 めぐみ"},
-{id:"560",name:"田中 聡"},
-{id:"562",name:"平沢 菜摘"},
-{id:"564",name:"松原 敏夫"},
-{id:"565",name:"北原 浩二"},
-{id:"566",name:"尾名高 沙織"},
-{id:"567",name:"岩波 鷹也"},
-{id:"568",name:"唐澤 美結"},
-{id:"569",name:"菊池 空"},
-{id:"570",name:"ドーン 真菜"},
-{id:"571",name:"田中 千穂"},
-{id:"572",name:"宮澤 早苗"},
-{id:"573",name:"河村 拓也"},
-{id:"574",name:"久保田 陽菜"},
-{id:"575",name:"小平 藍花"},
-{id:"577",name:"舘前 流星"},
-{id:"578",name:"保科 和希"},
-{id:"579",name:"三浦 研太"},
-{id:"580",name:"小島 千歩"},
-{id:"581",name:"平松 美穂"},
-{id:"582",name:"福沢 慶太"},
-{id:"583",name:"黒澤 亜理沙"},
-{id:"585",name:"辻 治之"},
-{id:"586",name:"増澤 亜由美"},
-{id:"587",name:"吉田 陽輔"},
-{id:"588",name:"細田 唯"},
-{id:"590",name:"大草 三樹"},
-{id:"591",name:"小田切 梁"},
-{id:"592",name:"酒井 優愛"},
-{id:"593",name:"村上 杏花"},
-{id:"594",name:"池上 毅"},
-{id:"595",name:"中原 ﾏﾘｶﾞｰ　ｻﾝﾁｪｽ"},
-{id:"597",name:"薄田 琳流"},
-{id:"598",name:"勝 沙月"},
-{id:"599",name:"市原 慎吾"},
-{id:"600",name:"小原 隆二"},
-{id:"601",name:"ｶﾊﾞﾝｸﾞ ｱｲｺ　ｴｽﾞﾗ"},
-{id:"602",name:"岩永 喜孝"},
-{id:"604",name:"酒井 薫"},
-{id:"605",name:"大木島 衣俐"},
-{id:"606",name:"北川 涼晴"},
-{id:"607",name:"佐藤 晶子"},
-{id:"608",name:"堀内 伊知郎"},
-{id:"609",name:"堀米 昭彦"},
-{id:"610",name:"菅原 卓"},
-{id:"611",name:"耳塚 博人"},
-{id:"5013",name:"ﾍﾞﾄﾞﾔ ｼﾞｮｾﾙ ｶﾌﾟﾝｶﾞﾝ"},
-{id:"5014",name:"ﾃｨﾛ ﾏｰｸ ｸﾘｽﾃﾙ ｲﾉｯﾄ"},
-{id:"5045",name:"ﾙｾﾛ ｼﾞｬﾝ ﾎﾟｰﾙｾｶﾝﾄﾞｱﾙﾋﾞﾃ"},
-{id:"5055",name:"ﾏﾅﾀｯﾄﾞ ﾏﾙﾘﾝ ﾙｽﾞ ｱﾘﾝｸﾞｶﾞﾗﾝ"},
-{id:"5056",name:"ｶﾞﾗｳﾗ ｼﾞｬﾅﾘｰ ﾙｾｽ"},
-{id:"5057",name:"ﾀﾝﾀｲ ﾗｲﾓﾝﾄﾞ ｺﾙﾃｽ"},
-{id:"5058",name:"ﾍﾟﾆｬｽ ﾚｲﾗﾝ ﾌﾟｴﾌﾞﾗ"},
-{id:"5063",name:"ﾊﾞﾝｶﾚ ﾌｪﾙｸﾘｽ ﾊﾞﾘﾝｸﾞ"},
-{id:"5064",name:"ﾛﾏﾉ ｱﾙｾﾞｲ ｵﾗｼｵﾝ"},
-{id:"5065",name:"ｽﾙﾀﾝ ﾒﾙ ｱﾝﾄﾆｰ ﾃﾞﾎﾞﾀ"},
-{id:"5069",name:"ｾﾐﾘｱ ｱﾘｴﾙ ﾇﾆｪｽﾞ"},
-{id:"5070",name:"ﾅﾊﾞﾚｽﾞ ﾕﾚﾘｰ ｻﾙﾊﾞﾄﾞﾙ"},
-{id:"5071",name:"ｴﾚﾆｮ ｼﾞｬｰｿﾝ ｿｹﾆｮ"},
-{id:"5072",name:"ﾎﾞﾙﾎﾞﾝ ｶﾙﾛ ｶﾌﾞｺｽ"},
-{id:"5073",name:"ﾌﾛﾚｽ ｼﾞｭﾘｰ ﾃﾞｶﾞﾓ"},
-{id:"5079",name:"ｱﾚｶﾞﾄﾞ ﾘﾃﾞｨｱ　ﾀﾝｶﾞﾛ"},
-{id:"5080",name:"ﾊﾞﾛﾝｸﾞ ﾁｪﾘｰ　ｼﾙﾊﾞ"},
-{id:"5081",name:"ﾍﾟﾘｱｿﾞ ﾛﾘﾅ　ｶｽﾙ"},
-{id:"5082",name:"ｾﾉ ﾏﾘｱ　ｼﾞｮｱﾝ　ｶﾊﾞﾌｸﾞ"},
-{id:"5084",name:"ｸﾘﾏｺ ﾁｬｰﾘｰﾄ　ｶﾞﾚｺﾞ"},
-{id:"5085",name:"ｿﾛﾝﾀﾞ ｼﾞｪﾆｳﾞｪﾌﾞ　ｶｽﾃｨﾛﾝ"},
-{id:"5086",name:"ﾍﾉﾋﾞｻ ﾅﾈｯﾄ　ｶﾆｬﾚｽ"},
-{id:"5087",name:"ﾋﾞﾗﾜﾝ ﾏﾘﾘﾝ　ﾍﾞﾅﾛ"},
-{id:"5088",name:"ｴﾝﾄﾏ ﾛﾄﾞﾘｺﾞ　ｼﾞｭﾆｱ　ｱｲﾝ"},
-{id:"5089",name:"ﾎﾞﾚｽ ﾗﾐﾙ　ｱﾊﾞｻ"},
-{id:"5090",name:"ｱﾐｯﾄ ﾎﾞﾈﾌｨｱｰ　ｱﾓﾘﾝ"},
-{id:"5091",name:"ﾌﾝﾃｨﾘｱ ｴﾙｼﾞｪｲｸ　ｳｸﾞｻﾝ"},
-{id:"5092",name:"ﾇｶﾞﾛｯﾄ ｽﾃﾜｰﾄﾞ　ｶﾞﾘｱﾏｿ"},
-{id:"5093",name:"ﾎﾞﾗﾝﾊﾞｵ ﾙｯﾁｪ ｲﾅﾋｯﾄﾞ"},
-{id:"5094",name:"ﾙｱﾙﾊﾃｨ ﾁｪ ｱｰﾙ ﾐﾗﾝﾀﾞ"},
-{id:"5095",name:"ﾚｶﾞﾙﾄﾞ ﾙﾅ ｲﾊﾞﾆｪｽ"},
-{id:"5096",name:"ﾘﾍﾞﾗ ﾗﾓﾝ ｼﾞｭﾆｱ ｱﾊﾞﾖﾝ"},
-{id:"5097",name:"ﾀﾌﾟﾀﾞｻﾝ ﾏｲｹﾙ ｶﾍﾞﾘｽ"},
-{id:"5098",name:"ｴｽｷｰﾘｬ ｼﾞｮﾝｼﾞｰ ﾎﾞﾝﾄｸﾞ"},
-{id:"5099",name:"ﾋﾟｱ ｳｪﾝﾃﾞﾙ ｶﾄﾞｩｺﾞｸﾞ"},
-{id:"5100",name:"ﾋﾞﾀﾞﾙ ｼﾞｮｱﾝ ﾃﾞﾒｼｰﾘｮ"},
-{id:"5101",name:"ｱﾙﾌﾞﾙ ｸﾘｽﾃｨﾝ ｼﾞｮｲ ﾑﾆｪｽ"}
-];
 
 /* ===================== state ===================== */
 const today = new Date();
@@ -1364,11 +1122,7 @@ let state = {
   urlSavedMsg:'',
   csvMonth: currentMonthValue(),
   employeeMasterText:'', employeeMasterMsg:null,
-  masterNew:{id:'', name:'', mealType:'', pauseStart:'', pauseEnd:'', hireDate:''}, masterNewMsg:null,
-  masterSearch:'', masterEditId:null, masterEditDraft:null, masterEditMsg:null,
-  masterDeleteId:null, masterBulkOpen:false,
-  masterPending:null,      // 保存前の確認内容
-  rosterImportPending:null, rosterImportMsg:null,   // 社員リストからの一括追加（利用なし）
+  masterPending:null,      // 貼り付け内容を保存する前の確認用
   specialDaysMsg:null,
   closedDaysMsg:null,
   csvWarning:'',
@@ -1691,7 +1445,7 @@ function isDeviceTrusted(id, name){
     if(!raw) return false;
     const o = JSON.parse(raw);
     if(!o.until || new Date(o.until).getTime() < Date.now()) return false;
-    return normName(o.name||'') === normName(name);
+    return sameName(o.name||'', name);
   }catch(e){ return false; }
 }
 function trustDevice(id, name){
@@ -1706,9 +1460,40 @@ function forgetDevice(id){
 }
 
 /* ===================== 名前・日付のゆらぎ吸収 ===================== */
-// 全角/半角スペース・大文字小文字の違いを無視して氏名を比較する
+// 氏名を照合するための「ならし」。次の違いは無視して同じ人とみなす。
+//   ・スペースの有無と、姓・名の順番      Mark Tilo ／ Tilo Mark ／ MarkTilo
+//   ・英字の大文字・小文字                MARK TILO ／ mark tilo
+//   ・全角の英数字と半角の英数字          Ｍａｒｋ → Mark
+//   ・半角カタカナと全角カタカナ          ﾃｨﾛ → ティロ
+//   ・ひらがなとカタカナ                  てぃろ → ティロ
+//   ・アクセント記号                      José → Jose
+//   ・ハイフン・アポストロフィ・中黒など  Anne-Marie ／ Anne Marie
+// 漢字・カタカナ・ローマ字は別の文字のまま（読み方の辞書を持っていないため）。
+// 文字のならしをして、スペースで区切った単語の配列にする
+function nameParts(s){
+  let t = String(s??'');
+  // 全角英数字・半角カタカナなどを標準の形へそろえる（Ｍａｒｋ → Mark、ﾃｨﾛ → ティロ）
+  try{ t = t.normalize('NFKC'); }catch(e){}
+  // アクセント記号を外す（é → e）
+  try{ t = t.normalize('NFD').replace(/[\u0300-\u036F]/g,'').normalize('NFC'); }catch(e){}
+  t = t.toLowerCase();
+  // ひらがな → カタカナ
+  t = t.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+  // 区切りに使われる記号はスペース扱い。長音符「ー」は文字なので残す
+  t = t.replace(/[\-\u2010\u2011\u2012\u2013\u2014\u2015\u2212.,'\u2019\u0060"()\u30FB]+/g, ' ');
+  return t.split(/[\s\u3000]+/).filter(Boolean);
+}
+// 照合用のキー（スペースを詰めた形）。名簿の差分判定でも使う
 function normName(s){
-  return String(s??'').replace(/[\s\u3000]/g,'').toLowerCase();
+  return nameParts(s).join('');
+}
+// 姓・名を並べ替えたキー。「Mark Tilo」と「Tilo Mark」を同じ扱いにするため
+function nameSortedKey(s){
+  return nameParts(s).sort().join('');
+}
+// 同じ人の氏名とみなせるか（順番どおりでも、姓名が逆でも通す）
+function sameName(a, b){
+  return normName(a) === normName(b) || nameSortedKey(a) === nameSortedKey(b);
 }
 // 2026/8/1・2026年8月1日 なども 2026-08-01 に揃える。読めなければ null
 function normDate(s){
@@ -1753,7 +1538,7 @@ async function checkAgainstMaster(id, name){
   // まずその社員1名分だけを読む（名簿全件を読まないので速い）
   const one = await getMasterEmp(id);
   if(one){
-    if(normName(one.name) !== normName(name)) return {ok:false, reason:'mismatch'};
+    if(!sameName(one.name, name)) return {ok:false, reason:'mismatch'};
     return {ok:true, emp:one};
   }
   // 見つからないときだけ、名簿そのものが未登録かどうかを確かめる
@@ -2455,9 +2240,9 @@ async function runMineSearch(){
 
   const [master, rec, pinRec] = await Promise.all([getMasterEmp(id), getEmp(id), getPinRecord(id)]);
   if(master){
-    if(normName(master.name) !== normName(name)){ state.mineError = t.mineNameMismatch; return; }
+    if(!sameName(master.name, name)){ state.mineError = t.mineNameMismatch; return; }
   } else if(rec){
-    if(normName(rec.name) !== normName(name)){ state.mineError = t.mineNameMismatch; return; }
+    if(!sameName(rec.name, name)){ state.mineError = t.mineNameMismatch; return; }
   } else {
     state.mineError = t.mineNotFound; return;
   }
@@ -2887,8 +2672,9 @@ function masterToText(list){
     }).join('\n');
 }
 function masterEntryDesc(e){
+  const h = e.hireDate ? `／入社日 ${e.hireDate}` : '';
   const p = e.pauseStart ? `／停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}` : '';
-  return `${e.id} ${e.name}（${mealTypeJa(e.mealType)}${p}）`;
+  return `${e.id} ${e.name}（${mealTypeJa(e.mealType)}${h}${p}）`;
 }
 function diffMaster(oldList, newList){
   const oldMap = new Map(oldList.map(e=>[String(e.id), e]));
@@ -2900,35 +2686,33 @@ function diffMaster(oldList, newList){
     const parts = [];
     if(String(o.name||'') !== String(n.name||'')) parts.push(`氏名 ${o.name} → ${n.name}`);
     if((o.mealType||'') !== (n.mealType||'')) parts.push(`お食事タイプ ${mealTypeJa(o.mealType)} → ${mealTypeJa(n.mealType)}`);
+    const oH = o.hireDate || 'なし', nH = n.hireDate || 'なし';
+    if(oH !== nH) parts.push(`入社日 ${oH} → ${nH}`);
     const oP = o.pauseStart ? `${o.pauseStart}〜${o.pauseEnd||'未定'}` : 'なし';
     const nP = n.pauseStart ? `${n.pauseStart}〜${n.pauseEnd||'未定'}` : 'なし';
     if(oP !== nP) parts.push(`停止期間 ${oP} → ${nP}`);
     if(parts.length) changed.push({id, name:n.name, parts});
   });
   oldMap.forEach((o, id)=>{ if(!newMap.has(id)) removed.push(o); });
-  return {added, removed, changed};
-}
 
-/* 社員リスト一括追加：現在の名簿にまだいない社員番号だけを拾う（既存分には一切触れない） */
-function computeRosterImportDiff(master){
-  const existingIds = new Set(master.map(e=>String(e.id)));
-  const toAdd = FULL_ROSTER_IMPORT_20260819.filter(e=>!existingIds.has(String(e.id)));
-  return { toAdd, alreadyCount: FULL_ROSTER_IMPORT_20260819.length - toAdd.length };
-}
-function renderRosterImportPreview(pv){
-  const t = T.ja;
-  return `
-    <div class="diffbox">
-      <h3>${t.diffTitle}</h3>
-      ${pv.toAdd.length ? `<div class="diffsec"><div class="t">${t.rosterImportNew.replace('{n}', pv.toAdd.length)}</div>
-        <div class="scrolllist" style="margin-top:6px;"><p class="small" style="margin:0;line-height:1.9;">${escapeHtml(pv.toAdd.map(e=>`${e.id} ${e.name}`).join('、'))}</p></div></div>`
-        : `<p class="small">${t.rosterImportNone}</p>`}
-      <p class="small">${t.rosterImportAlready.replace('{n}', pv.alreadyCount)}</p>
-      <div class="btnrow">
-        ${pv.toAdd.length ? `<button class="btn btn-accent" id="adm-roster-run">${t.rosterImportRun}</button>` : ''}
-        <button class="btn btn-ghost" id="adm-roster-cancel">${t.masterCancelBtn}</button>
-      </div>
-    </div>`;
+  // 「社員番号だけを書き換えた」行を見つける。氏名が一致していて、削除側・追加側とも
+  // その氏名が1人だけのときに限り、番号の変更として扱う（同姓同名の取り違えを防ぐ）。
+  // ここで拾えた分は、保存時にキャンセル記録・購入記録・閲覧PINも新しい番号へ移す。
+  const renamed = [];
+  removed.forEach(o=>{
+    const key = normName(o.name);
+    if(removed.filter(x=>normName(x.name)===key).length !== 1) return;
+    const cands = added.filter(n=>normName(n.name)===key);
+    if(cands.length !== 1) return;
+    renamed.push({from:String(o.id), to:String(cands[0].id), name:cands[0].name});
+  });
+  const fromIds = new Set(renamed.map(r=>r.from));
+  const toIds = new Set(renamed.map(r=>r.to));
+  return {
+    added: added.filter(n=>!toIds.has(String(n.id))),
+    removed: removed.filter(o=>!fromIds.has(String(o.id))),
+    changed, renamed,
+  };
 }
 
 /* 貼り付けられた日付を読み取って、登録できるものに振り分ける */
@@ -2974,140 +2758,95 @@ function renderClosedBulkPreview(pv){
     </div>`;
 }
 
-/* 従業員マスタ：新規登録と、検索してからの変更・削除 */
-function masterTypePick(prefix, current, t){
-  return `<div class="typepick">
-      <button type="button" class="${current==='set'?'active':''}" data-${prefix}-type="set">${t.typeSet}</button>
-      <button type="button" class="${current==='okazu'?'active':''}" data-${prefix}-type="okazu">${t.typeOkazu}</button>
-      <button type="button" class="${current==='none'?'active':''}" data-${prefix}-type="none">${t.typeNone}</button>
-    </div>
-    <p class="footnote" style="margin-top:-4px;">${t.mealTypeChangeNote}</p>`;
+/* 貼り付け欄の書き方ガイド。入社・停止・退職・氏名など、迷いやすいところをまとめてある。 */
+function masterHelpHtml(){
+  return `
+    <p class="footnote" style="margin-top:0;">1行が1人です。列の順番は
+      <code style="background:#F2EDE0;border-radius:4px;padding:1px 5px;">社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日</code>。
+      はじめの3つは必ず入れ、うしろの3つは必要な人だけ入れます（空欄でかまいません）。</p>
+
+    <details class="helpbox">
+      <summary>書き方とよくある操作（入社・停止・退職・氏名）</summary>
+
+      <h4>基本の書き方</h4>
+      <ul>
+        <li>お食事タイプは <code>セット</code> <code>おかず</code> <code>利用なし</code> のどれか。</li>
+        <li>日付は <code>2026-09-15</code> の形。<code>2026/9/15</code>、<code>2026年9月15日</code> でも読み取ります。</li>
+        <li>うしろの列だけ入れたいときは、間の列をカンマで空けます。入社日だけなら
+          <code>612,山田 太郎,セット,,,2026-09-15</code>。</li>
+        <li>行の順番は自由です（保存すると社員番号の順に並びます）。空行は無視します。</li>
+      </ul>
+
+      <h4>新しく食べはじめる人（入社・利用開始）</h4>
+      <p>行を1行追加します。<b>入社日＝はじめて食べる日</b>です。その日より前は、金額計算にも「本日の状況」の人数にも入りません。</p>
+      <p>例）9月15日入社でセットを食べる　→　<code>612,山田 太郎,セット,,,2026-09-15</code></p>
+      <p>もとから在籍している人（中途入社でない人）は、入社日は空欄のままでよいです。</p>
+
+      <h4>しばらく食べない人（休職・長期出張）</h4>
+      <p>行は消さずに、<b>停止開始日＝最初に食べない日</b>を入れます。再開日を空欄にすると、そのままずっと停止します。</p>
+      <p>例）9月20日から休職　→　<code>612,山田 太郎,セット,2026-09-20,,2026-09-15</code></p>
+      <p>停止した日は金額計算と当日の人数から外れます。社員側でキャンセルを入れてもらう必要はありません。</p>
+
+      <h4>また食べはじめる人（復職）</h4>
+      <p><b>再開日＝また食べはじめる日</b>です（その日から計上されます）。停止開始日は消さずに残してください。過ぎた月の金額を正しく出すために使っています。</p>
+      <p>例）11月4日から復帰　→　<code>612,山田 太郎,セット,2026-09-20,2026-11-04,2026-09-15</code></p>
+      <p>停止期間は1人につき1組だけ持てます。次の停止を入れるときは前の期間を上書きすることになり、過ぎた月の見込み額の表示も変わります（すでに出力したCSVは変わりません）。</p>
+
+      <h4>退職する人</h4>
+      <p><span class="warn">行を消すのは、その月の月次CSVを出したあとにしてください。</span>先に消すと名簿から消えるため、その月に食べた分がCSVに出てこなくなります。</p>
+      <ol>
+        <li>停止開始日に「最初に食べない日」を入れる（9月30日が最終出勤なら <code>2026-10-01</code>）</li>
+        <li>その月の月次CSVを出力する</li>
+        <li>そのあとで、この欄からその行を消す</li>
+      </ol>
+
+      <h4>セットとおかずを入れ替える人</h4>
+      <p>月の途中からの変更はできません。書き換えると、その月のCSVをまだ出していなければ、その月ぜんぶがその単価で計算されます。月の初めに切り替えるのが安全です。</p>
+
+      <h4>ランチを食べない人（割引商品だけ買う人）</h4>
+      <p><code>613,佐藤 花子,利用なし</code> のように登録します。ランチ代は0円です。その日だけ臨時で食べるときは、「臨時ランチ登録」の［社員］から日付を登録してください。</p>
+
+      <h4>氏名の書き方（外国人社員の場合）</h4>
+      <p>社員がフォームに入れた氏名と、この名簿の氏名を照合しています。照合では、次の違いは<b>すべて無視</b>します。</p>
+      <ul>
+        <li>英字の大文字・小文字　<code>Mark Tilo</code> <code>MARK TILO</code> <code>mark tilo</code></li>
+        <li>スペースの有無と、姓・名の順番　<code>Tilo Mark</code> <code>MarkTilo</code></li>
+        <li>全角の英字と半角の英字　<code>Ｍａｒｋ</code>（日本語入力のままでも通ります）</li>
+        <li>半角カタカナ・全角カタカナ・ひらがな　<code>ﾃｨﾛ</code> <code>ティロ</code> <code>てぃろ</code></li>
+        <li>アクセント記号　<code>José</code> と <code>Jose</code></li>
+        <li>ハイフン・アポストロフィ・中黒・ピリオド　<code>Anne-Marie</code> <code>Anne・Marie</code> <code>Anne Marie</code></li>
+      </ul>
+      <p>いっぽうで、<b>漢字・カタカナ・ローマ字はいまも別の文字として扱います</b>（読み方の辞書を持っていないため、<code>ティロ</code> と <code>Tilo</code> は別人になります）。</p>
+      <ul>
+        <li>ローマ字で入力する人が多いなら、<b>この名簿もローマ字で登録してください。</b>大文字・小文字や順番は気にせず入力できます。</li>
+        <li>カタカナで登録するなら、社員にもカタカナで入力してもらってください（半角・全角は問いません）。</li>
+        <li>ローマ字にする場合は、パスポートやIDカードの表記に合わせるのが確実です。給与システムのカタカナ表記から書き起こすと、人によって <code>Tiro</code> / <code>Tilo</code> のようにブレます。</li>
+        <li>氏名に<b>カンマ（,）は使えません</b>。列の区切りとして読まれてしまいます。</li>
+      </ul>
+
+      <h4>社員番号を変える人</h4>
+      <p>氏名をそのままにして番号だけ書き換えると「社員番号の変更」として扱い、キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。確認画面に変更内容が出るので、そこで確かめてから保存してください。</p>
+    </details>
+  `;
 }
-function masterPauseFields(prefix, ps, pe, t){
-  return `<p class="footnote" style="margin-top:0;">${t.pauseOptional}</p>
-    <div class="row2">
-      <div class="field" style="margin-bottom:0;">
-        <label>${t.pauseFrom}</label>
-        <input type="date" id="${prefix}-ps" value="${escapeHtml(ps||'')}">
-      </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>${t.pauseTo}</label>
-        <input type="date" id="${prefix}-pe" value="${escapeHtml(pe||'')}">
-      </div>
-    </div>`;
-}
-// 中途入社の人向け：入社日より前は金額計算にも人数にも含めない
-function masterHireDateField(prefix, hireDate, t){
-  return `<div class="field">
-      <label>${t.hireDateLabel}</label>
-      <input type="date" id="${prefix}-hire" value="${escapeHtml(hireDate||'')}">
-      <p class="footnote" style="margin-top:4px;">${t.hireDateHelp}</p>
-    </div>`;
-}
+
+/* 従業員マスタ：登録・変更・削除はすべてこの貼り付け欄から行う */
 function masterCardBody(master, t){
-  const n = state.masterNew;
-  const q = (state.masterSearch||'').trim().toLowerCase();
-  const results = q
-    ? master.filter(e=> String(e.id).toLowerCase().includes(q) || String(e.name||'').toLowerCase().includes(q))
-        .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
-    : [];
-
-  const rows = results.map(e=>{
-    const id = String(e.id);
-    if(state.masterEditId === id){
-      const dr = state.masterEditDraft || {};
-      return `<div class="editbox">
-        <div class="row2">
-          <div class="field"><label>${t.empId}</label><input type="text" id="me-id" value="${escapeHtml(dr.id||'')}"></div>
-          <div class="field"><label>${t.empName}</label><input type="text" id="me-name" value="${escapeHtml(dr.name||'')}"></div>
-        </div>
-        <label>${t.mealTypeLabel}</label>
-        ${masterTypePick('me', dr.mealType, t)}
-        ${masterHireDateField('me', dr.hireDate, t)}
-        ${masterPauseFields('me', dr.pauseStart, dr.pauseEnd, t)}
-        <p class="footnote" id="me-idwarn" data-oldid="${escapeHtml(id)}" style="color:var(--danger);${
-          (dr.id||'') !== id ? '' : 'display:none;'}">${
-          t.masterIdChangeWarn.replace('{from}', id).replace('{to}', escapeHtml(dr.id||''))}</p>
-        <div class="btnrow">
-          <button class="btn btn-accent" id="me-save">${t.masterSaveBtn}</button>
-          <button class="btn btn-ghost" id="me-cancel">${t.masterCancelBtn}</button>
-        </div>
-        <div class="status-msg">${state.masterEditMsg ? `<span style="color:var(--danger)">${state.masterEditMsg}</span>` : ''}</div>
-      </div>`;
-    }
-    if(state.masterDeleteId === id){
-      return `<div class="editbox" style="border-color:var(--danger);background:var(--danger-soft);">
-        <p style="margin:0 0 6px;font-weight:700;color:#8C2E22;">${
-          t.masterDeleteConfirm.replace('{name}', escapeHtml(e.name)).replace('{id}', escapeHtml(id))}</p>
-        <p class="footnote" style="margin-top:0;color:#8C2E22;">${t.masterDeleteWarn}</p>
-        <div class="btnrow">
-          <button class="btn btn-danger" id="md-yes">${t.masterDeleteBtn}</button>
-          <button class="btn btn-ghost" id="md-no">${t.masterCancelBtn}</button>
-        </div>
-      </div>`;
-    }
-    const pause = e.pauseStart ? `<span class="pausechip">停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}</span>` : '';
-    const hireChip = e.hireDate ? `<span class="pausechip">入社日 ${e.hireDate}</span>` : '';
-    return `<div class="emprow">
-      <span class="who">${escapeHtml(e.name)} <span class="small">(${escapeHtml(id)})</span>
-        <span class="statuspill ${e.mealType==='set'?'on':'off'}">${mealTypeJa(e.mealType)}</span>${hireChip}${pause}</span>
-      <span class="btns">
-        <button class="btn btn-ghost" data-edit-emp="${escapeHtml(id)}">${t.masterEditBtn}</button>
-        <button class="btn btn-danger" data-del-emp="${escapeHtml(id)}">${t.masterDeleteBtn}</button>
-      </span>
-    </div>`;
-  }).join('');
-
   return `
     <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
 
     <div class="subsec">
-      <p class="sublabel">${t.masterNewTitle}</p>
-      <div class="row2">
-        <div class="field"><label>${t.empId}</label><input type="text" id="mn-id" value="${escapeHtml(n.id)}" placeholder="${t.empIdPh}"></div>
-        <div class="field"><label>${t.empName}</label><input type="text" id="mn-name" value="${escapeHtml(n.name)}" placeholder="${t.empNamePh}"></div>
-      </div>
-      <label>${t.mealTypeLabel}</label>
-      ${masterTypePick('mn', n.mealType, t)}
-      ${masterHireDateField('mn', n.hireDate, t)}
-      ${masterPauseFields('mn', n.pauseStart, n.pauseEnd, t)}
+      <p class="sublabel">${t.masterBulkTitle}</p>
+      <p class="footnote" style="margin-top:0;">${t.masterBulkOnlyNote}</p>
+      ${masterHelpHtml()}
+      <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:220px;">${escapeHtml(state.employeeMasterText)}</textarea>
       <div class="btnrow">
-        <button class="btn btn-primary" id="mn-add">${t.masterAddBtn}</button>
+        <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
+        <button class="btn btn-ghost" id="adm-master-reset">${t.masterReloadText}</button>
       </div>
-      <div class="status-msg">${state.masterNewMsg ? `<span style="color:${state.masterNewMsg.ok?'var(--good)':'var(--danger)'}">${state.masterNewMsg.text}</span>` : ''}</div>
-    </div>
-
-    <div class="subsec">
-      <p class="sublabel">${t.masterSearchTitle}</p>
-      <input type="text" id="mm-search" placeholder="${t.masterSearchPh}" value="${escapeHtml(state.masterSearch||'')}">
       <div class="status-msg">${state.employeeMasterMsg ? `<span style="color:${state.employeeMasterMsg.ok?'var(--good)':'var(--danger)'}">${state.employeeMasterMsg.text}</span>` : ''}</div>
-      <div style="margin-top:6px;">
-        ${q ? (rows || `<p class="small">${t.noEmployees}</p>`) : `<p class="small">${t.masterSearchHint}</p>`}
-      </div>
+      ${state.masterPending ? renderMasterDiff(state.masterPending) : ''}
     </div>
-
-    <div class="subsec">
-      <p class="sublabel">${t.rosterImportTitle}</p>
-      <p class="footnote" style="margin-top:0;">${t.rosterImportHelp}</p>
-      <div class="btnrow">
-        <button class="btn btn-primary" id="adm-roster-check">${t.rosterImportCheck}</button>
-      </div>
-      <div class="status-msg">${state.rosterImportMsg ? `<span style="color:${state.rosterImportMsg.ok?'var(--good)':'var(--danger)'}">${state.rosterImportMsg.text}</span>` : ''}</div>
-      ${state.rosterImportPending ? renderRosterImportPreview(state.rosterImportPending) : ''}
-    </div>
-
-    ${state.masterBulkOpen ? `
-      <div class="subsec">
-        <p class="sublabel">${t.masterBulkOpen}</p>
-        <p class="footnote" style="margin-top:0;">${t.employeeMasterHelp}</p>
-        <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:160px;">${escapeHtml(state.employeeMasterText)}</textarea>
-        <div class="btnrow">
-          <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
-          <button class="btn btn-ghost" id="adm-master-bulk-close">${t.masterBulkClose}</button>
-        </div>
-        ${state.masterPending ? renderMasterDiff(state.masterPending) : ''}
-      </div>
-    ` : `<button type="button" class="minilink" id="adm-master-bulk-open">${t.masterBulkOpen}</button>`}
   `;
 }
 
@@ -4043,190 +3782,20 @@ async function renderAdmin(vp){
       };
     });
 
-    /* --- 従業員マスタ：新規登録 --- */
-    const bind = (id, fn, ev) => { const el = vp.querySelector('#'+id); if(el) el[ev||'oninput'] = fn; };
-    bind('mn-id',   e=>{ state.masterNew.id = e.target.value; });
-    bind('mn-name', e=>{ state.masterNew.name = e.target.value; });
-    bind('mn-ps',   e=>{ state.masterNew.pauseStart = e.target.value; }, 'onchange');
-    bind('mn-pe',   e=>{ state.masterNew.pauseEnd = e.target.value; }, 'onchange');
-    vp.querySelectorAll('[data-mn-type]').forEach(b=>{
-      b.onclick = ()=>{ state.masterNew.mealType = b.dataset.mnType; state.masterNewMsg = null; drawAdmin(); };
-    });
-    const mnAdd = vp.querySelector('#mn-add');
-    if(mnAdd) mnAdd.onclick = async ()=>{
-      const n = state.masterNew;
-      const id = String(n.id||'').trim(), name = String(n.name||'').trim();
-      if(!id){ state.masterNewMsg = {text:t.masterNeedId, ok:false}; drawAdmin(); return; }
-      if(!name){ state.masterNewMsg = {text:t.masterNeedName, ok:false}; drawAdmin(); return; }
-      if(n.mealType !== 'set' && n.mealType !== 'okazu' && n.mealType !== 'none'){ state.masterNewMsg = {text:t.masterNeedType, ok:false}; drawAdmin(); return; }
-      if(master.some(e=>String(e.id)===id)){
-        state.masterNewMsg = {text:t.masterDupId.replace('{id}', id), ok:false}; drawAdmin(); return;
-      }
-      const hireInput = document.getElementById('mn-hire');
-      const hireDate = normDate(hireInput ? hireInput.value : '');
-      if(hireDate===null){
-        state.masterNewMsg = {text:t.hireDateBad, ok:false}; drawAdmin(); return;
-      }
-      const ps = normDate(n.pauseStart||''), pe = normDate(n.pauseEnd||'');
-      if(ps===null || pe===null || (ps && pe && pe < ps)){
-        state.masterNewMsg = {text:t.masterBadPause, ok:false}; drawAdmin(); return;
-      }
-      const entry = {id:id, name:name, mealType:n.mealType};
-      if(hireDate) entry.hireDate = hireDate;
-      if(ps) entry.pauseStart = ps;
-      if(pe) entry.pauseEnd = pe;
-      mnAdd.disabled = true;
-      await kvRequest('kvSet', {key:'master:'+id, value: JSON.stringify(entry)});
-      state.masterNew = {id:'', name:'', mealType:'', pauseStart:'', pauseEnd:'', hireDate:''};
-      state.masterNewMsg = {text:t.masterAdded.replace('{name}', name), ok:true};
-      state.employeeMasterText = '';   // 一括欄は次に開いたとき最新から作り直す
-      await reload();
-      autoClear('masterNewMsg');
-    };
-
-    /* --- 従業員マスタ：検索して変更・削除 --- */
-    bindLiveSearch(vp.querySelector('#mm-search'), (val)=>{
-      state.masterSearch = val;
-      state.masterEditId = null; state.masterDeleteId = null;
-      state.masterEditMsg = null; state.employeeMasterMsg = null;
-      drawAdmin();
-    });
-    vp.querySelectorAll('[data-edit-emp]').forEach(b=>{
-      b.onclick = ()=>{
-        const e = master.find(x=>String(x.id)===b.dataset.editEmp);
-        if(!e) return;
-        state.masterEditId = String(e.id);
-        state.masterEditDraft = {id:String(e.id), name:e.name||'', mealType:e.mealType||'',
-                                pauseStart:e.pauseStart||'', pauseEnd:e.pauseEnd||'', hireDate:e.hireDate||''};
-        state.masterDeleteId = null; state.masterEditMsg = null;
-        drawAdmin();
-      };
-    });
-    bind('me-id',   e=>{
-      state.masterEditDraft.id = e.target.value;
-      const warn = vp.querySelector('#me-idwarn');
-      if(warn){
-        const oldId = warn.dataset.oldid;
-        const newId = String(e.target.value||'').trim();
-        if(newId && newId !== oldId){
-          warn.textContent = t.masterIdChangeWarn.replace('{from}', oldId).replace('{to}', newId);
-          warn.style.display = '';
-        } else {
-          warn.style.display = 'none';
-        }
-      }
-    });
-    bind('me-name', e=>{ state.masterEditDraft.name = e.target.value; });
-    bind('me-ps',   e=>{ state.masterEditDraft.pauseStart = e.target.value; }, 'onchange');
-    bind('me-pe',   e=>{ state.masterEditDraft.pauseEnd = e.target.value; }, 'onchange');
-    vp.querySelectorAll('[data-me-type]').forEach(b=>{
-      b.onclick = ()=>{ state.masterEditDraft.mealType = b.dataset.meType; state.masterEditMsg = null; drawAdmin(); };
-    });
-    const meCancel = vp.querySelector('#me-cancel');
-    if(meCancel) meCancel.onclick = ()=>{
-      state.masterEditId = null; state.masterEditDraft = null; state.masterEditMsg = null; drawAdmin();
-    };
-    const meSave = vp.querySelector('#me-save');
-    if(meSave) meSave.onclick = async ()=>{
-      const oldId = state.masterEditId;
-      const dr = state.masterEditDraft || {};
-      const newId = String(dr.id||'').trim(), name = String(dr.name||'').trim();
-      if(!newId){ state.masterEditMsg = t.masterNeedId; drawAdmin(); return; }
-      if(!name){ state.masterEditMsg = t.masterNeedName; drawAdmin(); return; }
-      if(dr.mealType !== 'set' && dr.mealType !== 'okazu' && dr.mealType !== 'none'){ state.masterEditMsg = t.masterNeedType; drawAdmin(); return; }
-      if(newId !== oldId && master.some(e=>String(e.id)===newId)){
-        state.masterEditMsg = t.masterDupId.replace('{id}', newId); drawAdmin(); return;
-      }
-      const hireInput = document.getElementById('me-hire');
-      const hireDate = normDate(hireInput ? hireInput.value : (dr.hireDate||''));
-      if(hireDate===null){
-        state.masterEditMsg = t.hireDateBad; drawAdmin(); return;
-      }
-      const ps = normDate(dr.pauseStart||''), pe = normDate(dr.pauseEnd||'');
-      if(ps===null || pe===null || (ps && pe && pe < ps)){
-        state.masterEditMsg = t.masterBadPause; drawAdmin(); return;
-      }
-      const entry = {id:newId, name:name, mealType:dr.mealType};
-      if(hireDate) entry.hireDate = hireDate;
-      if(ps) entry.pauseStart = ps;
-      if(pe) entry.pauseEnd = pe;
-      meSave.disabled = true;
-      if(newId !== oldId){
-        await kvRequest('kvDelete', {key:'master:'+oldId});
-        await migrateEmployeeId(oldId, newId);
-      }
-      await kvRequest('kvSet', {key:'master:'+newId, value: JSON.stringify(entry)});
-      state.masterEditId = null; state.masterEditDraft = null; state.masterEditMsg = null;
-      state.employeeMasterMsg = {text:t.masterUpdated.replace('{name}', name), ok:true};
-      state.masterNewMsg = null;
-      state.employeeMasterText = '';
-      await reload();
-      autoClear('employeeMasterMsg');
-    };
-    vp.querySelectorAll('[data-del-emp]').forEach(b=>{
-      b.onclick = ()=>{
-        state.masterDeleteId = b.dataset.delEmp;
-        state.masterEditId = null; state.masterEditDraft = null;
-        drawAdmin();
-      };
-    });
-    const mdNo = vp.querySelector('#md-no');
-    if(mdNo) mdNo.onclick = ()=>{ state.masterDeleteId = null; drawAdmin(); };
-    const mdYes = vp.querySelector('#md-yes');
-    if(mdYes) mdYes.onclick = async ()=>{
-      const id = state.masterDeleteId;
-      const e = master.find(x=>String(x.id)===id);
-      mdYes.disabled = true;
-      await kvRequest('kvDelete', {key:'master:'+id});
-      state.masterDeleteId = null;
-      state.employeeMasterMsg = {text:t.masterDeleted.replace('{name}', (e&&e.name)||id), ok:true};
-      state.masterNewMsg = null;
-      state.employeeMasterText = '';
-      await reload();
-      autoClear('employeeMasterMsg');
-    };
-
-    /* --- 社員リストからの一括追加（利用なし） --- */
-    const rosterCheckBtn = vp.querySelector('#adm-roster-check');
-    if(rosterCheckBtn) rosterCheckBtn.onclick = ()=>{
-      state.rosterImportPending = computeRosterImportDiff(master);
-      state.rosterImportMsg = null;
-      drawAdmin();
-    };
-    const rosterRunBtn = vp.querySelector('#adm-roster-run');
-    if(rosterRunBtn) rosterRunBtn.onclick = async ()=>{
-      rosterRunBtn.disabled = true;
-      const toAdd = state.rosterImportPending.toAdd;
-      const items = toAdd.map(e=>({key:'master:'+e.id, value: JSON.stringify({id:e.id, name:e.name, mealType:'none'})}));
-      await kvSetManyChunked(items);
-      state.rosterImportPending = null;
-      state.rosterImportMsg = {text:t.rosterImportDone.replace('{n}', toAdd.length), ok:true};
-      state.employeeMasterText = '';   // 一括書き換え欄も次回開いたときに最新化されるように
-      await reload();
-      setTimeout(()=>{ state.rosterImportMsg=null; drawAdmin(); }, 8000);
-    };
-    const rosterCancelBtn = vp.querySelector('#adm-roster-cancel');
-    if(rosterCancelBtn) rosterCancelBtn.onclick = ()=>{ state.rosterImportPending = null; drawAdmin(); };
-
-    /* --- 従業員マスタ：まとめて書き換え（貼り付け） --- */
-    const bulkOpen = vp.querySelector('#adm-master-bulk-open');
-    if(bulkOpen) bulkOpen.onclick = ()=>{
-      state.masterBulkOpen = true;
-      if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
-      drawAdmin();
-    };
-    const bulkClose = vp.querySelector('#adm-master-bulk-close');
-    if(bulkClose) bulkClose.onclick = ()=>{
-      state.masterBulkOpen = false; state.masterPending = null; drawAdmin();
-    };
-
-    const _el_adm_master_text = vp.querySelector('#adm-master-text');
-    if(_el_adm_master_text) _el_adm_master_text.oninput = e=>{
+    /* --- 従業員マスタ：貼り付けによる書き換え（登録・変更・削除はここだけ） --- */
+    const masterTextBox = vp.querySelector('#adm-master-text');
+    if(masterTextBox) masterTextBox.oninput = e=>{
       state.employeeMasterText = e.target.value;
-      if(state.masterPending){ state.masterPending = null; }
+      if(state.masterPending) state.masterPending = null;
     };
-    const _el_adm_master_check = vp.querySelector('#adm-master-check');
-    if(_el_adm_master_check) _el_adm_master_check.onclick = ()=>{
+    const masterResetBtn = vp.querySelector('#adm-master-reset');
+    if(masterResetBtn) masterResetBtn.onclick = ()=>{
+      state.employeeMasterText = masterToText(master);
+      state.masterPending = null; state.employeeMasterMsg = null;
+      drawAdmin();
+    };
+    const masterCheckBtn = vp.querySelector('#adm-master-check');
+    if(masterCheckBtn) masterCheckBtn.onclick = ()=>{
       const parsed = parseMasterText(state.employeeMasterText);
       if(parsed.error){
         state.masterPending = null;
@@ -4240,11 +3809,13 @@ async function renderAdmin(vp){
     const confirmBtn = vp.querySelector('#adm-master-confirm');
     if(confirmBtn) confirmBtn.onclick = async ()=>{
       confirmBtn.disabled = true;
-      const list = state.masterPending.list;
-      await setEmployeeMaster(list);
+      const pending = state.masterPending;
+      // 社員番号だけを書き換えた行は、キャンセル記録・購入記録・閲覧PINも新しい番号へ移す
+      for(const r of (pending.diff.renamed||[])) await migrateEmployeeId(r.from, r.to);
+      await setEmployeeMaster(pending.list);
       state.masterPending = null;
-      state.employeeMasterText = masterToText(list);
-      state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', list.length), ok:true};
+      state.employeeMasterText = masterToText(pending.list);
+      state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', pending.list.length), ok:true};
       await reload();
       setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },4000);
     };
@@ -4311,13 +3882,17 @@ function parseMasterText(text){
 function renderMasterDiff(pending){
   const t = T.ja;
   const d = pending.diff;
-  const nothing = !d.added.length && !d.removed.length && !d.changed.length;
+  const renamed = d.renamed || [];
+  const nothing = !d.added.length && !d.removed.length && !d.changed.length && !renamed.length;
   return `
     <div class="diffbox">
       <h3>${t.diffTitle}</h3>
       ${nothing ? `<p class="small">${t.diffSame}</p>` : ''}
       ${d.added.length ? `<div class="diffsec"><div class="t">${t.diffAdd.replace('{n}', d.added.length)}</div>
         <ul>${d.added.map(e=>`<li>${escapeHtml(masterEntryDesc(e))}</li>`).join('')}</ul></div>` : ''}
+      ${renamed.length ? `<div class="diffsec"><div class="t">${t.diffRename.replace('{n}', renamed.length)}</div>
+        <ul>${renamed.map(r=>`<li>${escapeHtml(r.name)}：${escapeHtml(r.from)} → ${escapeHtml(r.to)}</li>`).join('')}</ul>
+        <p class="footnote">${t.diffRenameNote}</p></div>` : ''}
       ${d.changed.length ? `<div class="diffsec"><div class="t">${t.diffChange.replace('{n}', d.changed.length)}</div>
         <ul>${d.changed.map(c=>`<li>${escapeHtml(c.id+' '+c.name)}：${escapeHtml(c.parts.join('、'))}</li>`).join('')}</ul></div>` : ''}
       ${d.removed.length ? `<div class="diffsec del"><div class="t">${t.diffDel.replace('{n}', d.removed.length)}</div>
@@ -4428,4 +4003,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
