@@ -410,11 +410,22 @@ textarea.csvbox{
   font-size:13px;font-weight:800;color:var(--accent-deeper);margin-bottom:12px;letter-spacing:0.02em;
 }
 .weekfc-head-row{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;
+  display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-bottom:12px;flex-wrap:wrap;
 }
 .weekfc-head-row .weekfc-head{margin-bottom:0;}
-.weekfc-nav{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.weekfc-nav .navbtn{width:28px;height:28px;font-size:14px;}
+.weekfc-nav{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.weekfc-nav .navbtn{
+  border:1px solid var(--accent-line);background:#fff;
+  color:var(--ink);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;
+  flex-shrink:0;font-family:inherit;
+}
+.weekfc-nav .navbtn:hover{background:var(--accent-soft);border-color:var(--accent-mid);}
+.weekfc-head-row .backtoday{
+  border:1px solid var(--accent-line);background:#fff;color:var(--ink-soft);
+  border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  flex-shrink:0;
+}
+.weekfc-head-row .backtoday:hover{background:var(--accent-soft);border-color:var(--accent-mid);color:var(--ink);}
 .weekfc-totals{
   display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;
 }
@@ -807,10 +818,10 @@ const T = {
     mineSummaryTitle:"控除予定の明細",
     mineDeductLabel:"控除予定金額（{m}月分）",
     rcptLunch:"ランチ", rcptProducts:"割引商品",
-    rcptDays:"{n}日", rcptPieces:"{n}点",
-    rcptLunchSub:"給食のある日 {serving}日 ／ キャンセル {cancel}日",
-    rcptPausedSub:" ／ 停止期間 {n}日",
-    rcptBeforeHireSub:" ／ 入社前 {n}日",
+    rcptDays:"利用日 {n}日", rcptPieces:"{n}点",
+    rcptPausedSub:"停止期間 {n}日",
+    rcptBeforeHireSub:"入社前 {n}日",
+    rcptSubSep:" ／ ",
     rcptProductsNone:"この月の購入はありません",
     singleDatesMonth:"{m}月の個別キャンセル", minePurchaseMonth:"{m}月の割引商品の購入",
     mineExtraEatMonth:"{m}月の臨時ランチ",
@@ -826,9 +837,10 @@ const T = {
     breakdownSingle:"個別 {n}日", breakdownRecurring:"定期 {n}日",
     mineServingDays:"給食のある日 {n}日（土日・休業日を除く）",
     minePausedNote:"停止期間により {n}日 は対象外です。",
-    mineUnitNote:"単価：{u}（セット料金指定日は1食300円）",
+    mineUnitNote:"単価：{u}",
+    mineUnitSetDayNote:"（セット料金指定日は1食300円）",
     mineUnitSet:"セット 300円", mineUnitOkazu:"おかず 200円", mineUnitNone:"利用なし（ランチ代の対象外）", mineUnitUnknown:"未設定（おかず200円で計算）",
-    mineEstimateNote:"金額は「給食のある日 − キャンセル日 − 停止期間」で計算した見込み額です。実際の控除額は給与明細をご確認ください。",
+    mineEstimateNote:"金額は、土日・休業日・キャンセル日・停止期間を除いた利用日数 × 単価で計算した見込み額です。実際の控除額は給与明細をご確認ください。",
 
     adminLoginTitle:"管理画面ログイン", adminLoginDesc:"社員食堂スタッフ用。パスワードを入力してください。",
     password:"パスワード", login:"ログイン", wrongPw:"パスワードが違います。",
@@ -1021,10 +1033,10 @@ const T = {
     mineSummaryTitle:"Estimated deduction breakdown",
     mineDeductLabel:"Estimated deduction (month {m})",
     rcptLunch:"Lunch", rcptProducts:"Discounted products",
-    rcptDays:"{n} day(s)", rcptPieces:"{n} item(s)",
-    rcptLunchSub:"{serving} serving days / {cancel} cancelled",
-    rcptPausedSub:" / {n} paused",
-    rcptBeforeHireSub:" / {n} before hire date",
+    rcptDays:"{n} day(s) used", rcptPieces:"{n} item(s)",
+    rcptPausedSub:"{n} paused",
+    rcptBeforeHireSub:"{n} before hire date",
+    rcptSubSep:" / ",
     rcptProductsNone:"No purchases this month",
     singleDatesMonth:"Individual cancellations in month {m}", minePurchaseMonth:"Purchases in month {m}",
     mineExtraEatMonth:"Extra lunches in month {m}",
@@ -1040,9 +1052,10 @@ const T = {
     breakdownSingle:"{n} individual", breakdownRecurring:"{n} recurring",
     mineServingDays:"{n} serving days (weekends and closed days excluded)",
     minePausedNote:"{n} day(s) excluded by your pause period.",
-    mineUnitNote:"Unit price: {u} (set-price days are ¥300 for everyone)",
+    mineUnitNote:"Unit price: {u}",
+    mineUnitSetDayNote:" (set-price days are ¥300 for everyone)",
     mineUnitSet:"Set ¥300", mineUnitOkazu:"Okazu ¥200", mineUnitNone:"Not using lunch service (not charged)", mineUnitUnknown:"Not set (calculated as Okazu ¥200)",
-    mineEstimateNote:"This is an estimate: serving days − cancelled days − pause period. Please check your payslip for the final amount.",
+    mineEstimateNote:"This is an estimate: days used (weekends, closed days, cancellations and pause periods excluded) × unit price. Please check your payslip for the final amount.",
     weekdayShort:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
   }
 };
@@ -2426,6 +2439,14 @@ function paintMineResult(){
     : s.mealType==='okazu' ? t.mineUnitOkazu
     : s.mealType==='none' ? t.mineUnitNone
     : t.mineUnitUnknown;
+  // 単価の注記（「セット料金指定日」はセット以外の人だけに関係する話なので、その人にだけ出す）
+  const unitNoteText = t.mineUnitNote.replace('{u}', unitText)
+    + ((s.mealType!=='set' && s.mealType!=='none') ? t.mineUnitSetDayNote : '');
+  // 日数から外れた分（停止期間・入社前）は、あるときだけ補足する
+  const lunchExcludeNote = [
+    s.pausedDays ? t.rcptPausedSub.replace('{n}', s.pausedDays) : '',
+    s.beforeHireDays ? t.rcptBeforeHireSub.replace('{n}', s.beforeHireDays) : '',
+  ].filter(Boolean).join(t.rcptSubSep);
 
   const lockedDates = (s.singleDatesInMonth||[]).filter(d=>isPastCutoff(d));
   const singleRows = (s.singleDatesInMonth||[]).length
@@ -2497,10 +2518,8 @@ function paintMineResult(){
             <span class="k">${t.rcptLunch}</span>
             <span class="q">${t.rcptDays.replace('{n}', s.eatDays)}</span>
             <span class="a">¥${s.lunchAmount.toLocaleString()}</span>
-            <span class="sub">${t.rcptLunchSub.replace('{serving}', s.servingCount).replace('{cancel}', s.cancelledDays)}${
-              s.pausedDays ? t.rcptPausedSub.replace('{n}', s.pausedDays) : ''
-            }${s.beforeHireDays ? t.rcptBeforeHireSub.replace('{n}', s.beforeHireDays) : ''}${cancelBreakdownText(s, t)}</span>
-            <span class="sub">${t.mineUnitNote.replace('{u}', unitText)}</span>
+            ${lunchExcludeNote ? `<span class="sub">${lunchExcludeNote}</span>` : ''}
+            <span class="sub">${unitNoteText}</span>
           </div>
           <div class="rcpt-row ${s.purchaseAmount===0?'zero':''}">
             <span class="k">${t.rcptProducts}</span>
@@ -3210,12 +3229,12 @@ async function renderAdmin(vp){
 
       <div class="weekfc">
         <div class="weekfc-head-row">
-          <div class="weekfc-head">📦 発注参考：${weekLabel}（${weekDates[0].slice(5).replace('-','/')}〜${weekDates[4].slice(5).replace('-','/')}）の見込み</div>
           <div class="weekfc-nav">
             <button type="button" class="navbtn" data-week-shift="-1">‹</button>
             <button type="button" class="navbtn" data-week-shift="1">›</button>
-            ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
           </div>
+          <div class="weekfc-head">📦 発注参考：${weekLabel}（${weekDates[0].slice(5).replace('-','/')}〜${weekDates[4].slice(5).replace('-','/')}）の見込み</div>
+          ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
         </div>
         <div class="weekfc-totals">
           <div class="weekfc-tot"><span class="n">${weekTotals.set}</span><span class="l">セット計</span></div>
