@@ -894,6 +894,9 @@ const T = {
     csvExportBtn:"CSVをダウンロード",
     csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。単価は従業員マスタのお食事タイプ（セット¥300／おかず¥200／利用なし¥0）を使い、「セット料金指定日」は全員¥300で計算します（利用なしの人は対象外）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず／利用なし）を登録してください。",
+    csvSplitHelp:"従業員番号8000以降（8000を含む）の人は、給与システム用のCSVには入れず、「食品利用明細」として別ファイルでダウンロードします。明細には社員No・氏名・お食事タイプ・食べた日数・食べなかった日数・合計金額と、その月の給食日ごとの○（食べた日）／×（キャンセル）／-（対象外）が並びます。ボタンを1回押すと、対象者がいる分だけファイルが順にダウンロードされます。",
+    csvExportDone:"ダウンロードしました。給与システム用：{a}名／利用明細（8000番以降）：{b}名",
+    csvExportNoOne:"対象月に出力できる社員がいませんでした。",
 
     employeeMasterTitle:"従業員マスタ",
     masterBulkTitle:"名簿の書き換え（貼り付け）",
@@ -1092,6 +1095,8 @@ const WD_KEYS = ['su','mo','tu','we','th','fr','sa'];
 const ADMIN_PASSWORD = "masuda";
 const PRICE_SET = 300;
 const PRICE_OKAZU = 200;
+// 従業員番号がこの番号以上の人は、給与システム用CSVには入れず、別の「利用明細CSV」に出す
+const DETAIL_CSV_ID_FROM = 8000;
 // 割引商品の単価（この7種類から個数を入力する）
 const PRICE_OPTIONS = [50,100,150,200,250,300,350];
 // 本社カレンダー2026の赤字（平日のみ）。土日はもともと給食がないため含めない。
@@ -1165,6 +1170,7 @@ let state = {
   specialDaysMsg:null,
   closedDaysMsg:null,
   csvWarning:'',
+  csvInfo:'',
   // 来客用ランチ（人数カウンターのみ。給与や請求には関与しない）
   guestDate:'', guestSetCount:0, guestOkazuCount:0, guestNote:'', guestMsg:null,
   // 臨時ランチ（来客／普段「利用なし」の社員が、特定の日だけ食べる場合。同じメニュー内でタブ切り替え）
@@ -1719,39 +1725,43 @@ function servingDaysInMonth(y, m0, closedSet){
 // その社員が実際に食べた日と金額（社員側の見込み表示・CSV出力の両方で使う）
 // extraEatMap: Map(日付 -> 'set'|'okazu')。普段「利用なし」の人が、その日だけ臨時で食べる場合の登録。
 function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap){
+  // 日ごとの状態を残しておく（利用明細CSVで「食べた日／食べなかった日」を出すために使う）
+  // 'eat'=食べた／'cancel'=キャンセルした／'off'=もともと対象外（停止期間・利用しない曜日・入社前・利用なし）
+  const dayStatus = new Map();
+  const eatDates = [], cancelledDates = [], offDates = [];
   // ランチを利用しない人（利用なし）は、臨時ランチの登録がある日だけカウントする
   if(emp && emp.mealType === 'none'){
     let eatDays=0, amount=0;
     servingDays.forEach(d=>{
-      if(isBeforeHireDate(emp, d)) return;   // 入社前は臨時ランチも対象外
-      const extraType = extraEatMap && extraEatMap.get(d);
-      if(!extraType) return;
-      eatDays++;
+      // 入社前は臨時ランチも対象外
+      const extraType = isBeforeHireDate(emp, d) ? null : (extraEatMap && extraEatMap.get(d));
+      if(!extraType){ dayStatus.set(d,'off'); offDates.push(d); return; }
+      eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
       amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
     });
-    return {eatDays, amount, pausedDays:0, cancelledDays:0, beforeHireDays:0, weekdayOffDays:0};
+    return {eatDays, amount, pausedDays:0, cancelledDays:0, beforeHireDays:0, weekdayOffDays:0, dayStatus, eatDates, cancelledDates, offDates};
   }
   const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
   let eatDays=0, amount=0, pausedDays=0, cancelledDays=0, beforeHireDays=0, weekdayOffDays=0;
   servingDays.forEach(d=>{
-    if(isBeforeHireDate(emp, d)){ beforeHireDays++; return; }
-    if(isPausedOn(emp, d)){ pausedDays++; return; }
+    if(isBeforeHireDate(emp, d)){ beforeHireDays++; dayStatus.set(d,'off'); offDates.push(d); return; }
+    if(isPausedOn(emp, d)){ pausedDays++; dayStatus.set(d,'off'); offDates.push(d); return; }
     // もともと利用しない曜日。その日だけ臨時ランチの登録があれば、食べた日として数える
     if(isWeekdayOff(emp, d)){
       const extraType = extraEatMap && extraEatMap.get(d);
       if(extraType){
-        eatDays++;
+        eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
         amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
       } else {
-        weekdayOffDays++;
+        weekdayOffDays++; dayStatus.set(d,'off'); offDates.push(d);
       }
       return;
     }
-    if(cancelledSet.has(d)){ cancelledDays++; return; }
-    eatDays++;
+    if(cancelledSet.has(d)){ cancelledDays++; dayStatus.set(d,'cancel'); cancelledDates.push(d); return; }
+    eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
     amount += (specialSet && specialSet.has(d)) ? PRICE_SET : basePrice;
   });
-  return {eatDays, amount, pausedDays, cancelledDays, beforeHireDays, weekdayOffDays};
+  return {eatDays, amount, pausedDays, cancelledDays, beforeHireDays, weekdayOffDays, dayStatus, eatDates, cancelledDates, offDates};
 }
 // 臨時ランチの登録から、日付 -> 種類 のMapを作る（無ければ空のMap）
 function extraEatMapFromRecord(rec){
@@ -3685,6 +3695,7 @@ async function renderAdmin(vp){
 
       ${qcard('csv', t.csvExportTitle, `
         <p class="footnote">${t.csvExportHelp}</p>
+        <p class="footnote">${t.csvSplitHelp}</p>
         <div class="field">
           <label>${t.csvExportMonthLabel}</label>
           <input type="month" id="adm-csv-month" value="${state.csvMonth}">
@@ -3692,6 +3703,7 @@ async function renderAdmin(vp){
         <div class="btnrow">
           <button class="btn btn-primary" id="adm-csv-export">${t.csvExportBtn}</button>
         </div>
+        ${state.csvInfo ? `<p class="small" style="margin-top:8px;">${escapeHtml(state.csvInfo)}</p>` : ''}
         ${state.csvWarning ? `<p class="small" style="color:var(--danger);margin-top:8px;">${state.csvWarning}</p>` : ''}
       `)}
 
@@ -3864,10 +3876,14 @@ async function renderAdmin(vp){
     const _el_adm_csv_export = vp.querySelector('#adm-csv-export');
     if(_el_adm_csv_export) _el_adm_csv_export.onclick = async ()=>{
       const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth);
-      if(result && result.missingMealType > 0){
-        state.csvWarning = t.csvMealTypeWarning.replace('{n}', result.missingMealType);
+      if(result){
+        state.csvInfo = result.count
+          ? t.csvExportDone.replace('{a}', result.payrollCount).replace('{b}', result.detailCount)
+          : t.csvExportNoOne;
+        state.csvWarning = result.missingMealType > 0
+          ? t.csvMealTypeWarning.replace('{n}', result.missingMealType) : '';
         drawAdmin();
-        setTimeout(()=>{ state.csvWarning=''; drawAdmin(); }, 8000);
+        setTimeout(()=>{ state.csvInfo=''; state.csvWarning=''; drawAdmin(); }, 10000);
       }
     };
 
@@ -4184,21 +4200,75 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
     const extraMap = extraEatByEmp[e.id] || new Map();
     const calc = calcForEmployee(e, cancelled, servingDays, specialSet, extraMap);
     const purchase = Number(purchaseByEmp[e.id]||0);
-    perEmployee[e.id] = {name:e.name, amount:calc.amount + purchase, lunch:calc.amount, purchase};
+    perEmployee[e.id] = {name:e.name, amount:calc.amount + purchase, lunch:calc.amount, purchase, calc, mealType:e.mealType};
   });
 
   const ids = Object.keys(perEmployee).sort((a,b)=> a.localeCompare(b,'ja',{numeric:true}));
 
-  const EMPTY_TAIL = ',,,,,,,,,,,'; // matches the 11 trailing empty columns in the reference file
-  const header = ['社員No','給与処理年','給与処理回','支給グループ','弁当・食品購入代'].join(',') + EMPTY_TAIL;
-  const rows = ids.map(id=>{
-    const e = perEmployee[id];
-    return [id, payYear, payRound, 1, e.amount].join(',') + EMPTY_TAIL;
-  });
-  const csvBody = [header, ...rows].join('\r\n') + '\r\n';
+  // 従業員番号8000以降は給与システムに入れないので、別ファイルに分ける
+  const payrollIds = ids.filter(id=>!isDetailCsvId(id));
+  const detailIds  = ids.filter(id=> isDetailCsvId(id));
 
-  const filename = `食品控除データ_${dataMonthNum}月.csv`;
+  // ---- ① 給与システム用（7999まで）----
+  if(payrollIds.length){
+    const EMPTY_TAIL = ',,,,,,,,,,,'; // matches the 11 trailing empty columns in the reference file
+    const header = ['社員No','給与処理年','給与処理回','支給グループ','弁当・食品購入代'].join(',') + EMPTY_TAIL;
+    const rows = payrollIds.map(id=>{
+      const e = perEmployee[id];
+      return [id, payYear, payRound, 1, e.amount].join(',') + EMPTY_TAIL;
+    });
+    downloadCsv([header, ...rows].join('\r\n') + '\r\n', `食品控除データ_${dataMonthNum}月.csv`);
+  }
 
+  // ---- ② 利用明細（8000以降）----
+  if(detailIds.length){
+    // 2つ目のダウンロードがブラウザにまとめてブロックされないよう、少し間を空ける
+    if(payrollIds.length) await new Promise(r=>setTimeout(r, 700));
+    const mealTypeLabel = mt => mt==='set' ? `セット(${PRICE_SET}円)` : mt==='none' ? '利用なし' : `おかず(${PRICE_OKAZU}円)`;
+    const dayCols = servingDays.map(d=>{
+      const dt = parseISO(d);
+      return `${dt.getMonth()+1}/${dt.getDate()}(${WD_CHARS[dt.getDay()]})`;
+    });
+    const header = ['社員No','氏名','お食事タイプ','給食日数','食べた日数','食べなかった日数','ランチ代','商品購入代','合計金額', ...dayCols];
+    const rows = detailIds.map(id=>{
+      const e = perEmployee[id];
+      const calc = e.calc || {};
+      const status = calc.dayStatus || new Map();
+      const eatDays = Number(calc.eatDays||0);
+      const marks = servingDays.map(d=>{
+        const s = status.get(d);
+        return s==='eat' ? '○' : s==='cancel' ? '×' : '-';
+      });
+      return [id, e.name, mealTypeLabel(e.mealType), servingDays.length, eatDays, servingDays.length - eatDays,
+              e.lunch, e.purchase, e.amount, ...marks];
+    });
+    // 合計行（人数分をまとめて確認できるように）
+    const totalAmount = detailIds.reduce((s,id)=> s + Number(perEmployee[id].amount||0), 0);
+    const totalLunch  = detailIds.reduce((s,id)=> s + Number(perEmployee[id].lunch||0), 0);
+    const totalBuy    = detailIds.reduce((s,id)=> s + Number(perEmployee[id].purchase||0), 0);
+    const totalRow = ['','合計','','','','', totalLunch, totalBuy, totalAmount, ...servingDays.map(()=>'')];
+
+    const lines = [header, ...rows, totalRow].map(r=>r.map(csvCell).join(','));
+    lines.push('');
+    lines.push(csvCell('※ ○=食べた日／×=キャンセルした日／-=対象外（停止期間・利用しない曜日・入社前・利用なし）'));
+    downloadCsv(lines.join('\r\n') + '\r\n', `食品利用明細_${DETAIL_CSV_ID_FROM}番以降_${dataMonthNum}月.csv`);
+  }
+
+  return { count: ids.length, payrollCount: payrollIds.length, detailCount: detailIds.length, missingMealType };
+}
+
+// 従業員番号8000以降かどうか（数字として読めない番号は、これまでどおり給与システム用に入れる）
+function isDetailCsvId(id){
+  const n = Number(String(id).trim());
+  return Number.isFinite(n) && n >= DETAIL_CSV_ID_FROM;
+}
+// CSVの1マス分（カンマ・改行・ダブルクォートが入っていても壊れないようにする）
+function csvCell(v){
+  const s = String(v ?? '');
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+// Shift-JISに変換してダウンロードする（変換ライブラリが無いときはBOM付きUTF-8）
+function downloadCsv(csvBody, filename){
   let blob;
   if(window.Encoding){
     const unicodeArray = Encoding.stringToCode(csvBody);
@@ -4212,9 +4282,7 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  return { count: ids.length, missingMealType };
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
 }
 
 /* ===================== utils ===================== */
