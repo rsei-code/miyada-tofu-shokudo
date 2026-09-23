@@ -854,8 +854,8 @@ const T = {
     mineServingDays:"給食のある日 {n}日（土日・休業日を除く）",
     minePausedNote:"停止期間により {n}日 は対象外です。",
     mineUnitNote:"単価：{u}",
-    mineUnitSetDayNote:"（セット料金指定日は1食300円）",
-    mineUnitSet:"セット 300円", mineUnitOkazu:"おかず 200円", mineUnitNone:"利用なし（ランチ代の対象外）", mineUnitUnknown:"未設定（おかず200円で計算）",
+    mineUnitSetDayNote:"",
+    mineUnitSet:"300円", mineUnitOkazu:"おかず 200円", mineUnitNone:"利用なし（ランチ代の対象外）", mineUnitUnknown:"未設定（300円で計算）",
     mineEstimateNote:"金額は、土日・休業日・キャンセル日・停止期間・利用しない曜日を除いた利用日数 × 単価で計算した見込み額です。実際の控除額は給与明細をご確認ください。",
 
     adminLoginTitle:"管理画面ログイン", adminLoginDesc:"社員食堂スタッフ用。パスワードを入力してください。",
@@ -872,7 +872,7 @@ const T = {
     pausedLabel:"停止中",
     notHiredYetLabel:"未入社",
     boardClosedToday:"この日は休業日です（給食なし）",
-    masterNeededForBoard:"内訳（セット・おかず）を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
+    masterNeededForBoard:"食べる人の人数を表示するには、設定画面で従業員マスタ（お食事タイプ入り）を登録してください。",
     searchTitle:"個別検索", searchByDate:"日付で検索", searchByEmp:"従業員で検索",
     pausedListTitle:"停止期間の登録がある社員（{n}名）",
     closedBulkTitle:"カレンダーから一括登録",
@@ -892,8 +892,8 @@ const T = {
 
     csvExportTitle:"月次CSV出力", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
     csvExportBtn:"CSVをダウンロード",
-    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。単価は従業員マスタのお食事タイプ（セット¥300／おかず¥200／利用なし¥0）を使い、「セット料金指定日」は全員¥300で計算します（利用なしの人は対象外）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
-    csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（デフォルトの「おかず（¥200）」で計算しています）。設定画面の従業員マスタでお食事タイプ（セット／おかず／利用なし）を登録してください。",
+    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
+    csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（「利用あり（¥300）」で計算しています）。設定画面の従業員マスタでお食事タイプ（利用あり／利用なし）を登録してください。",
     csvSplitHelp:"従業員番号8000以降（8000を含む）の人は、給与システム用のCSVには入れず、「食品利用明細」として別ファイルでダウンロードします。明細には社員No・氏名・お食事タイプ・食べた日数・食べなかった日数・合計金額と、その月の給食日ごとの○（食べた日）／×（キャンセル）／-（対象外）が並びます。ボタンを1回押すと、対象者がいる分だけファイルが順にダウンロードされます。",
     csvExportDone:"ダウンロードしました。給与システム用：{a}名／利用明細（8000番以降）：{b}名",
     csvExportNoOne:"対象月に出力できる社員がいませんでした。",
@@ -906,7 +906,7 @@ const T = {
     diffRenameNote:"キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
     masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
     masterSearchPh:"社員番号または名前で検索",
-    mealTypeLabel:"お食事タイプ", typeSet:"セット（¥300）", typeOkazu:"おかず（¥200）", typeNone:"利用なし（¥0）",
+    mealTypeLabel:"お食事タイプ", typeSet:"利用あり（¥300）", typeNone:"利用なし（¥0）",
     mealTypeChangeNote:"※ 変更は月の途中からは受け付けられません。その月のCSVをまだ出力していなければ、変更した時点でその月全体に反映されます（すでに出力済みの月の金額は変わりません）。",
     hireDateLabel:"入社日（任意・中途入社の場合）",
     hireDateHelp:"入社日より前の日付は、給食の日であっても金額計算・「本日の状況」の人数から自動的に除外されます。中途入社でない場合は空欄のままで構いません。",
@@ -936,8 +936,8 @@ const T = {
     rosterImportAlready:"すでに登録済み：{n}名（リスト内）",
     rosterImportRun:"この内容で追加する",
     rosterImportDone:"{n}名を「利用なし」として追加しました。",
-    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日,利用曜日」の順で貼り付けてください。お食事タイプは「セット」「おかず」「利用なし」のいずれか。ランチを食べず割引商品の購入だけする人は「利用なし」を登録してください（ランチ代は発生しません）。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。入社日（省略可）を入れると、その日より前は中途入社として金額計算・人数集計から除きます。停止期間を使わず入社日だけ入れる場合は、停止開始日・再開日の列を空欄のままにしてください。利用曜日（省略可）には、毎週決まった曜日だけ食べる人の「食べる曜日」を書きます（例：火水／月火木金／水以外）。空欄なら月〜金すべて食べる扱いです。指定した曜日以外は社員側のカレンダーで選べなくなり、金額計算・人数集計からも自動で除きます。",
-    employeeMasterPh:"例）\n1,テスト一郎,セット\n2,テスト次郎,おかず\n3,テスト三郎,セット,2026-08-01,2026-09-01\n4,テスト四郎,利用なし\n5,テスト五郎,セット,,,2026-08-15\n6,テスト六郎,セット,,,,火水\n7,テスト七子,おかず,,,,月火木金",
+    employeeMasterHelp:"1行に「社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日,利用曜日」の順で貼り付けてください。お食事タイプは「利用あり」「利用なし」のどちらか（以前の「セット」「おかず」と書かれた行は「利用あり」として読み取ります）。ランチを食べず割引商品の購入だけする人は「利用なし」を登録してください（ランチ代は発生しません）。停止開始日・再開日は休職・長期出張などで給食を止める期間に使います（省略可）。再開日を空欄にすると、停止がずっと続きます。停止開始日から再開日の前日までは食べない扱いとなり、金額計算・当日の人数集計から除きます。入社日（省略可）を入れると、その日より前は中途入社として金額計算・人数集計から除きます。停止期間を使わず入社日だけ入れる場合は、停止開始日・再開日の列を空欄のままにしてください。利用曜日（省略可）には、毎週決まった曜日だけ食べる人の「食べる曜日」を書きます（例：火水／月火木金／水以外）。空欄なら月〜金すべて食べる扱いです。指定した曜日以外は社員側のカレンダーで選べなくなり、金額計算・人数集計からも自動で除きます。",
+    employeeMasterPh:"例）\n1,テスト一郎,利用あり\n2,テスト次郎,利用あり\n3,テスト三郎,利用あり,2026-08-01,2026-09-01\n4,テスト四郎,利用なし\n5,テスト五郎,利用あり,,,2026-08-15\n6,テスト六郎,利用あり,,,,火水\n7,テスト七子,利用あり,,,,月火木金",
     employeeMasterCheck:"内容を確認する", employeeMasterConfirm:"この内容で保存する", employeeMasterCancel:"やめる",
     employeeMasterSaved:"名簿を保存しました（{n}件）", employeeMasterCount:"現在 {n} 件登録されています。",
     employeeMasterInvalid:"{line}行目の形式が正しくありません（社員番号,氏名,お食事タイプ,停止開始日,再開日）。",
@@ -946,7 +946,7 @@ const T = {
     employeeMasterDup:"{line}行目の社員番号 {id} が重複しています。",
     employeeMasterBadWeekday:"{line}行目の利用曜日が読み取れません。「火水」（火・水だけ利用）または「水以外」（水だけ利用しない）のように書いてください。",
     employeeMasterEmptyWeekday:"{line}行目の利用曜日が「利用する曜日なし」になっています。まったく利用しない人は、お食事タイプを「利用なし」にしてください。",
-    employeeMasterWeekdayInDate:"{line}行目：利用曜日は7列目（入社日のうしろ）に書いてください。例）612,山田 太郎,セット,,,,火水",
+    employeeMasterWeekdayInDate:"{line}行目：利用曜日は7列目（入社日のうしろ）に書いてください。例）612,山田 太郎,利用あり,,,,火水",
     diffTitle:"保存前の確認",
     diffAdd:"追加（{n}件）", diffDel:"削除（{n}件）", diffChange:"変更（{n}件）", diffSame:"変更はありません。そのまま保存できます。",
     diffDelWarn:"削除される社員がいます。名簿から消えると、その社員はキャンセル登録ができなくなり、CSVにも出力されません。",
@@ -972,7 +972,7 @@ const T = {
     guestLunchAdd:"この人数を追加する", guestLunchRemove:"削除",
     guestLunchNone:"登録されている来客予定はありません。",
     guestLunchNeedDate:"日付を選んでください。",
-    guestLunchNeedCount:"セットまたはおかずの人数を1人以上入力してください。",
+    guestLunchNeedCount:"人数を1人以上入力してください。",
     guestLunchAdded:"追加しました。同じ日付にすでに登録がある場合は人数を積み増しています。",
 
     extraEatTitle:"臨時ランチ登録（利用なしの人）",
@@ -1080,8 +1080,8 @@ const T = {
     mineServingDays:"{n} serving days (weekends and closed days excluded)",
     minePausedNote:"{n} day(s) excluded by your pause period.",
     mineUnitNote:"Unit price: {u}",
-    mineUnitSetDayNote:" (set-price days are ¥300 for everyone)",
-    mineUnitSet:"Set ¥300", mineUnitOkazu:"Okazu ¥200", mineUnitNone:"Not using lunch service (not charged)", mineUnitUnknown:"Not set (calculated as Okazu ¥200)",
+    mineUnitSetDayNote:"",
+    mineUnitSet:"¥300", mineUnitOkazu:"Okazu ¥200", mineUnitNone:"Not using lunch service (not charged)", mineUnitUnknown:"Not set (calculated as ¥300)",
     mineEstimateNote:"This is an estimate: days used (weekends, closed days, cancellations, pause periods and your non-lunch weekdays excluded) × unit price. Please check your payslip for the final amount.",
     weekdayShort:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
   }
@@ -1094,7 +1094,7 @@ const HAS_LOGO = LOGO_DATA_URL.indexOf('data:image') === 0;
 const WD_KEYS = ['su','mo','tu','we','th','fr','sa'];
 const ADMIN_PASSWORD = "masuda";
 const PRICE_SET = 300;
-const PRICE_OKAZU = 200;
+// ランチはセットのみ（おかずは廃止）。食べた日はすべて1食この金額で計算する。
 // 従業員番号がこの番号以上の人は、給与システム用CSVには入れず、別の「利用明細CSV」に出す
 const DETAIL_CSV_ID_FROM = 8000;
 // 割引商品の単価（この7種類から個数を入力する）
@@ -1737,11 +1737,11 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
       const extraType = isBeforeHireDate(emp, d) ? null : (extraEatMap && extraEatMap.get(d));
       if(!extraType){ dayStatus.set(d,'off'); offDates.push(d); return; }
       eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
-      amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
+      amount += PRICE_SET;
     });
     return {eatDays, amount, pausedDays:0, cancelledDays:0, beforeHireDays:0, weekdayOffDays:0, dayStatus, eatDates, cancelledDates, offDates};
   }
-  const basePrice = emp && emp.mealType==='set' ? PRICE_SET : PRICE_OKAZU;
+  const basePrice = PRICE_SET;   // セットのみ（以前「おかず」だった人・未設定の人もセット料金）
   let eatDays=0, amount=0, pausedDays=0, cancelledDays=0, beforeHireDays=0, weekdayOffDays=0;
   servingDays.forEach(d=>{
     if(isBeforeHireDate(emp, d)){ beforeHireDays++; dayStatus.set(d,'off'); offDates.push(d); return; }
@@ -1751,7 +1751,7 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
       const extraType = extraEatMap && extraEatMap.get(d);
       if(extraType){
         eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
-        amount += (specialSet && specialSet.has(d)) ? PRICE_SET : (extraType==='set' ? PRICE_SET : PRICE_OKAZU);
+        amount += PRICE_SET;
       } else {
         weekdayOffDays++; dayStatus.set(d,'off'); offDates.push(d);
       }
@@ -1759,7 +1759,7 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
     }
     if(cancelledSet.has(d)){ cancelledDays++; dayStatus.set(d,'cancel'); cancelledDates.push(d); return; }
     eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
-    amount += (specialSet && specialSet.has(d)) ? PRICE_SET : basePrice;
+    amount += basePrice;
   });
   return {eatDays, amount, pausedDays, cancelledDays, beforeHireDays, weekdayOffDays, dayStatus, eatDates, cancelledDates, offDates};
 }
@@ -2610,13 +2610,11 @@ function paintMineResult(){
   const master = state.mineMaster;
   const s = state.mineSummary;
   const displayName = (master && master.name) || (rec && rec.name) || state.mineName;
-  const unitText = s.mealType==='set' ? t.mineUnitSet
-    : s.mealType==='okazu' ? t.mineUnitOkazu
+  // 「利用あり」（以前の「おかず」も含む）の人は1食300円
+  const unitText = (s.mealType==='set' || s.mealType==='okazu') ? t.mineUnitSet
     : s.mealType==='none' ? t.mineUnitNone
     : t.mineUnitUnknown;
-  // 単価の注記（「セット料金指定日」はセット以外の人だけに関係する話なので、その人にだけ出す）
-  const unitNoteText = t.mineUnitNote.replace('{u}', unitText)
-    + ((s.mealType!=='set' && s.mealType!=='none') ? t.mineUnitSetDayNote : '');
+  const unitNoteText = t.mineUnitNote.replace('{u}', unitText);
   // 日数から外れた分（停止期間・入社前）は、あるときだけ補足する
   const lunchExcludeNote = [
     s.pausedDays ? t.rcptPausedSub.replace('{n}', s.pausedDays) : '',
@@ -2666,8 +2664,8 @@ function paintMineResult(){
 
   const extraRows = (s.extraEatInMonth && s.extraEatInMonth.length)
     ? s.extraEatInMonth.map(e=>`
-        <div class="item"><span>${e.date}（${dowLabel(e.date,state.lang)}）　<span class="small">${e.mealType==='set'?t.mineUnitSet:t.mineUnitOkazu}</span></span>
-          <b>¥${(e.mealType==='set'?PRICE_SET:PRICE_OKAZU).toLocaleString()}</b>
+        <div class="item"><span>${e.date}（${dowLabel(e.date,state.lang)}）</span>
+          <b>¥${PRICE_SET.toLocaleString()}</b>
         </div>`).join('')
     : `<p class="small">${t.none}</p>`;
 
@@ -2856,13 +2854,13 @@ function renderAdminLogin(vp){
 }
 
 /* ---------- 従業員マスタのテキスト変換 ---------- */
-function mealTypeJa(v){ return v==='set' ? 'セット' : (v==='okazu' ? 'おかず' : (v==='none' ? '利用なし' : '未設定')); }
+function mealTypeJa(v){ return (v==='set' || v==='okazu') ? '利用あり' : (v==='none' ? '利用なし' : '未設定'); }
 function masterToText(list){
   return list
     .slice()
     .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}))
     .map(e=>{
-      const cols = [e.id, e.name, e.mealType==='set'?'セット':e.mealType==='okazu'?'おかず':e.mealType==='none'?'利用なし':''];
+      const cols = [e.id, e.name, (e.mealType==='set'||e.mealType==='okazu')?'利用あり':e.mealType==='none'?'利用なし':''];
       const wd = empWeekdays(e);
       const wdText = wd ? wd.map(i=>WD_CHARS[i]).join('') : '';
       if(e.pauseStart || e.pauseEnd || e.hireDate || wdText) cols.push(e.pauseStart||'', e.pauseEnd||'');
@@ -2973,34 +2971,34 @@ function masterHelpHtml(){
 
       <h4>基本の書き方</h4>
       <ul>
-        <li>お食事タイプは <code>セット</code> <code>おかず</code> <code>利用なし</code> のどれか。</li>
+        <li>お食事タイプは <code>利用あり</code> <code>利用なし</code> のどちらか。</li>
         <li>日付は <code>2026-09-15</code> の形。<code>2026/9/15</code>、<code>2026年9月15日</code> でも読み取ります。</li>
         <li>うしろの列だけ入れたいときは、間の列をカンマで空けます。入社日だけなら
-          <code>612,山田 太郎,セット,,,2026-09-15</code>。</li>
+          <code>612,山田 太郎,利用あり,,,2026-09-15</code>。</li>
         <li>行の順番は自由です（保存すると社員番号の順に並びます）。空行は無視します。</li>
       </ul>
 
       <h4>新しく食べはじめる人（入社・利用開始）</h4>
       <p>行を1行追加します。<b>入社日＝はじめて食べる日</b>です。その日より前は、金額計算にも「本日の状況」の人数にも入りません。</p>
-      <p>例）9月15日入社でセットを食べる　→　<code>612,山田 太郎,セット,,,2026-09-15</code></p>
+      <p>例）9月15日入社でランチを利用する　→　<code>612,山田 太郎,利用あり,,,2026-09-15</code></p>
       <p>もとから在籍している人（中途入社でない人）は、入社日は空欄のままでよいです。</p>
 
       <h4>しばらく食べない人（休職・長期出張）</h4>
       <p>行は消さずに、<b>停止開始日＝最初に食べない日</b>を入れます。再開日を空欄にすると、そのままずっと停止します。</p>
-      <p>例）9月20日から休職　→　<code>612,山田 太郎,セット,2026-09-20,,2026-09-15</code></p>
+      <p>例）9月20日から休職　→　<code>612,山田 太郎,利用あり,2026-09-20,,2026-09-15</code></p>
       <p>停止した日は金額計算と当日の人数から外れます。社員側でキャンセルを入れてもらう必要はありません。</p>
 
       <h4>また食べはじめる人（復職）</h4>
       <p><b>再開日＝また食べはじめる日</b>です（その日から計上されます）。停止開始日は消さずに残してください。過ぎた月の金額を正しく出すために使っています。</p>
-      <p>例）11月4日から復帰　→　<code>612,山田 太郎,セット,2026-09-20,2026-11-04,2026-09-15</code></p>
+      <p>例）11月4日から復帰　→　<code>612,山田 太郎,利用あり,2026-09-20,2026-11-04,2026-09-15</code></p>
       <p>停止期間は1人につき1組だけ持てます。次の停止を入れるときは前の期間を上書きすることになり、過ぎた月の見込み額の表示も変わります（すでに出力したCSVは変わりません）。</p>
 
       <h4>決まった曜日だけ食べる人（毎週の設定）</h4>
       <p>7列目の<b>利用曜日</b>に、<b>食べる曜日</b>を書きます。書かなければ、これまでどおり月〜金すべて食べる扱いです。</p>
       <ul>
-        <li>火曜と水曜だけ食べる　→　<code>612,山田 太郎,セット,,,,火水</code></li>
-        <li>毎週水曜は食べない　→　<code>612,山田 太郎,セット,,,,月火木金</code>（<code>水以外</code> と書いても同じです）</li>
-        <li>月曜と金曜だけ食べる　→　<code>613,佐藤 花子,おかず,,,,月金</code></li>
+        <li>火曜と水曜だけ食べる　→　<code>612,山田 太郎,利用あり,,,,火水</code></li>
+        <li>毎週水曜は食べない　→　<code>612,山田 太郎,利用あり,,,,月火木金</code>（<code>水以外</code> と書いても同じです）</li>
+        <li>月曜と金曜だけ食べる　→　<code>613,佐藤 花子,利用あり,,,,月金</code></li>
       </ul>
       <p>ここで指定した「食べない曜日」は、社員側のカレンダーでも選べなくなります。<b>毎週のキャンセルを社員に登録してもらう必要はありません。</b>金額計算・「本日の状況」・発注参考の人数からも、その曜日は自動で外れます。</p>
       <p>いつもの曜日に戻すときは、7列目を空欄にしてください（<code>毎日</code> と書いても同じです）。</p>
@@ -3014,9 +3012,6 @@ function masterHelpHtml(){
         <li>その月の月次CSVを出力する</li>
         <li>そのあとで、この欄からその行を消す</li>
       </ol>
-
-      <h4>セットとおかずを入れ替える人</h4>
-      <p>月の途中からの変更はできません。書き換えると、その月のCSVをまだ出していなければ、その月ぜんぶがその単価で計算されます。月の初めに切り替えるのが安全です。</p>
 
       <h4>ランチを食べない人（割引商品だけ買う人）</h4>
       <p><code>613,佐藤 花子,利用なし</code> のように登録します。ランチ代は0円です。その日だけ臨時で食べるときは、「臨時ランチ登録」の［社員］から日付を登録してください。</p>
@@ -3271,7 +3266,7 @@ async function renderAdmin(vp){
           return;
         }
         if(cancelledIds.has(String(e.id))) return;
-        if(e.mealType==='set') setCount++; else if(e.mealType==='okazu') okazuCount++;
+        setCount++;   // セットのみ（未設定・旧おかずもセットとして数える）
       });
       const guest = guestLunches.find(g=>g.date===dateStr) || null;
       if(guest) extraCount += Number(guest.set||0) + Number(guest.okazu||0);
@@ -3320,7 +3315,7 @@ async function renderAdmin(vp){
           if(!extraType) return;
           extraEatToday++;
           extraEatNamesToday.push(e.name);
-          if(extraType==='set') extraEatSetToday++; else extraEatOkazuToday++;
+          extraEatSetToday++;
           return;
         }
         if(isPausedOn(e, bISO)){ pausedTotal++; return; }
@@ -3331,7 +3326,7 @@ async function renderAdmin(vp){
           if(extraType){
             extraEatToday++;
             extraEatNamesToday.push(e.name);
-            if(extraType==='set') extraEatSetToday++; else extraEatOkazuToday++;
+            extraEatSetToday++;
           } else {
             offWeekdayTotal++;
           }
@@ -3340,10 +3335,10 @@ async function renderAdmin(vp){
         if(cancelledIdsToday.has(String(e.id))){
           cancelTotal++;
           cancelNamesToday.push(e.name);
-          if(e.mealType==='set') cancelSet++; else if(e.mealType==='okazu') cancelOkazu++; else cancelUnknown++;
+          if(e.mealType==='set' || e.mealType==='okazu') cancelSet++; else cancelUnknown++;
         }else{
           eatingTotal++;
-          if(e.mealType==='set') eatingSet++; else if(e.mealType==='okazu') eatingOkazu++; else eatingUnknown++;
+          if(e.mealType==='set' || e.mealType==='okazu') eatingSet++; else eatingUnknown++;
         }
       });
       eatingTotal += extraEatToday; eatingSet += extraEatSetToday; eatingOkazu += extraEatOkazuToday;
@@ -3428,8 +3423,14 @@ async function renderAdmin(vp){
           </div>
         </div>
         <div class="board-detailrow">
-          <div class="board-detail-col">${t.setLabel} ${eatingSet}${t.peopleUnit} ・ ${t.okazuLabel} ${eatingOkazu}${t.peopleUnit}${eatingUnknown? ' ・ '+t.unknownLabel+' '+eatingUnknown+t.peopleUnit : ''}${extraCombinedLine? `<br>${extraCombinedLine}`:''}</div>
-          <div class="board-detail-col cancel">${t.setLabel} ${cancelSet}${t.peopleUnit} ・ ${t.okazuLabel} ${cancelOkazu}${t.peopleUnit}${cancelUnknown? ' ・ '+t.unknownLabel+' '+cancelUnknown+t.peopleUnit : ''}${cancelNamesToday.length? `<br>${cancelNamesToday.map(escapeHtml).join('、')}`:''}${pausedTotal? `<br>${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）`:''}${offWeekdayTotal? `<br>利用しない曜日 ${offWeekdayTotal}${t.peopleUnit}（曜日の設定により人数に含みません）`:''}${notHiredYetTotal? `<br>${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）`:''}</div>
+          <div class="board-detail-col">${[eatingUnknown? t.unknownLabel+' '+eatingUnknown+t.peopleUnit : '', extraCombinedLine].filter(Boolean).join('<br>')}</div>
+          <div class="board-detail-col cancel">${[
+            cancelUnknown? t.unknownLabel+' '+cancelUnknown+t.peopleUnit : '',
+            cancelNamesToday.length? cancelNamesToday.map(escapeHtml).join('、') : '',
+            pausedTotal? `${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）` : '',
+            offWeekdayTotal? `利用しない曜日 ${offWeekdayTotal}${t.peopleUnit}（曜日の設定により人数に含みません）` : '',
+            notHiredYetTotal? `${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）` : '',
+          ].filter(Boolean).join('<br>')}</div>
         </div>
         ` : `
         <div class="board-totrow">
@@ -3452,8 +3453,7 @@ async function renderAdmin(vp){
           ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
         </div>
         <div class="weekfc-totals">
-          <div class="weekfc-tot"><span class="n">${weekTotals.set}</span><span class="l">セット計</span></div>
-          <div class="weekfc-tot"><span class="n">${weekTotals.okazu}</span><span class="l">おかず計</span></div>
+          <div class="weekfc-tot"><span class="n">${weekTotals.set}</span><span class="l">週合計</span></div>
           <div class="weekfc-tot"><span class="n">${weekTotals.extra}</span><span class="l">臨時ランチ計</span></div>
         </div>
         <table class="weekfc-table">
@@ -3462,8 +3462,7 @@ async function renderAdmin(vp){
             ${weekStats.map(s=>`<th>${dowLabel(s.date,'ja')}<br><span class="small">${s.date.slice(5).replace('-','/')}</span></th>`).join('')}
           </tr></thead>
           <tbody>
-            <tr><td class="rowlbl">セット</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.setCount}</td>`).join('')}</tr>
-            <tr><td class="rowlbl">おかず</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.okazuCount}</td>`).join('')}</tr>
+            <tr><td class="rowlbl">通常</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.setCount}</td>`).join('')}</tr>
             <tr><td class="rowlbl">臨時</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.extraCount}</td>`).join('')}</tr>
           </tbody>
         </table>
@@ -3610,18 +3609,6 @@ async function renderAdmin(vp){
           }).join('') : `<p class="small">${t.guestLunchNone}</p>`}
         </div>
         `}
-      `)}
-
-      ${qcard('special', t.specialDaysTitle, `
-        <p class="footnote">${t.specialDaysHelp}</p>
-        <div class="field-row">
-          <input type="date" id="adm-special-date">
-          <button class="btn btn-primary" id="adm-special-add">${t.specialDaysAdd}</button>
-        </div>
-        <div class="status-msg">${state.specialDaysMsg ? `<span style="color:${state.specialDaysMsg.ok?'var(--good)':'var(--danger)'}">${state.specialDaysMsg.text}</span>` : ''}</div>
-        <div class="daylist" style="margin-top:10px;">
-          ${specialDays.length? specialDays.map(d=>`<div class="item"><span>${d}（${dowLabel(d,'ja')}）</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-special="${d}">${t.specialDaysRemove}</button></div>`).join('') : `<p class="small">${t.specialDaysNone}</p>`}
-        </div>
       `)}
 
       ${qcard('closed', t.closedDaysTitle, `
@@ -4096,8 +4083,8 @@ function parseMasterText(text){
     const id = parts[0], name = parts[1], typeRaw = parts[2]||'';
     let mealType;
     if(typeRaw){
-      if(/セット|^set$/i.test(typeRaw)) mealType = 'set';
-      else if(/おかず|^okazu$/i.test(typeRaw)) mealType = 'okazu';
+      // 「利用あり」で登録する（内部の値は従来どおり 'set'）。以前の「セット」「おかず」も利用ありとして読み取る
+      if(/利用あり|^あり$|セット|おかず|^set$|^okazu$/i.test(typeRaw)) mealType = 'set';
       else if(/利用なし|^none$/i.test(typeRaw)) mealType = 'none';
     }
     const pauseStart = normDate(parts[3]||'');
@@ -4224,7 +4211,7 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   if(detailIds.length){
     // 2つ目のダウンロードがブラウザにまとめてブロックされないよう、少し間を空ける
     if(payrollIds.length) await new Promise(r=>setTimeout(r, 700));
-    const mealTypeLabel = mt => mt==='set' ? `セット(${PRICE_SET}円)` : mt==='none' ? '利用なし' : `おかず(${PRICE_OKAZU}円)`;
+    const mealTypeLabel = mt => mt==='none' ? '利用なし' : `利用あり(${PRICE_SET}円)`;
     const dayCols = servingDays.map(d=>{
       const dt = parseISO(d);
       return `${dt.getMonth()+1}/${dt.getDate()}(${WD_CHARS[dt.getDay()]})`;
@@ -4307,4 +4294,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
