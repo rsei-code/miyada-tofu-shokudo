@@ -89,7 +89,12 @@ body{
   transition:all .15s ease;
 }
 .admin-corner-btn:hover{border-color:var(--accent-mid);color:var(--ink);background:var(--accent-soft);}
-@media (max-width:560px){.admin-corner-btn{font-size:10.5px;padding:5px 9px;}}
+@media (max-width:560px){
+  .admin-corner-btn{font-size:10.5px;padding:5px 9px;}
+  /* スマホ版：「管理者はこちら」をヘッダー右上に固定配置 */
+  .masthead-right .admin-corner-btn{position:absolute;top:10px;right:10px;z-index:2;}
+  .masthead-brand{padding-right:112px;}
+}
 
 .tabbar{
   display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
@@ -4294,3 +4299,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
