@@ -443,20 +443,30 @@ textarea.csvbox{
 }
 .weekfc-tot .l{display:block;font-size:11px;margin-top:4px;color:var(--ink-soft);font-weight:700;}
 .weekfc-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
+.weekfc-table{table-layout:fixed;}
 .weekfc-table th, .weekfc-table td{
-  text-align:center;padding:7px 4px;font-size:12.5px;border-bottom:1px solid var(--accent-line);
+  text-align:center;padding:9px 4px;font-size:12.5px;border-bottom:1px solid var(--accent-line);
 }
+.weekfc-table td{
+  font-family:'Shippori Mincho',serif;font-size:20px;font-weight:800;color:var(--ink);line-height:1.2;
+}
+.weekfc-table th:first-child, .weekfc-table td.rowlbl{width:52px;}
 .weekfc-table th{
   background:transparent;color:var(--ink-soft);font-weight:700;font-size:11.5px;line-height:1.5;padding-top:9px;
 }
 .weekfc-table th .small{font-size:10px;font-weight:600;color:var(--ink-soft);opacity:0.8;}
-.weekfc-table td.rowlbl{text-align:left;font-weight:700;color:var(--ink);padding-left:10px;white-space:nowrap;}
-.weekfc-table td.closed{color:var(--ink-soft);font-size:11px;}
+.weekfc-table td.rowlbl{text-align:left;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);padding-left:10px;white-space:nowrap;}
+.weekfc-table td.closed{font-family:inherit;color:var(--ink-soft);font-size:11px;font-weight:600;}
+.weekfc-table tr.total td{background:var(--accent-soft);color:var(--accent-deeper);border-top:2px solid var(--accent-line);}
+.weekfc-table tr.total td.rowlbl{color:var(--accent-deeper);}
 .weekfc-table tr:last-child td{border-bottom:none;}
 @media (max-width:480px){
   .weekfc{padding:13px 12px;}
-  .weekfc-tot .n{font-size:20px;}
-  .weekfc-table th, .weekfc-table td{font-size:11px;padding:6px 2px;}
+  .weekfc-table th{font-size:11px;padding:7px 1px;}
+  .weekfc-table td{font-size:18px;padding:8px 1px;}
+  .weekfc-table td.rowlbl{font-size:12px;padding-left:6px;}
+  .weekfc-table th:first-child, .weekfc-table td.rowlbl{width:40px;}
+  .weekfc-table td.closed{font-size:10.5px;}
 }
 
 /* 管理者メニューの区分けラベル（厨房担当者向け／システム管理者向け） */
@@ -761,6 +771,7 @@ const T = {
     title:"宮田とうふ工房",
     empId:"社員番号", empIdPh:"例）123", empName:"名前", empNamePh:"例）山田 太郎",
     empIdNotice:"先頭に「0」を付けずに入力してください（例：012 ではなく 12）。",
+    empNameNotice:"姓と名の間のスペースはなくても大丈夫です（入れる場合、全角・半角どちらでも可）。",
     step1:"社員情報", step2:"キャンセルする日を選択（複数選択可）",
     recOpen:"毎週同じ曜日をキャンセルする（任意）", recClose:"閉じる",
     recStopBtn:"停止", recEndedLabel:"終了",
@@ -995,6 +1006,7 @@ const T = {
     title:"Miyada Tofu Workshop",
     empId:"Employee ID", empIdPh:"e.g. 123", empName:"Name", empNamePh:"e.g. Taro Yamada",
     empIdNotice:"Please don't include a leading \"0\" (e.g. 12, not 012).",
+    empNameNotice:"A space between your family and given name is optional.",
     step1:"Your Information", step2:"Select date(s) to cancel (multiple allowed)",
     recOpen:"Cancel every week on the same weekday (optional)", recClose:"Close",
     recStopBtn:"Stop", recEndedLabel:"Ended",
@@ -1899,6 +1911,7 @@ function renderForm(vp){
         <div class="field">
           <label>${t.empName}</label>
           <input type="text" id="f-empname" placeholder="${t.empNamePh}" value="${escapeHtml(state.empName)}">
+          <p class="footnote" style="margin-top:6px;">${t.empNameNotice}</p>
         </div>
       </div>
     </div>
@@ -2507,7 +2520,7 @@ async function computeMineSummary(){
 
 function paintPinGate(box, t){
   const isSetup = state.mineStage === 'setPin';
-  const who = `${escapeHtml((state.mineMaster && state.mineMaster.name) || state.mineName.trim())}（${escapeHtml(state.mineId.trim())}）`;
+  const who = `No.${escapeHtml(state.mineId.trim())} ${escapeHtml((state.mineMaster && state.mineMaster.name) || state.mineName.trim())}`;
   box.innerHTML = `
     <div class="gate">
       <div class="who">${who}</div>
@@ -2676,7 +2689,7 @@ function paintMineResult(){
 
   box.innerHTML = `
     <div class="card">
-      <h2 style="margin-bottom:6px;">${escapeHtml(displayName)} <span class="small">(${escapeHtml(state.mineId.trim())})</span>
+      <h2 style="margin-bottom:6px;"><span class="small">No.${escapeHtml(state.mineId.trim())}</span> ${escapeHtml(displayName)}
         ${master && master.pauseStart ? `<span class="pausechip">${pauseLabel(master, state.lang)}</span>` : ''}
         ${master && empWeekdays(master) ? `<span class="wdchip">${t.useWeekdayChip.replace('{wd}', weekdaysText(master, state.lang))}</span>` : ''}
       </h2>
@@ -3354,6 +3367,8 @@ async function renderAdmin(vp){
     // 来客用ランチ（表示中の日付の分。給与や請求には一切関与しない）
     const guestToday = guestLunches.find(g=>g.date === bISO) || null;
     const guestTotalToday = guestToday ? Number(guestToday.set||0) + Number(guestToday.okazu||0) : 0;
+    // 来客用ランチも「食べる人」に含める（発注参考の合計と同じ数え方にそろえる）
+    if(masterAvailable) eatingTotal += guestTotalToday;
 
     // 臨時（来客＋社員）をまとめて1行で表示するためのテキストを組み立てる
     // 例：「臨時：計3人、内訳：エビデント2人、増田雅敏（上の人数に含む）」
@@ -3432,9 +3447,6 @@ async function renderAdmin(vp){
           <div class="board-detail-col cancel">${[
             cancelUnknown? t.unknownLabel+' '+cancelUnknown+t.peopleUnit : '',
             cancelNamesToday.length? cancelNamesToday.map(escapeHtml).join('、') : '',
-            pausedTotal? `${t.pausedLabel} ${pausedTotal}${t.peopleUnit}（停止期間中のため人数に含みません）` : '',
-            offWeekdayTotal? `利用しない曜日 ${offWeekdayTotal}${t.peopleUnit}（曜日の設定により人数に含みません）` : '',
-            notHiredYetTotal? `${t.notHiredYetLabel} ${notHiredYetTotal}${t.peopleUnit}（入社日がまだのため人数に含みません）` : '',
           ].filter(Boolean).join('<br>')}</div>
         </div>
         ` : `
@@ -3457,10 +3469,6 @@ async function renderAdmin(vp){
           <div class="weekfc-head">📦 発注参考：${weekLabel}（${weekDates[0].slice(5).replace('-','/')}〜${weekDates[4].slice(5).replace('-','/')}）の見込み</div>
           ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
         </div>
-        <div class="weekfc-totals">
-          <div class="weekfc-tot"><span class="n">${weekTotals.set}</span><span class="l">週合計</span></div>
-          <div class="weekfc-tot"><span class="n">${weekTotals.extra}</span><span class="l">臨時ランチ計</span></div>
-        </div>
         <table class="weekfc-table">
           <thead><tr>
             <th></th>
@@ -3469,6 +3477,7 @@ async function renderAdmin(vp){
           <tbody>
             <tr><td class="rowlbl">通常</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.setCount}</td>`).join('')}</tr>
             <tr><td class="rowlbl">臨時</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.extraCount}</td>`).join('')}</tr>
+            <tr class="total"><td class="rowlbl">合計</td>${weekStats.map(s=> s.closed ? `<td class="closed">休業</td>` : s.noMaster ? `<td>-</td>` : `<td>${s.setCount + s.extraCount}</td>`).join('')}</tr>
           </tbody>
         </table>
       </div>
@@ -3491,7 +3500,7 @@ async function renderAdmin(vp){
             }).join(' / ') || t.none;
             const me = masterById.get(String(r.employeeId));
             return `<div class="daylist item" style="display:block;">
-              <b>${escapeHtml(r.name)} <span class="small">(${escapeHtml(r.employeeId)})</span></b>
+              <b><span class="small">No.${escapeHtml(r.employeeId)}</span> ${escapeHtml(r.name)}</b>
               ${me && me.pauseStart ? `<span class="pausechip">停止 ${me.pauseStart}〜${me.pauseEnd||'未定'}</span>` : ''}
               ${me && empWeekdays(me) ? `<span class="wdchip">利用曜日 ${weekdaysText(me,'ja')}</span>` : ''}
               <p class="small" style="margin:6px 0 2px">個別: ${escapeHtml(singles)}</p>
@@ -3509,7 +3518,7 @@ async function renderAdmin(vp){
               const me = masterById.get(String(x.employeeId));
               const paused = me && isPausedOn(me, searchDate);
               const wdOff = me && isWeekdayOff(me, searchDate);
-              return `<div class="item"><span>${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span>${paused?`<span class="pausechip">停止期間中</span>`:''}${wdOff?`<span class="wdchip">もともと利用しない曜日</span>`:''}</span><span class="badge ${x.type}">${x.type==='recurring'?'定期':'個別'}</span></div>`;
+              return `<div class="item"><span><span class="small">No.${escapeHtml(x.employeeId)}</span> ${escapeHtml(x.name)}${paused?`<span class="pausechip">停止期間中</span>`:''}${wdOff?`<span class="wdchip">もともと利用しない曜日</span>`:''}</span><span class="badge ${x.type}">${x.type==='recurring'?'定期':'個別'}</span></div>`;
             }).join('') : `<p class="small">${t.noResults}</p>`}
           </div>
         </div>
@@ -3535,7 +3544,7 @@ async function renderAdmin(vp){
               const idStr = String(e.id);
               const selected = state.extraEatSelectedId === idStr;
               return `<div class="emprow">
-                <span class="who">${escapeHtml(e.name)} <span class="small">(${escapeHtml(idStr)})</span>
+                <span class="who"><span class="small">No.${escapeHtml(idStr)}</span> ${escapeHtml(e.name)}
                   <span class="statuspill ${e.mealType==='none'?'off':'on'}">${mealTypeJa(e.mealType)}</span>
                   ${empWeekdays(e) ? `<span class="wdchip">利用曜日 ${weekdaysText(e,'ja')}</span>` : ''}</span>
                 <span class="btns"><button class="btn ${selected?'btn-primary':'btn-ghost'}" data-select-extraeat="${escapeHtml(idStr)}">${selected?t.extraEatSelected:t.extraEatSelect}</button></span>
@@ -3549,7 +3558,7 @@ async function renderAdmin(vp){
           const list = (rec && rec.extraEatDates) || [];
           return `
           <div class="subsec" style="margin-top:12px;">
-            <p class="sublabel">${escapeHtml(emp?emp.name:'')}（${escapeHtml(state.extraEatSelectedId)}）</p>
+            <p class="sublabel">No.${escapeHtml(state.extraEatSelectedId)} ${escapeHtml(emp?emp.name:'')}</p>
             <div class="field">
               <label>${t.extraEatDate}</label>
               <input type="date" id="adm-extraeat-date">
@@ -3581,7 +3590,7 @@ async function renderAdmin(vp){
             <div style="margin-top:8px;">
               ${all.length ? all.map(x=>{
                 const locked = x.date < todayISO();
-                return `<div class="item"><span>${x.date}（${dowLabel(x.date,'ja')}） ${escapeHtml(x.name)} <span class="small">(${escapeHtml(x.employeeId)})</span></span>${
+                return `<div class="item"><span>${x.date}（${dowLabel(x.date,'ja')}） <span class="small">No.${escapeHtml(x.employeeId)}</span> ${escapeHtml(x.name)}</span>${
                   locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
                          : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat-all="${escapeHtml(x.employeeId)}|${x.date}">${t.delete}</button>`
                 }</div>`;
@@ -3654,7 +3663,7 @@ async function renderAdmin(vp){
 
       ${pausedList.length ? qcard('paused', t.pausedListTitle.replace('{n}', pausedList.length), `
         <div class="daylist">
-          ${pausedList.map(e=>`<div class="item"><span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span></span><span class="small">${e.pauseStart} 〜 ${e.pauseEnd||'未定'}${isPausedOn(e,tISO)?'（停止中）':''}</span></div>`).join('')}
+          ${pausedList.map(e=>`<div class="item"><span><span class="small">No.${escapeHtml(e.id)}</span> ${escapeHtml(e.name)}</span><span class="small">${e.pauseStart} 〜 ${e.pauseEnd||'未定'}${isPausedOn(e,tISO)?'（停止中）':''}</span></div>`).join('')}
         </div>
         <p class="footnote">停止期間は下の「従業員マスタ」で編集できます。</p>
       `) : ''}
@@ -3669,7 +3678,7 @@ async function renderAdmin(vp){
         <div class="status-msg">${state.adminPinMsg ? `<span style="color:var(--good)">${state.adminPinMsg}</span>` : ''}</div>
         ${pinSearchResults.length ? `<div class="scrolllist" style="margin-top:8px;">
           ${pinSearchResults.map(e=>`<div class="daylist item" style="border-top:none;margin-top:0;padding-top:8px;">
-            <span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span>
+            <span><span class="small">No.${escapeHtml(e.id)}</span> ${escapeHtml(e.name)}
               <span class="statuspill ${e.stateClass}">${e.stateLabel}</span></span>
             ${e.hasPin ? `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-pin-reset="${escapeHtml(e.id)}" data-pin-name="${escapeHtml(e.name)}">${t.adminPinReset}</button>` : ''}
           </div>`).join('')}
@@ -3680,7 +3689,7 @@ async function renderAdmin(vp){
           <p class="footnote" style="margin-top:0;">${t.adminPinUnsetHelp}</p>
           <div class="scrolllist">
             ${pinUnsetList.map(e=>`<div class="daylist item" style="border-top:none;margin-top:0;padding-top:8px;">
-              <span>${escapeHtml(e.name)} <span class="small">(${escapeHtml(e.id)})</span></span>
+              <span><span class="small">No.${escapeHtml(e.id)}</span> ${escapeHtml(e.name)}</span>
             </div>`).join('')}
           </div>` : ''}
       `)}
