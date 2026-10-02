@@ -1561,7 +1561,7 @@ function sameName(a, b){
 }
 // 名簿に登録された氏名と、入力された氏名が同じ人とみなせるか。
 // sameName に加えて、名簿の氏名が3語以上（例：ﾅｷｰﾈｽ ﾗﾈﾙ ﾋｱｶﾞﾝ／伊藤 ﾚｲﾔ ｴﾝﾘｹｽ）の場合は、
-// その一部の語だけの入力でも通す。
+// その一部の語だけの入力でも通す。ただし漢字の苗字だけ（「伊藤」など）では通さない。
 //   ・1語だけ            ﾅｷｰﾈｽ ／ ラネル ／ ヒアガン
 //   ・続いた語をつなげて  ナキーネス ラネル ／ ラネルヒアガン
 //   ・語を並べ替えて      ヒアガン ナキーネス
@@ -1573,12 +1573,14 @@ function matchesMasterName(masterName, input){
   if(mp.length < 3 || !ip.length) return false;
   const joined = ip.join('');
   if(joined.length < 2) return false;
+  // 漢字だけの語（伊藤・中原など）しか使っていない入力は、同じ苗字の別の人と区別できないので通さない
+  const hasNonKanji = list => list.some(w => !isKanjiWord(w));
   // 名簿の続いた語を（スペースなしで）つなげたものと一致するか
   for(let i=0;i<mp.length;i++){
     let acc = '';
     for(let j=i;j<mp.length;j++){
       acc += mp[j];
-      if(acc === joined) return true;
+      if(acc === joined) return hasNonKanji(mp.slice(i, j+1));
       if(acc.length >= joined.length) break;
     }
   }
@@ -1589,7 +1591,11 @@ function matchesMasterName(masterName, input){
     if(k === -1) return false;
     pool.splice(k,1);
   }
-  return true;
+  return hasNonKanji(ip);
+}
+// 漢字だけでできた語か（々・〆・ヶ も漢字の仲間として扱う）
+function isKanjiWord(w){
+  return /^[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\u3005\u3006\u30F6]+$/.test(w);
 }
 // 管理画面の検索用：半角・全角カタカナ、ひらがな、スペースの違いを無視して部分一致を探す
 function nameIncludes(target, q){
@@ -4359,5 +4365,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
-
