@@ -1541,6 +1541,8 @@ function nameParts(s){
   t = t.toLowerCase();
   // ひらがな → カタカナ
   t = t.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+  // カタカナの直後のハイフン・波線などは長音「ー」の打ち間違いとみなす（ﾅｷ-ﾈｽ・ナキ－ネス → ナキーネス）
+  for(let i=0;i<3;i++) t = t.replace(/([\u30A1-\u30FA\u30FC])[\-\u2010\u2011\u2012\u2013\u2014\u2015\u2212~\u301C\u30A0]/g, '$1\u30FC');
   // 区切りに使われる記号はスペース扱い。長音符「ー」は文字なので残す
   t = t.replace(/[\-\u2010\u2011\u2012\u2013\u2014\u2015\u2212.,'\u2019\u0060"()\u30FB]+/g, ' ');
   return t.split(/[\s\u3000]+/).filter(Boolean);
@@ -1556,6 +1558,54 @@ function nameSortedKey(s){
 // 同じ人の氏名とみなせるか（順番どおりでも、姓名が逆でも通す）
 function sameName(a, b){
   return normName(a) === normName(b) || nameSortedKey(a) === nameSortedKey(b);
+}
+// 名簿に登録された氏名と、入力された氏名が同じ人とみなせるか。
+// sameName に加えて、名簿の氏名が3語以上（例：ﾅｷｰﾈｽ ﾗﾈﾙ ﾋｱｶﾞﾝ／伊藤 ﾚｲﾔ ｴﾝﾘｹｽ）の場合は、
+// その一部の語だけの入力でも通す。
+//   ・1語だけ            ﾅｷｰﾈｽ ／ ラネル ／ ヒアガン
+//   ・続いた語をつなげて  ナキーネス ラネル ／ ラネルヒアガン
+//   ・語を並べ替えて      ヒアガン ナキーネス
+// 1文字だけの入力は通さない。半角・全角、ひらがな・カタカナの違いは nameParts でならし済み。
+function matchesMasterName(masterName, input){
+  if(sameName(masterName, input)) return true;
+  const mp = nameParts(masterName);
+  const ip = nameParts(input);
+  if(mp.length < 3 || !ip.length) return false;
+  const joined = ip.join('');
+  if(joined.length < 2) return false;
+  // 名簿の続いた語を（スペースなしで）つなげたものと一致するか
+  for(let i=0;i<mp.length;i++){
+    let acc = '';
+    for(let j=i;j<mp.length;j++){
+      acc += mp[j];
+      if(acc === joined) return true;
+      if(acc.length >= joined.length) break;
+    }
+  }
+  // 入力の各語が、名簿の別々の語に1つずつ一致するか（順番は問わない）
+  const pool = mp.slice();
+  for(const w of ip){
+    const k = pool.indexOf(w);
+    if(k === -1) return false;
+    pool.splice(k,1);
+  }
+  return true;
+}
+// 管理画面の検索用：半角・全角カタカナ、ひらがな、スペースの違いを無視して部分一致を探す
+function nameIncludes(target, q){
+  const k = normName(q);
+  if(!k) return false;
+  return normName(target).includes(k);
+}
+// 送信前に、入力された氏名を名簿の正式な氏名に置き換える。
+// サーバー（Apps Script）側の照合や記録・CSVには、名簿どおりの氏名が渡るようにするため。
+async function resolveMasterName(id, name){
+  try{
+    let m = (state.formMaster && String(state.formMaster.id) === String(id)) ? state.formMaster : null;
+    if(!m || !matchesMasterName(m.name, name)) m = await getMasterEmp(id);
+    if(m && m.name && matchesMasterName(m.name, name)) return m.name;
+  }catch(e){}
+  return name;
 }
 // 2026/8/1・2026年8月1日 なども 2026-08-01 に揃える。読めなければ null
 function normDate(s){
@@ -1674,7 +1724,7 @@ async function checkAgainstMaster(id, name){
   // まずその社員1名分だけを読む（名簿全件を読まないので速い）
   const one = await getMasterEmp(id);
   if(one){
-    if(!sameName(one.name, name)) return {ok:false, reason:'mismatch'};
+    if(!matchesMasterName(one.name, name)) return {ok:false, reason:'mismatch'};
     return {ok:true, emp:one};
   }
   // 見つからないときだけ、名簿そのものが未登録かどうかを確かめる
@@ -2152,7 +2202,7 @@ async function refreshFormMaster(){
   state.formMasterKey = key;
   try{
     const m = await getMasterEmp(id);
-    const next = (m && sameName(m.name, name)) ? m : null;
+    const next = (m && matchesMasterName(m.name, name)) ? m : null;
     const beforeWd = JSON.stringify(empWeekdays(state.formMaster) || null);
     const afterWd = JSON.stringify(empWeekdays(next) || null);
     state.formMaster = next;
@@ -2226,7 +2276,7 @@ async function submitPurchase(){
     state.msg = t.needQty; render(); return;
   }
   const id = state.empId.trim();
-  const name = state.empName.trim();
+  const name = await resolveMasterName(id, state.empName.trim());
 
   // 1回目：名簿照合とPINの状態確認を1回のリクエストにまとめて行い、最終確認画面を出す。
   // （以前は「名簿照合」と「PIN状態確認」で別々に2回問い合わせていた）
@@ -2326,7 +2376,7 @@ async function submitCancellation(){
   }
 
   const id = state.empId.trim();
-  const name = state.empName.trim();
+  const name = await resolveMasterName(id, state.empName.trim());
   const recurringRule = hasRecurring ? {
     id: 'r'+Date.now(),
     weekdays: Array.from(state.recurringWd).filter(i=>i!==0 && i!==6).sort(),
@@ -2434,7 +2484,7 @@ function renderMineSection(vp){
 async function runMineSearch(){
   const t = T[state.lang];
   const id = state.mineId.trim();
-  const name = state.mineName.trim();
+  let name = state.mineName.trim();
   state.mineSearched = true;
   state.mineError = null; state.mineRecord = null; state.mineMaster = null; state.mineSummary = null;
   state.mineStage = 'search'; state.minePin = ''; state.minePin2 = '';
@@ -2444,7 +2494,8 @@ async function runMineSearch(){
 
   const [master, rec, pinRec] = await Promise.all([getMasterEmp(id), getEmp(id), getPinRecord(id)]);
   if(master){
-    if(!sameName(master.name, name)){ state.mineError = t.mineNameMismatch; return; }
+    if(!matchesMasterName(master.name, name)){ state.mineError = t.mineNameMismatch; return; }
+    name = master.name;   // 以降は名簿どおりの氏名で扱う
   } else if(rec){
     if(!sameName(rec.name, name)){ state.mineError = t.mineNameMismatch; return; }
   } else {
@@ -3388,7 +3439,7 @@ async function renderAdmin(vp){
 
     const nameSearchLower = (state.adminSearch||'').trim().toLowerCase();
     const nameResults = nameSearchLower ? records.filter(r=>
-      (r.employeeId+'').toLowerCase().includes(nameSearchLower) || (r.name||'').toLowerCase().includes(nameSearchLower)
+      (r.employeeId+'').toLowerCase().includes(nameSearchLower) || nameIncludes(r.name||'', nameSearchLower)
     ).sort((a,b)=> (a.employeeId+'').localeCompare(b.employeeId+'')) : [];
 
     // 閲覧用PINの状況
@@ -3408,7 +3459,7 @@ async function renderAdmin(vp){
     });
     const pinQuery = (state.adminPinSearch||'').trim().toLowerCase();
     const pinSearchResults = pinQuery
-      ? pinRows.filter(e=> e.id.toLowerCase().includes(pinQuery) || (e.name||'').toLowerCase().includes(pinQuery))
+      ? pinRows.filter(e=> e.id.toLowerCase().includes(pinQuery) || nameIncludes(e.name||'', pinQuery))
       : [];
     const pinUnsetList = pinRows.filter(e=>!e.hasPin);
 
@@ -3537,7 +3588,7 @@ async function renderAdmin(vp){
           ${(function(){
             const q = (state.extraEatSearch||'').trim().toLowerCase();
             if(!q) return `<p class="small">${t.masterSearchHint}</p>`;
-            const results = master.filter(e=> String(e.id).toLowerCase().includes(q) || String(e.name||'').toLowerCase().includes(q))
+            const results = master.filter(e=> String(e.id).toLowerCase().includes(q) || nameIncludes(e.name||'', q))
               .sort((a,b)=> String(a.id).localeCompare(String(b.id),'ja',{numeric:true}));
             if(!results.length) return `<p class="small">${t.noEmployees}</p>`;
             return results.map(e=>{
@@ -4308,4 +4359,5 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
 
