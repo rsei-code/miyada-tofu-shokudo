@@ -991,14 +991,24 @@ const T = {
     guestLunchNeedCount:"人数を1人以上入力してください。",
     guestLunchAdded:"追加しました。同じ日付にすでに登録がある場合は人数を積み増しています。",
 
-    extraEatTitle:"臨時ランチ登録（利用なしの人）",
-    extraEatHelp:"普段は「利用なし」で登録している社員が、その日だけ臨時でランチを食べる場合にここから登録してください。登録した日は月次CSVの金額計算にも反映され、「本日の状況」の人数にも加算されます。社員番号または氏名で検索して選んでください。",
+    extraEatTitle:"臨時ランチ登録（利用なしの人・利用曜日以外に食べる人）",
+    extraEatHelp:"普段は「利用なし」の社員や、利用曜日が決まっている社員（例：月火木金）が、いつもは食べない日に臨時でランチを食べる場合にここから登録してください。利用曜日が決まっている人は、「代わりに食べない日」も同時に登録できます（例：今週だけ木曜をやめて水曜に食べる）。登録した日は月次CSVの金額計算にも反映され、「本日の状況」の人数にも加算されます。社員番号または氏名で検索して選んでください。",
     extraEatDate:"食べる日", extraEatSelect:"選ぶ", extraEatSelected:"選択中",
     extraEatAllTitle:"登録されている臨時ランチ（全員・{n}件）", extraEatAllNone:"登録されている臨時ランチはありません。",
     extraEatLockedLabel:"削除できません",
     extraEatAdd:"この内容で登録する",
     extraEatAdded:"登録しました。",
     extraEatNeedDate:"日付を選んでください。",
+    swapCancelLabel:"代わりに食べない日（振替・任意）",
+    swapCancelHelp:"いつも食べる曜日をこの週だけやめる場合に選んでください。社員本人がキャンセル登録をしなくても、この日はキャンセル扱いになります。",
+    swapCancelNotOff:"{d}（{w}）はもともと食べる曜日なので、臨時ランチの登録は不要です。",
+    swapCancelNotEatDay:"{d}（{w}）はもともと食べない曜日なので、キャンセルの登録は不要です。",
+    swapCancelNotLunchDay:"{d}は土日または休業日のため、キャンセルの登録はできません。",
+    swapCancelPast:"{d}は締切（当日8:00）を過ぎているため、キャンセルの登録はできません。",
+    swapCancelSame:"「食べる日」と「代わりに食べない日」が同じ日になっています。",
+    swapAdded:"登録しました。{eat}（{ew}）を臨時ランチ、{cancel}（{cw}）をキャンセルにしました。",
+    empCancelListTitle:"この人のキャンセル日（今日以降・個別）",
+    empCancelListNote:"社員本人が登録した分と、ここで振替として登録した分の両方が出ます。",
     weekdayShort:["日","月","火","水","木","金","土"],
   },
   en:{
@@ -3077,7 +3087,7 @@ function masterHelpHtml(){
       </ul>
       <p>ここで指定した「食べない曜日」は、社員側のカレンダーでも選べなくなります。<b>毎週のキャンセルを社員に登録してもらう必要はありません。</b>金額計算・「本日の状況」・発注参考の人数からも、その曜日は自動で外れます。</p>
       <p>いつもの曜日に戻すときは、7列目を空欄にしてください（<code>毎日</code> と書いても同じです）。</p>
-      <p>この設定をしている人が、たまたまその曜日に食べる日だけは、「臨時ランチ登録」の［社員］から日付を登録すれば1食分として計上されます。</p>
+      <p>この設定をしている人が、たまたまその曜日に食べる日だけは、「臨時ランチ登録」の［社員］から日付を登録すれば1食分として計上されます。<b>ある週だけ曜日を入れ替える場合</b>（例：木曜をやめて水曜に食べる）は、同じ画面の「代わりに食べない日」に木曜の日付を入れて登録すれば、水曜の臨時ランチと木曜のキャンセルが一度に登録されます。</p>
       <p class="warn">※ 途中で曜日を変えると、その月のCSVをまだ出していない場合は、その月ぜんぶが新しい曜日で計算されます。月の初めに切り替えるのが安全です。</p>
 
       <h4>退職する人</h4>
@@ -3620,6 +3630,12 @@ async function renderAdmin(vp){
               <label>${t.extraEatDate}</label>
               <input type="date" id="adm-extraeat-date">
             </div>
+            ${(emp && emp.mealType!=='none' && empWeekdays(emp)) ? `
+            <div class="field">
+              <label>${t.swapCancelLabel}</label>
+              <input type="date" id="adm-swap-cancel-date">
+              <p class="small" style="margin-top:4px;">${t.swapCancelHelp}</p>
+            </div>` : ''}
             <div class="btnrow"><button class="btn btn-primary" id="adm-extraeat-add">${t.extraEatAdd}</button></div>
             <div class="status-msg">${state.extraEatMsg ? `<span style="color:${state.extraEatMsg.ok?'var(--good)':'var(--danger)'}">${state.extraEatMsg.text}</span>` : ''}</div>
             <div class="daylist" style="margin-top:10px;">
@@ -3631,6 +3647,24 @@ async function renderAdmin(vp){
                 }</div>`;
               }).join('') : `<p class="small">${t.none}</p>`}
             </div>
+            ${(emp && emp.mealType!=='none') ? (function(){
+              const today = todayISO();
+              const cl = ((rec && rec.singleDates) || []).filter(d=> d >= today).slice().sort();
+              return `
+            <div class="daylist" style="margin-top:12px;">
+              <label>${t.empCancelListTitle}</label>
+              <p class="small">${t.empCancelListNote}</p>
+              <div style="margin-top:6px;">
+              ${cl.length ? cl.map(d=>{
+                const locked = isPastCutoff(d);
+                return `<div class="item"><span>${d}（${dowLabel(d,'ja')}）</span>${
+                  locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
+                         : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-emp-cancel="${d}">${t.delete}</button>`
+                }</div>`;
+              }).join('') : `<p class="small">${t.none}</p>`}
+              </div>
+            </div>`;
+            })() : ''}
           </div>`;
         })() : ''}
         ${(function(){
@@ -4024,7 +4058,7 @@ async function renderAdmin(vp){
       };
     });
 
-    /* --- 臨時ランチ登録（利用なしの人） --- */
+    /* --- 臨時ランチ登録（利用なしの人・利用曜日以外に食べる人）＋振替キャンセル --- */
     bindLiveSearch(vp.querySelector('#adm-extraeat-search'), (val)=>{
       state.extraEatSearch = val; drawAdmin();
     });
@@ -4040,8 +4074,23 @@ async function renderAdmin(vp){
       const d = document.getElementById('adm-extraeat-date').value;
       if(!d){ state.extraEatMsg = {text:t.extraEatNeedDate, ok:false}; drawAdmin(); return; }
       const id = state.extraEatSelectedId;
-      extraAddBtn.disabled = true;
       const emp = masterById.get(id);
+      const swapInput = document.getElementById('adm-swap-cancel-date');
+      const cd = swapInput ? swapInput.value : '';
+      const fill = (msg, x)=> msg.replace('{d}', x).replace('{w}', dowLabel(x,'ja'));
+      const showErr = (text)=>{ state.extraEatMsg = {text, ok:false}; drawAdmin(); };
+      // 利用曜日が決まっている人：食べる日は「もともと食べない曜日」であること
+      if(emp && emp.mealType!=='none' && empWeekdays(emp) && !isWeekdayOff(emp, d)){
+        return showErr(fill(t.swapCancelNotOff, d));
+      }
+      // 振替（代わりに食べない日）のチェック
+      if(cd){
+        if(cd === d) return showErr(t.swapCancelSame);
+        if(!isLunchDay(cd)) return showErr(t.swapCancelNotLunchDay.replace('{d}', cd));
+        if(isPastCutoff(cd)) return showErr(t.swapCancelPast.replace('{d}', cd));
+        if(isWeekdayOff(emp, cd)) return showErr(fill(t.swapCancelNotEatDay, cd));
+      }
+      extraAddBtn.disabled = true;
       const rec = (await getEmp(id)) || {employeeId:id, name:(emp&&emp.name)||'', singleDates:[], recurring:[]};
       rec.name = (emp && emp.name) || rec.name;
       rec.extraEatDates = rec.extraEatDates || [];
@@ -4049,9 +4098,18 @@ async function renderAdmin(vp){
       // 臨時ランチは来客・社員とも全てセット固定
       if(idx===-1) rec.extraEatDates.push({date:d, mealType: 'set'});
       else rec.extraEatDates[idx].mealType = 'set';
-      await setEmp(id, rec);
+      // 振替：代わりに食べない日を個別キャンセルとして追加（社員本人のキャンセルと同じ扱い）
+      if(cd){
+        rec.singleDates = rec.singleDates || [];
+        if(rec.singleDates.indexOf(cd) === -1) rec.singleDates.push(cd);
+        rec.singleDates.sort();
+      }
+      const ok = await setEmp(id, rec);
+      if(!ok){ extraAddBtn.disabled = false; return showErr(t.saveFailed); }
       state.extraEatDate = '';
-      state.extraEatMsg = {text:t.extraEatAdded, ok:true};
+      state.extraEatMsg = {text: cd
+        ? t.swapAdded.replace('{eat}', d).replace('{ew}', dowLabel(d,'ja')).replace('{cancel}', cd).replace('{cw}', dowLabel(cd,'ja'))
+        : t.extraEatAdded, ok:true};
       await reload();
       setTimeout(()=>{ state.extraEatMsg=null; drawAdmin(); }, 6000);
     };
@@ -4064,6 +4122,20 @@ async function renderAdmin(vp){
         const rec = await getEmp(id);
         if(rec){
           rec.extraEatDates = (rec.extraEatDates||[]).filter(e=>e.date!==d);
+          await setEmp(id, rec);
+        }
+        await reload();
+      };
+    });
+    vp.querySelectorAll('[data-remove-emp-cancel]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        const d = btn.dataset.removeEmpCancel;
+        if(isPastCutoff(d)) return;   // 二重の安全確認（締切を過ぎたキャンセルは取り消せない）
+        btn.disabled = true;
+        const id = state.extraEatSelectedId;
+        const rec = await getEmp(id);
+        if(rec){
+          rec.singleDates = (rec.singleDates||[]).filter(x=>x!==d);
           await setEmp(id, rec);
         }
         await reload();
@@ -4365,3 +4437,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
