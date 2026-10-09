@@ -564,6 +564,13 @@ textarea.csvbox{
   margin:0 0 6px;font-family:'Shippori Mincho',serif;font-size:16px;
 }
 .gate p{margin:0 0 14px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;}
+.purpin{
+  margin-top:16px;padding:14px 14px 10px;border:1px solid var(--line);border-radius:10px;background:#FDFBF5;
+}
+.purpin .ttl{font-size:13px;font-weight:700;color:var(--accent-deep);margin-bottom:6px;}
+.purpin .lead{margin:0 0 10px;font-size:13px;line-height:1.65;}
+.purpin .hint{margin:8px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.6;}
+.purpin .field{margin-bottom:10px;}
 .pinfield input{
   max-width:170px;font-size:22px;letter-spacing:0.4em;text-align:center;
   font-variant-numeric:tabular-nums;padding:12px 10px;
@@ -785,11 +792,14 @@ const T = {
     purchaseConfirmBtn:"この内容で送信する",
     purchaseConfirmSummary:"合計 ¥{n}（{items}）",
     purchaseConfirmBack:"内容を修正する",
-    purPinEnter:"本人確認のため、4桁のPINを入力してください。",
-    purPinSet:"初めての方は4桁のPINを設定してください。「自分の記録」を見るときにも同じPINを使います。",
-    purPinLocked:"PINを続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者にPINのリセットを依頼してください。",
+    purPinEnter:"本人確認のため、4桁の暗証番号を入力してください。",
+    purPinSet:"暗証番号がまだ登録されていません。上に入力した番号をこのまま暗証番号として登録しますので、確認のためもう一度入力してください。「自分の記録」を見るときにも同じ暗証番号を使います。",
+    purPinFirstHint:"初めての方は、ここに好きな4桁の数字を入力してください（そのまま暗証番号として登録されます）。",
+    purPinAlreadySet:"暗証番号はすでに登録されています。登録済みの暗証番号を入力してください。",
+    purPinTitle:"暗証番号",
+    purPinLocked:"暗証番号を続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者に暗証番号のリセットを依頼してください。",
     mineDeductNote:"{m}月の給与から天引き",
-    submitPurchase:"購入登録に進む", needQty:"個数を1つ以上入力してください。",
+    submitPurchase:"購入を登録する", needQty:"個数を1つ以上入力してください。",
     purchaseSuccessBody:"割引商品の購入を登録しました。給与控除に反映されます。",
     minePurchaseTitle:"割引商品の購入", minePurchaseNone:"この月の購入はありません。",
     adminPurchaseLabel:"商品購入",
@@ -817,29 +827,29 @@ const T = {
     mineIdPh:"社員番号（例：123）", mineNamePh:"氏名フルネーム（例：山田 太郎）",
     search:"検索", mineNotFound:"記録が見つかりません。まだキャンセルの登録がないか、社員番号をご確認ください。",
     mineNeedIdName:"社員番号と氏名（フルネーム）の両方を入力してください。",
-    pinSetTitle:"閲覧用のPINを設定してください", 
-    pinSetDesc:"金額を他の人に見られないようにするため、4桁の数字を登録します。次回からはこのPINで確認できます。銀行のキャッシュカードなど、他で使っている番号は避けてください。",
-    pinEnterTitle:"閲覧用PINを入力してください",
-    pinEnterDesc:"ご本人確認のため、登録した4桁のPINを入力してください。",
-    pinLabel:"PIN（4桁）", pinLabel2:"確認のためもう一度",
-    pinRemember:"この端末では次回からPINを省略する（{n}日間）",
+    pinSetTitle:"暗証番号を設定してください", 
+    pinSetDesc:"金額を他の人に見られないようにするため、4桁の数字を登録します。次回からはこの暗証番号で確認できます。銀行のキャッシュカードなど、他で使っている番号は避けてください。",
+    pinEnterTitle:"暗証番号を入力してください",
+    pinEnterDesc:"ご本人確認のため、登録した4桁の暗証番号を入力してください。",
+    pinLabel:"暗証番号（4桁）", pinLabel2:"確認のためもう一度",
+    pinRemember:"この端末では次回から暗証番号の入力を省略する",
     pinSetBtn:"設定して記録を見る", pinEnterBtn:"確認する",
-    pinNeed4:"4桁の数字を入力してください。", pinNotMatch:"2つのPINが一致しません。",
-    pinWrong:"PINが違います。あと{n}回間違えるとロックされます。",
+    pinNeed4:"4桁の数字を入力してください。", pinNotMatch:"2つの暗証番号が一致しません。",
+    pinWrong:"暗証番号が違います。あと{n}回間違えるとロックされます。",
     pinLockedTitle:"ロックされています",
-    pinLockedBody:"PINの入力を続けて間違えたため、あと約{n}分は確認できません。お急ぎの場合や忘れてしまった場合は、社員食堂の担当者にPINのリセットを依頼してください。",
-    pinChangeLink:"PINを変更する", pinForgetLink:"この端末の記憶を消す",
-    pinChanged:"PINを変更しました。", pinForgotten:"この端末の記憶を消しました。次回はPINの入力が必要です。",
-    pinNewLabel:"新しいPIN（4桁）",
+    pinLockedBody:"暗証番号の入力を続けて間違えたため、あと約{n}分は確認できません。お急ぎの場合や忘れてしまった場合は、社員食堂の担当者に暗証番号のリセットを依頼してください。",
+    pinChangeLink:"暗証番号を変更する", pinForgetLink:"この端末の記憶を消す",
+    pinChanged:"暗証番号を変更しました。", pinForgotten:"この端末の記憶を消しました。次回は暗証番号の入力が必要です。",
+    pinNewLabel:"新しい暗証番号（4桁）",
     pinSaveBtn:"変更する", pinCancelBtn:"やめる",
-    adminPinTitle:"記録閲覧PINの管理",
-    adminPinHelp:"社員が「自分の記録」を見るときの4桁PINです。PINはハッシュ化して保存しているため、担当者にも番号は見えません。忘れた人・ロックされた人はここでリセットしてください。リセットすると、その社員は次回に新しいPINを設定できます。",
+    adminPinTitle:"暗証番号の管理",
+    adminPinHelp:"社員が割引商品を購入するときや「自分の記録」を見るときに使う4桁の暗証番号です。暗証番号はハッシュ化して保存しているため、担当者にも番号は見えません。忘れた人・ロックされた人はここでリセットしてください。リセットすると、その社員は次回に新しい暗証番号を設定できます。",
     adminPinSummary:"設定済 {set}名 ／ 未設定 {unset}名 ／ ロック中 {locked}名",
     adminPinSearchPh:"社員番号または名前で検索",
-    adminPinReset:"リセット", adminPinResetDone:"{name} さんのPINをリセットしました。",
+    adminPinReset:"リセット", adminPinResetDone:"{name} さんの暗証番号をリセットしました。",
     adminPinStateOn:"設定済", adminPinStateOff:"未設定", adminPinStateLock:"ロック中",
-    adminPinUnsetTitle:"PIN未設定の社員（{n}名）",
-    adminPinUnsetHelp:"未設定のうちは、社員番号と氏名を知っている人が先にPINを設定できてしまいます。早めの設定を呼びかけてください。",
+    adminPinUnsetTitle:"暗証番号未設定の社員（{n}名）",
+    adminPinUnsetHelp:"未設定のうちは、社員番号と氏名を知っている人が先に暗証番号を設定できてしまいます。早めの設定を呼びかけてください。",
     mineNameMismatch:"社員番号と氏名が一致しません。名簿に登録されている氏名（フルネーム）を入力してください。",
     singleDates:"個別のキャンセル日", recurringRules:"定期キャンセル設定", none:"なし",
     delete:"取消", weekdayLabel:"毎週",
@@ -919,7 +929,7 @@ const T = {
     masterBulkOnlyNote:"この欄の内容が、そのまま従業員マスタになります。行を追加すれば新規登録、行を消せば削除、書き換えれば変更です。「内容を確認する」を押すと、追加・変更・削除の一覧を確認してから保存できます。",
     masterReloadText:"現在の登録内容に戻す",
     diffRename:"社員番号の変更（{n}件）",
-    diffRenameNote:"キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
+    diffRenameNote:"キャンセル記録・購入記録・暗証番号も新しい番号へ引き継ぎます。",
     masterNewTitle:"新規登録", masterSearchTitle:"検索して変更・削除",
     masterSearchPh:"社員番号または名前で検索",
     mealTypeLabel:"お食事タイプ", typeSet:"利用あり（¥300）", typeNone:"利用なし（¥0）",
@@ -941,7 +951,7 @@ const T = {
     masterBadPause:"停止期間の日付を確認してください（再開日は停止開始日より後）。",
     masterDeleteConfirm:"{name}（{id}）を削除しますか？",
     masterDeleteWarn:"削除すると、この社員はキャンセルや購入の登録ができなくなり、月次CSVにも出力されません。これまでの記録そのものは残ります。",
-    masterIdChangeWarn:"社員番号を {from} → {to} に変更します。キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。",
+    masterIdChangeWarn:"社員番号を {from} → {to} に変更します。キャンセル記録・購入記録・暗証番号も新しい番号へ引き継ぎます。",
     masterSearchHint:"社員番号か氏名で検索すると、変更・削除ができます。",
     masterBulkOpen:"まとめて書き換える（貼り付け）", masterBulkClose:"閉じる",
     rosterImportTitle:"社員リストからの一括登録（利用なしとして追加）",
@@ -1031,7 +1041,10 @@ const T = {
     purchaseConfirmSummary:"Total ¥{n} ({items})",
     purchaseConfirmBack:"Edit my order",
     purPinEnter:"Please enter your 4-digit PIN to confirm it is you.",
-    purPinSet:"If this is your first time, please set a 4-digit PIN. The same PIN is used to view your records.",
+    purPinSet:"You have not registered a PIN yet. The number you entered above will be registered as your PIN, so please enter it once more to confirm. The same PIN is used to view your records.",
+    purPinFirstHint:"First time? Enter any 4-digit number here. It will be registered as your PIN.",
+    purPinAlreadySet:"A PIN is already registered. Please enter your registered PIN.",
+    purPinTitle:"PIN",
     purPinLocked:"Too many incorrect attempts. You cannot register a purchase for about {n} minutes. Please ask the cafeteria staff to reset your PIN.",
     mineDeductNote:"Deducted from the payroll in month {m}",
     submitPurchase:"Register purchase", needQty:"Please enter a quantity of at least one item.",
@@ -1067,7 +1080,7 @@ const T = {
     pinEnterTitle:"Enter your viewing PIN",
     pinEnterDesc:"Please enter the 4-digit PIN you registered.",
     pinLabel:"PIN (4 digits)", pinLabel2:"Enter it again to confirm",
-    pinRemember:"Skip the PIN on this device next time ({n} days)",
+    pinRemember:"Skip the PIN on this device next time",
     pinSetBtn:"Save and view my records", pinEnterBtn:"Continue",
     pinNeed4:"Please enter 4 digits.", pinNotMatch:"The two PINs do not match.",
     pinWrong:"Incorrect PIN. {n} more attempt(s) before it locks.",
@@ -1155,10 +1168,10 @@ let state = {
 
   formMode: 'cancel',      // cancel | purchase
   purchaseQty: {},         // {単価: 個数}
-  purchaseConfirm: false,  // 送信前の最終確認を表示中かどうか
   purchasePin:'', purchasePin2:'', purchasePinMsg:null,
   purchasePinMode:'enter', // enter | set | locked
   purchaseLockMin:0,
+  purchasePinKey:'',       // set/locked を判定したときの「社員番号|氏名」。変わったら enter に戻す
 
   formMonth: {y:today.getFullYear(), m:today.getMonth()},
   selectedDates: new Set(),
@@ -1417,7 +1430,6 @@ async function setGuestLunches(list){
    ・間違えた回数もサーバ側（スプレッドシート）に記録するので、
      ページを再読み込みしても回避できない
    ============================================================ */
-const DEVICE_TRUST_DAYS = 14;   // 一度PINを通した端末で入力を省略する日数
 const PIN_MAX_FAILS = 5;        // 何回間違えたらロックするか
 const PIN_LOCK_MINUTES = 10;    // ロックする時間（分）
 
@@ -1509,21 +1521,21 @@ async function verifyPin(id, pin){
   return {status:'wrong', left: PIN_MAX_FAILS - rec.fails};
 }
 
-/* この端末を信頼する（localStorageなので、この端末の中だけの話） */
+/* この端末を信頼する（localStorageなので、この端末の中だけの話）
+   期限は設けず、「この端末の記憶を消す」を押すまで覚えておく */
 function deviceKey(id){ return 'pin_ok:' + id; }
 function isDeviceTrusted(id, name){
   try{
     const raw = localStorage.getItem(deviceKey(id));
     if(!raw) return false;
     const o = JSON.parse(raw);
-    if(!o.until || new Date(o.until).getTime() < Date.now()) return false;
     return sameName(o.name||'', name);
   }catch(e){ return false; }
 }
 function trustDevice(id, name){
   try{
     localStorage.setItem(deviceKey(id), JSON.stringify({
-      name, until: new Date(Date.now() + DEVICE_TRUST_DAYS*86400000).toISOString(),
+      name, savedAt: new Date().toISOString(),   // 期限なし（「この端末の記憶を消す」まで有効）
     }));
   }catch(e){ /* 保存できなくても、毎回PINを入れれば使える */ }
 }
@@ -2008,6 +2020,24 @@ function renderForm(vp){
         <span class="l">${t.purchaseTotalLabel}</span>
         <span class="v" id="pur-total">¥${purchaseSumFromState().toLocaleString()}</span>
       </div>
+      <div class="purpin">
+        <div class="ttl">🔑 ${t.purPinTitle}</div>
+        ${state.purchasePinMode==='locked' ? `
+          <div class="notice danger" style="margin-bottom:10px;"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
+        ` : ''}
+        <p class="lead">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
+        <div class="field pinfield">
+          <label>${t.pinLabel}</label>
+          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}">
+        </div>
+        ${state.purchasePinMode==='set' ? `
+        <div class="field pinfield">
+          <label>${t.pinLabel2}</label>
+          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}">
+        </div>` : ''}
+        ${state.purchasePinMsg ? `<div class="status-msg"><span style="color:var(--danger)">${state.purchasePinMsg}</span></div>` : ''}
+        ${state.purchasePinMode==='enter' ? `<p class="hint">${t.purPinFirstHint}</p>` : ''}
+      </div>
       ` : `
       <h2>${t.step2}</h2>
       ${formWdLimited ? `<div class="notice"><div>🗓</div><div>${t.mineWeekdayNote.replace('{wd}', weekdaysText(formEmp, state.lang))}</div></div>` : ''}
@@ -2082,57 +2112,22 @@ function renderForm(vp){
 
     ${state.msg ? `<div class="notice danger">${state.msg}</div>` : ''}
 
-    ${(state.formMode!=='purchase' || !state.purchaseConfirm) ? `
     <div class="btnrow">
       <button class="btn btn-submit" id="submit-btn" ${state.submitting ? 'disabled' : ''}>${
         state.submitting ? t.submitting
           : (state.formMode==='purchase' ? '✓ ' + t.submitPurchase : '✓ ' + t.submit)
       }</button>
     </div>
-    ` : `
-    <div class="confirm-overlay" id="pur-confirm-overlay">
-      <div class="confirm-card">
-        <div class="icon">⚠️</div>
-        <h3>${t.purchaseConfirmTitle}</h3>
-        <p class="body">${t.purchaseConfirmBody}</p>
-        <div class="confirm-summary">
-          <div class="v">¥${purchaseSumFromState().toLocaleString()}</div>
-          <div class="items">${escapeHtml(purchaseItemsFromState().map(it=>`¥${it.price}×${it.qty}`).join('、'))}</div>
-        </div>
-        ${state.purchasePinMode==='locked' ? `
-          <div class="notice danger"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
-        ` : `
-          <p style="margin:0 0 12px;font-size:13.5px;text-align:center;">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
-          <div class="field pinfield" style="margin:0 auto ${state.purchasePinMode==='set'?'12px':'0'};text-align:center;">
-            <label style="text-align:center;">${t.pinLabel}</label>
-            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}" style="margin:0 auto;display:block;">
-          </div>
-          ${state.purchasePinMode==='set' ? `
-          <div class="field pinfield" style="margin:0 auto;text-align:center;">
-            <label style="text-align:center;">${t.pinLabel2}</label>
-            <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}" style="margin:0 auto;display:block;">
-          </div>` : ''}
-          <div class="status-msg" style="text-align:center;">${state.purchasePinMsg ? `<span style="color:var(--danger)">${state.purchasePinMsg}</span>` : ''}</div>
-        `}
-        <div class="btnrow" style="flex-direction:column;margin-top:18px;">
-          <button class="btn btn-submit" id="submit-btn" style="width:100%;" ${
-            state.submitting || state.purchasePinMode==='locked' ? 'disabled' : ''
-          }>${state.submitting ? t.submitting : '✓ ' + t.purchaseConfirmBtn}</button>
-          <button class="btn btn-ghost" id="pur-confirm-cancel" style="width:100%;" ${state.submitting ? 'disabled' : ''}>${t.purchaseConfirmBack}</button>
-        </div>
-      </div>
-    </div>
-    `}
   `;
 
-  vp.querySelector('#f-empid').oninput = e=>{ state.empId = e.target.value; persistEmpProfile(); resetPurchaseConfirm(); };
-  vp.querySelector('#f-empname').oninput = e=>{ state.empName = e.target.value; persistEmpProfile(); resetPurchaseConfirm(); };
+  vp.querySelector('#f-empid').oninput = e=>{ state.empId = e.target.value; persistEmpProfile(); };
+  vp.querySelector('#f-empname').oninput = e=>{ state.empName = e.target.value; persistEmpProfile(); };
   // 入力が終わったタイミングで、その人の「利用曜日」をカレンダーに反映する
-  vp.querySelector('#f-empid').onblur = ()=>{ refreshFormMaster(); };
-  vp.querySelector('#f-empname').onblur = ()=>{ refreshFormMaster(); };
+  vp.querySelector('#f-empid').onblur = ()=>{ refreshFormMaster(); resetPurchasePinIfPersonChanged(); };
+  vp.querySelector('#f-empname').onblur = ()=>{ refreshFormMaster(); resetPurchasePinIfPersonChanged(); };
 
   vp.querySelectorAll('.modeswitch button').forEach(b=>{
-    b.onclick = ()=>{ state.formMode = b.dataset.mode; state.msg = null; state.purchaseConfirm = false; render(); };
+    b.onclick = ()=>{ state.formMode = b.dataset.mode; state.msg = null; render(); };
   });
 
   if(state.formMode==='purchase'){
@@ -2145,8 +2140,10 @@ function renderForm(vp){
     if(purPin) purPin.oninput = e=>{ state.purchasePin = digits4(e.target.value); e.target.value = state.purchasePin; };
     const purPin2 = vp.querySelector('#pur-pin2');
     if(purPin2) purPin2.oninput = e=>{ state.purchasePin2 = digits4(e.target.value); e.target.value = state.purchasePin2; };
-    const purCancelBtn = vp.querySelector('#pur-confirm-cancel');
-    if(purCancelBtn) purCancelBtn.onclick = ()=>{ resetPurchaseConfirm(); };
+    // 暗証番号欄でEnterを押したら、そのまま登録ボタンと同じ動きにする
+    [purPin, purPin2].forEach(el=>{
+      if(el) el.onkeydown = e=>{ if(e.key==='Enter' && !state.submitting){ e.preventDefault(); submitPurchase(); } };
+    });
 
     vp.querySelectorAll('.qtyctl button[data-step]').forEach(btn=>{
       btn.onclick = ()=>{
@@ -2258,19 +2255,24 @@ function purchaseItemsFromState(){
     .map(p=>({price:p, qty:Number(state.purchaseQty[p]||0)}))
     .filter(it=>it.qty > 0);
 }
-// 個数や氏名を触ったら最終確認をやり直す（古い内容のまま送信されないように）
-function resetPurchaseConfirm(){
-  if(!state.purchaseConfirm) return;
-  state.purchaseConfirm = false;
+function purchasePersonKey(){
+  return String(state.empId||'').trim() + '|' + normName(String(state.empName||'').trim());
+}
+// 社員番号・氏名が変わったら、前の人の「初回設定」「ロック中」表示を引きずらないよう入力欄を初期状態に戻す
+// （入力中に描き直すとカーソルが外れるので、欄から離れたタイミングで行う）
+function resetPurchasePinIfPersonChanged(){
+  if(state.formMode !== 'purchase') return;
+  if(state.purchasePinMode === 'enter' && !state.purchasePinMsg) return;
+  if(state.purchasePinKey === purchasePersonKey()) return;
+  state.purchasePinMode = 'enter'; state.purchasePinKey = '';
   state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
-  render();   // PIN入力欄も含めて描き直す
+  render();
 }
 function setQty(price, raw, writeInput){
   let q = Math.floor(Number(raw));
   if(!isFinite(q) || q < 0) q = 0;
   if(q > 999) q = 999;
   state.purchaseQty[price] = q;
-  resetPurchaseConfirm();
   const inp = document.getElementById('qty-'+price);
   if(inp && writeInput) inp.value = q;
   const sub = document.getElementById('sub-'+price);
@@ -2294,88 +2296,81 @@ async function submitPurchase(){
   const id = state.empId.trim();
   const name = await resolveMasterName(id, state.empName.trim());
 
-  // 1回目：名簿照合とPINの状態確認を1回のリクエストにまとめて行い、最終確認画面を出す。
-  // （以前は「名簿照合」と「PIN状態確認」で別々に2回問い合わせていた）
-  if(!state.purchaseConfirm){
-    const check = await kvRequest('checkPurchaseStart', {payload:{employeeId:id, name:name}});
-    if(!check || check.status === 'mismatch' || check.status === 'not_found'){
-      state.msg = (check && check.status==='mismatch') ? t.masterMismatch : t.masterNotFound;
-      render(); return;
-    }
-    state.purchasePinMode = !check.hasPin ? 'set' : (check.lockedMinutes > 0 ? 'locked' : 'enter');
-    state.purchaseLockMin = check.lockedMinutes || 0;
-    state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
-    state.purchaseConfirm = true;
-    render();
-    return;
+  // 1画面・1回の送信で、名簿照合・暗証番号の検証（初回は登録）・購入の保存・ログ記録までまとめて行う。
+  // 暗証番号が未登録かどうかは事前に問い合わせず、送信結果（status:'none'）で判断する。
+  // 社員番号・氏名が前回判定時と変わっていたら、通常の入力（enter）として扱う
+  if(state.purchasePinKey !== purchasePersonKey() && state.purchasePinMode !== 'enter'){
+    state.purchasePinMode = 'enter'; state.purchasePin2 = '';
   }
-
-  if(state.purchasePinMode === 'locked'){
-    render(); return;   // ボタンは無効化されているはずだが念のため
-  }
+  state.purchasePinMsg = null;
   if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
   if(state.purchasePinMode === 'set' && state.purchasePin !== state.purchasePin2){
     state.purchasePinMsg = t.pinNotMatch; render(); return;
   }
+  const pinMode = state.purchasePinMode === 'set' ? 'set' : 'enter';
 
   state.submitting = true; render();
 
-  // 2回目：PINの検証（または新規設定）・購入の保存・購入ログへの記録を1回のリクエストにまとめる。
-  // （以前はPIN確認だけで2〜3回、購入の保存・ログ記録でさらに2回、合計5回前後に分かれていた）
   const res = await kvRequest('commitPurchase', {payload:{
     employeeId:id, name:name,
-    pin: state.purchasePin, pinMode: state.purchasePinMode,
+    pin: state.purchasePin, pinMode: pinMode,
     items: items,
     date: todayISO(), submittedAt: nowLocalStamp(),
   }});
+  state.submitting = false;
 
   if(!res){
-    state.submitting = false;
     state.msg = t.saveFailed;
     render(); return;
   }
   if(res.status === 'mismatch' || res.status === 'not_found'){
-    state.submitting = false;
-    state.purchaseConfirm = false;
+    state.purchasePinMode = 'enter'; state.purchasePinKey = ''; state.purchasePin2 = '';
     state.msg = res.status==='mismatch' ? t.masterMismatch : t.masterNotFound;
     render(); return;
   }
   if(res.status === 'locked'){
-    state.submitting = false;
     state.purchasePinMode = 'locked'; state.purchaseLockMin = res.minutes;
-    state.purchasePin = ''; render(); return;
+    state.purchasePinKey = purchasePersonKey();
+    state.purchasePin = ''; state.purchasePin2 = '';
+    render(); return;
   }
   if(res.status === 'wrong'){
-    state.submitting = false;
+    state.purchasePinMode = 'enter'; state.purchasePinKey = purchasePersonKey();
     state.purchasePin = '';
     state.purchasePinMsg = t.pinWrong.replace('{n}', res.left);
-    render(); return;
+    render(); focusPurchasePin('#pur-pin'); return;
   }
-  if(res.status === 'none' || res.status === 'already_set'){
-    // 担当者によるPINリセットや、別画面での同時設定などでフロント側の認識とズレた場合
-    state.submitting = false;
-    state.purchasePinMode = res.status === 'none' ? 'set' : 'enter';
-    state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
-    render(); return;
+  if(res.status === 'none'){
+    // まだ暗証番号を登録していない人：入力済みの番号は残し、確認用の2つ目の欄を出す
+    state.purchasePinMode = 'set'; state.purchasePinKey = purchasePersonKey();
+    state.purchasePin2 = '';
+    render(); focusPurchasePin('#pur-pin2'); return;
+  }
+  if(res.status === 'already_set'){
+    // 確認入力の間に担当者のリセット取り消し・別端末での登録などが起きた場合
+    state.purchasePinMode = 'enter'; state.purchasePinKey = '';
+    state.purchasePin = ''; state.purchasePin2 = '';
+    state.purchasePinMsg = t.purPinAlreadySet;
+    render(); focusPurchasePin('#pur-pin'); return;
   }
   if(res.status === 'pin_format'){
-    state.submitting = false;
     state.purchasePinMsg = t.pinNeed4;
     render(); return;
   }
   if(res.status !== 'ok'){
-    state.submitting = false;
     state.msg = t.saveFailed;
     render(); return;
   }
 
-  state.submitting = false;
-  state.purchaseConfirm = false;
+  state.purchasePinMode = 'enter'; state.purchasePinKey = '';
   state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
   state.purchaseQty = {};
   if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
   render();
   showStamp(t.successTitle, t.purchaseSuccessBody);
+}
+function focusPurchasePin(sel){
+  setTimeout(()=>{ const el = document.querySelector(sel); if(el) el.focus(); }, 0);
 }
 
 async function submitCancellation(){
@@ -2604,7 +2599,7 @@ function paintPinGate(box, t){
       </div>` : ''}
       <label class="checkline" style="font-weight:600;font-size:13px;">
         <input type="checkbox" id="gate-remember" ${state.mineRemember?'checked':''}>
-        <span>${t.pinRemember.replace('{n}', DEVICE_TRUST_DAYS)}</span>
+        <span>${t.pinRemember}</span>
       </label>
       <div class="btnrow">
         <button class="btn btn-accent" id="gate-go">${isSetup ? t.pinSetBtn : t.pinEnterBtn}</button>
@@ -3120,7 +3115,7 @@ function masterHelpHtml(){
       </ul>
 
       <h4>社員番号を変える人</h4>
-      <p>氏名をそのままにして番号だけ書き換えると「社員番号の変更」として扱い、キャンセル記録・購入記録・閲覧PINも新しい番号へ引き継ぎます。確認画面に変更内容が出るので、そこで確かめてから保存してください。</p>
+      <p>氏名をそのままにして番号だけ書き換えると「社員番号の変更」として扱い、キャンセル記録・購入記録・暗証番号も新しい番号へ引き継ぎます。確認画面に変更内容が出るので、そこで確かめてから保存してください。</p>
     </details>
   `;
 }
