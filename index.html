@@ -211,6 +211,9 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus{
 }
 .calnav .navbtn:disabled{opacity:0.3;cursor:not-allowed;}
 .calnav .label{font-weight:700;font-size:15px;font-family:'Shippori Mincho',serif;}
+.guestmonth{margin-top:16px;}
+.guestmonth .calnav{margin:0 0 6px;max-width:none;}
+.guestmonth .sum{font-size:12.5px;color:var(--ink-soft);margin:0 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
 
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:320px;margin:0 auto;}
 .calgrid .wd{
@@ -571,6 +574,20 @@ textarea.csvbox{
 .purpin .lead{margin:0 0 10px;font-size:13px;line-height:1.65;}
 .purpin .hint{margin:8px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.6;}
 .purpin .field{margin-bottom:10px;}
+/* 暗証番号が未入力・桁不足のまま「購入を登録する」を押したときの大きな警告 */
+.purpin.alert{border:2px solid var(--danger);background:#FFF6F4;}
+.pin-alert{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--danger-soft);border:2px solid var(--danger);border-radius:10px;
+  padding:14px 16px;margin:0 0 12px;color:#7A2A20;
+  animation:pinShake .4s ease-in-out;
+}
+.pin-alert .ic{font-size:28px;line-height:1;flex:none;}
+.pin-alert .h{font-size:19px;font-weight:800;color:var(--danger);line-height:1.35;margin-bottom:4px;}
+.pin-alert .b{font-size:14.5px;line-height:1.65;}
+.pinfield input.invalid{border:2px solid var(--danger);box-shadow:0 0 0 4px var(--danger-soft);}
+@keyframes pinShake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+@media (prefers-reduced-motion: reduce){.pin-alert{animation:none;}}
 .pinfield input{
   max-width:170px;font-size:22px;letter-spacing:0.4em;text-align:center;
   font-variant-numeric:tabular-nums;padding:12px 10px;
@@ -797,6 +814,12 @@ const T = {
     purPinFirstHint:"初めての方は、ここに好きな4桁の数字を入力してください（そのまま暗証番号として登録されます）。",
     purPinAlreadySet:"暗証番号はすでに登録されています。登録済みの暗証番号を入力してください。",
     purPinTitle:"暗証番号",
+    purPinEmptyTitle:"暗証番号が入力されていません",
+    purPinShortTitle:"暗証番号が4桁になっていません",
+    purPin2EmptyTitle:"確認用の暗証番号が入力されていません",
+    purPinAlertBody:"購入を登録するには、4桁の暗証番号が必要です。下の欄に入力してから、もう一度「購入を登録する」を押してください。",
+    purPin2AlertBody:"確認のため、同じ4桁の暗証番号を下の2つ目の欄にも入力してから、もう一度「購入を登録する」を押してください。",
+    purPinMissingBtnMsg:"暗証番号が入力されていないため、まだ登録されていません。上の「暗証番号」欄を確認してください。",
     purPinLocked:"暗証番号を続けて間違えたため、あと約{n}分は購入を登録できません。お急ぎの場合は社員食堂の担当者に暗証番号のリセットを依頼してください。",
     mineDeductNote:"{m}月の給与から天引き",
     submitPurchase:"購入を登録する", needQty:"個数を1つ以上入力してください。",
@@ -997,6 +1020,9 @@ const T = {
     guestLunchCount:"人数",
     guestLunchAdd:"この人数を追加する", guestLunchRemove:"削除",
     guestLunchNone:"登録されている来客予定はありません。",
+    guestLunchNoneMonth:"{month}に登録されている来客予定はありません。",
+    guestLunchMonthSum:"{month}：{days}日・計{n}人",
+    guestLunchThisMonth:"今月に戻る",
     guestLunchNeedDate:"日付を選んでください。",
     guestLunchNeedCount:"人数を1人以上入力してください。",
     guestLunchAdded:"追加しました。同じ日付にすでに登録がある場合は人数を積み増しています。",
@@ -1005,6 +1031,8 @@ const T = {
     extraEatHelp:"普段は「利用なし」の社員や、利用曜日が決まっている社員（例：月火木金）が、いつもは食べない日に臨時でランチを食べる場合にここから登録してください。利用曜日が決まっている人は、「代わりに食べない日」も同時に登録できます（例：今週だけ木曜をやめて水曜に食べる）。登録した日は月次CSVの金額計算にも反映され、「本日の状況」の人数にも加算されます。社員番号または氏名で検索して選んでください。",
     extraEatDate:"食べる日", extraEatSelect:"選ぶ", extraEatSelected:"選択中",
     extraEatAllTitle:"登録されている臨時ランチ（全員・{n}件）", extraEatAllNone:"登録されている臨時ランチはありません。",
+    extraEatAllTitleMonth:"{month}の臨時ランチ（全員・{n}件）",
+    extraEatAllNoneMonth:"{month}に登録されている臨時ランチはありません。",
     extraEatLockedLabel:"削除できません",
     extraEatAdd:"この内容で登録する",
     extraEatAdded:"登録しました。",
@@ -1045,6 +1073,12 @@ const T = {
     purPinFirstHint:"First time? Enter any 4-digit number here. It will be registered as your PIN.",
     purPinAlreadySet:"A PIN is already registered. Please enter your registered PIN.",
     purPinTitle:"PIN",
+    purPinEmptyTitle:"PIN not entered",
+    purPinShortTitle:"PIN must be 4 digits",
+    purPin2EmptyTitle:"Confirmation PIN not entered",
+    purPinAlertBody:"A 4-digit PIN is required to register a purchase. Enter it below, then press “Register purchase” again.",
+    purPin2AlertBody:"Enter the same 4-digit PIN in the second box below to confirm, then press “Register purchase” again.",
+    purPinMissingBtnMsg:"Not registered yet because the PIN is missing. Please check the PIN box above.",
     purPinLocked:"Too many incorrect attempts. You cannot register a purchase for about {n} minutes. Please ask the cafeteria staff to reset your PIN.",
     mineDeductNote:"Deducted from the payroll in month {m}",
     submitPurchase:"Register purchase", needQty:"Please enter a quantity of at least one item.",
@@ -1169,6 +1203,7 @@ let state = {
   formMode: 'cancel',      // cancel | purchase
   purchaseQty: {},         // {単価: 個数}
   purchasePin:'', purchasePin2:'', purchasePinMsg:null,
+  purchasePinAlert:null,   // 'empty' | 'short' | 'empty2'：未入力のまま送信したときの大きな警告
   purchasePinMode:'enter', // enter | set | locked
   purchaseLockMin:0,
   purchasePinKey:'',       // set/locked を判定したときの「社員番号|氏名」。変わったら enter に戻す
@@ -1213,9 +1248,11 @@ let state = {
   csvInfo:'',
   // 来客用ランチ（人数カウンターのみ。給与や請求には関与しない）
   guestDate:'', guestSetCount:0, guestOkazuCount:0, guestNote:'', guestMsg:null,
+  guestMonth:{y:today.getFullYear(), m:today.getMonth()},   // 来客一覧で表示する月
   // 臨時ランチ（来客／普段「利用なし」の社員が、特定の日だけ食べる場合。同じメニュー内でタブ切り替え）
   extraLunchMode:'guest',
   extraEatSearch:'', extraEatSelectedId:null, extraEatDate:'', extraEatMsg:null,
+  extraEatMonth:{y:today.getFullYear(), m:today.getMonth()},   // 社員の臨時ランチ一覧で表示する月
 };
 
 /* ===================== storage helpers ===================== */
@@ -2020,20 +2057,28 @@ function renderForm(vp){
         <span class="l">${t.purchaseTotalLabel}</span>
         <span class="v" id="pur-total">¥${purchaseSumFromState().toLocaleString()}</span>
       </div>
-      <div class="purpin">
+      <div class="purpin${state.purchasePinAlert?' alert':''}" id="pur-pin-box">
         <div class="ttl">🔑 ${t.purPinTitle}</div>
+        ${state.purchasePinAlert ? `
+          <div class="pin-alert" id="pur-pin-alert" role="alert">
+            <div class="ic">⚠️</div>
+            <div>
+              <div class="h">${state.purchasePinAlert==='empty2' ? t.purPin2EmptyTitle : (state.purchasePinAlert==='short' ? t.purPinShortTitle : t.purPinEmptyTitle)}</div>
+              <div class="b">${state.purchasePinAlert==='empty2' ? t.purPin2AlertBody : t.purPinAlertBody}</div>
+            </div>
+          </div>` : ''}
         ${state.purchasePinMode==='locked' ? `
           <div class="notice danger" style="margin-bottom:10px;"><div>🔒</div><div>${t.purPinLocked.replace('{n}', state.purchaseLockMin||PIN_LOCK_MINUTES)}</div></div>
         ` : ''}
         <p class="lead">${state.purchasePinMode==='set' ? t.purPinSet : t.purPinEnter}</p>
         <div class="field pinfield">
           <label>${t.pinLabel}</label>
-          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" value="${escapeHtml(state.purchasePin)}">
+          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin" class="${(state.purchasePinAlert==='empty'||state.purchasePinAlert==='short')?'invalid':''}" value="${escapeHtml(state.purchasePin)}">
         </div>
         ${state.purchasePinMode==='set' ? `
         <div class="field pinfield">
           <label>${t.pinLabel2}</label>
-          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" value="${escapeHtml(state.purchasePin2)}">
+          <input type="password" inputmode="numeric" autocomplete="off" maxlength="4" id="pur-pin2" class="${state.purchasePinAlert==='empty2'?'invalid':''}" value="${escapeHtml(state.purchasePin2)}">
         </div>` : ''}
         ${state.purchasePinMsg ? `<div class="status-msg"><span style="color:var(--danger)">${state.purchasePinMsg}</span></div>` : ''}
         ${state.purchasePinMode==='enter' ? `<p class="hint">${t.purPinFirstHint}</p>` : ''}
@@ -2127,7 +2172,7 @@ function renderForm(vp){
   vp.querySelector('#f-empname').onblur = ()=>{ refreshFormMaster(); resetPurchasePinIfPersonChanged(); };
 
   vp.querySelectorAll('.modeswitch button').forEach(b=>{
-    b.onclick = ()=>{ state.formMode = b.dataset.mode; state.msg = null; render(); };
+    b.onclick = ()=>{ state.formMode = b.dataset.mode; state.msg = null; state.purchasePinAlert = null; render(); };
   });
 
   if(state.formMode==='purchase'){
@@ -2137,9 +2182,9 @@ function renderForm(vp){
     });
     const digits4 = v => String(v||'').replace(/[^0-9]/g,'').slice(0,4);
     const purPin = vp.querySelector('#pur-pin');
-    if(purPin) purPin.oninput = e=>{ state.purchasePin = digits4(e.target.value); e.target.value = state.purchasePin; };
+    if(purPin) purPin.oninput = e=>{ state.purchasePin = digits4(e.target.value); e.target.value = state.purchasePin; clearPurchasePinAlertIfFilled(); };
     const purPin2 = vp.querySelector('#pur-pin2');
-    if(purPin2) purPin2.oninput = e=>{ state.purchasePin2 = digits4(e.target.value); e.target.value = state.purchasePin2; };
+    if(purPin2) purPin2.oninput = e=>{ state.purchasePin2 = digits4(e.target.value); e.target.value = state.purchasePin2; clearPurchasePinAlertIfFilled(); };
     // 暗証番号欄でEnterを押したら、そのまま登録ボタンと同じ動きにする
     [purPin, purPin2].forEach(el=>{
       if(el) el.onkeydown = e=>{ if(e.key==='Enter' && !state.submitting){ e.preventDefault(); submitPurchase(); } };
@@ -2265,7 +2310,7 @@ function resetPurchasePinIfPersonChanged(){
   if(state.purchasePinMode === 'enter' && !state.purchasePinMsg) return;
   if(state.purchasePinKey === purchasePersonKey()) return;
   state.purchasePinMode = 'enter'; state.purchasePinKey = '';
-  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null; state.purchasePinAlert = null;
   render();
 }
 function setQty(price, raw, writeInput){
@@ -2303,7 +2348,17 @@ async function submitPurchase(){
     state.purchasePinMode = 'enter'; state.purchasePin2 = '';
   }
   state.purchasePinMsg = null;
-  if(!/^\d{4}$/.test(state.purchasePin)){ state.purchasePinMsg = t.pinNeed4; render(); return; }
+  state.purchasePinAlert = null;
+  if(!/^\d{4}$/.test(state.purchasePin)){
+    state.purchasePinAlert = state.purchasePin ? 'short' : 'empty';
+    state.msg = t.purPinMissingBtnMsg;
+    render(); showPurchasePinAlert('#pur-pin'); return;
+  }
+  if(state.purchasePinMode === 'set' && !state.purchasePin2){
+    state.purchasePinAlert = 'empty2';
+    state.msg = t.purPinMissingBtnMsg;
+    render(); showPurchasePinAlert('#pur-pin2'); return;
+  }
   if(state.purchasePinMode === 'set' && state.purchasePin !== state.purchasePin2){
     state.purchasePinMsg = t.pinNotMatch; render(); return;
   }
@@ -2363,7 +2418,7 @@ async function submitPurchase(){
   }
 
   state.purchasePinMode = 'enter'; state.purchasePinKey = '';
-  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null;
+  state.purchasePin = ''; state.purchasePin2 = ''; state.purchasePinMsg = null; state.purchasePinAlert = null;
   state.purchaseQty = {};
   if(state.mineSearched && normName(state.mineId)===normName(id)) state.mineSearched = false;
   render();
@@ -2371,6 +2426,32 @@ async function submitPurchase(){
 }
 function focusPurchasePin(sel){
   setTimeout(()=>{ const el = document.querySelector(sel); if(el) el.focus(); }, 0);
+}
+// 大きな警告を見える位置までスクロールし、入力欄にカーソルを置く
+function showPurchasePinAlert(sel){
+  setTimeout(()=>{
+    const box = document.getElementById('pur-pin-box');
+    if(box && box.scrollIntoView){
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      box.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'center'});
+    }
+    const el = document.querySelector(sel);
+    if(el){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } }
+  }, 0);
+}
+// 必要な欄が埋まったら、再描画せずに警告だけ消す（入力中のカーソルを外さないため）
+function clearPurchasePinAlertIfFilled(){
+  if(!state.purchasePinAlert) return;
+  const ok1 = /^\d{4}$/.test(state.purchasePin);
+  const ok2 = state.purchasePinMode !== 'set' || /^\d{4}$/.test(state.purchasePin2);
+  if(state.purchasePinAlert === 'empty2' ? !ok2 : !ok1) return;
+  state.purchasePinAlert = null;
+  const T_ = T[state.lang];
+  if(state.msg === T_.purPinMissingBtnMsg) state.msg = null;
+  const a = document.getElementById('pur-pin-alert'); if(a) a.remove();
+  const box = document.getElementById('pur-pin-box'); if(box) box.classList.remove('alert');
+  document.querySelectorAll('#pur-pin, #pur-pin2').forEach(el=>el.classList.remove('invalid'));
+  document.querySelectorAll('.notice.danger').forEach(n=>{ if(n.textContent === T_.purPinMissingBtnMsg) n.remove(); });
 }
 
 async function submitCancellation(){
@@ -3670,17 +3751,31 @@ async function renderAdmin(vp){
             });
           });
           all.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+          // 表示中の月の分だけを出す（前月以前・翌月以降は ‹ › で切り替え）
+          const {y, m} = state.extraEatMonth;
+          const prefix = `${y}-${pad(m+1)}-`;
+          const label = monthLabel(y, m, 'ja');
+          const inMonth = all.filter(x=> String(x.date).startsWith(prefix));
+          const isThisMonth = (y===today.getFullYear() && m===today.getMonth());
           return `
-          <div class="daylist" style="margin-top:16px;">
-            <label>${t.extraEatAllTitle.replace('{n}', all.length)}</label>
-            <div style="margin-top:8px;">
-              ${all.length ? all.map(x=>{
+          <div class="daylist guestmonth">
+            <div class="calnav">
+              <button type="button" class="navbtn" id="adm-extraeat-prev" aria-label="前の月">‹</button>
+              <div class="label">${label}</div>
+              <button type="button" class="navbtn" id="adm-extraeat-next" aria-label="次の月">›</button>
+            </div>
+            <div class="sum">
+              <span>${t.extraEatAllTitleMonth.replace('{month}', label).replace('{n}', inMonth.length)}</span>
+              ${isThisMonth ? '' : `<button type="button" class="minilink" id="adm-extraeat-thismonth">${t.guestLunchThisMonth}</button>`}
+            </div>
+            <div>
+              ${inMonth.length ? inMonth.map(x=>{
                 const locked = x.date < todayISO();
                 return `<div class="item"><span>${x.date}（${dowLabel(x.date,'ja')}） <span class="small">No.${escapeHtml(x.employeeId)}</span> ${escapeHtml(x.name)}</span>${
                   locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
                          : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat-all="${escapeHtml(x.employeeId)}|${x.date}">${t.delete}</button>`
                 }</div>`;
-              }).join('') : `<p class="small">${t.extraEatAllNone}</p>`}
+              }).join('') : `<p class="small">${t.extraEatAllNoneMonth.replace('{month}', label)}</p>`}
             </div>
           </div>`;
         })()}
@@ -3702,12 +3797,31 @@ async function renderAdmin(vp){
         </div>
         <div class="btnrow"><button class="btn btn-primary" id="adm-guest-add">${t.guestLunchAdd}</button></div>
         <div class="status-msg">${state.guestMsg ? `<span style="color:${state.guestMsg.ok?'var(--good)':'var(--danger)'}">${state.guestMsg.text}</span>` : ''}</div>
-        <div class="daylist" style="margin-top:10px;">
-          ${guestLunches.length ? guestLunches.map(g=>{
+        ${(function(){
+          // 表示中の月の分だけを出す（前月以前・翌月以降は ‹ › で切り替え）
+          const {y, m} = state.guestMonth;
+          const prefix = `${y}-${pad(m+1)}-`;
+          const label = monthLabel(y, m, 'ja');
+          const inMonth = guestLunches.filter(g=> String(g.date).startsWith(prefix));
+          const sumN = inMonth.reduce((a,g)=> a + Number(g.set||0) + Number(g.okazu||0), 0);
+          const isThisMonth = (y===today.getFullYear() && m===today.getMonth());
+          return `
+        <div class="daylist guestmonth">
+          <div class="calnav">
+            <button type="button" class="navbtn" id="adm-guest-prev" aria-label="前の月">‹</button>
+            <div class="label">${label}</div>
+            <button type="button" class="navbtn" id="adm-guest-next" aria-label="次の月">›</button>
+          </div>
+          <div class="sum">
+            <span>${inMonth.length ? t.guestLunchMonthSum.replace('{month}', label).replace('{days}', inMonth.length).replace('{n}', sumN) : ''}</span>
+            ${isThisMonth ? '' : `<button type="button" class="minilink" id="adm-guest-thismonth">${t.guestLunchThisMonth}</button>`}
+          </div>
+          ${inMonth.length ? inMonth.map(g=>{
             const total = Number(g.set||0)+Number(g.okazu||0);
             return `<div class="item"><span>${g.date}（${dowLabel(g.date,'ja')}） ${total}${t.peopleUnit}${g.note?' － '+escapeHtml(g.note):''}</span><button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-guest="${g.date}">${t.guestLunchRemove}</button></div>`;
-          }).join('') : `<p class="small">${t.guestLunchNone}</p>`}
-        </div>
+          }).join('') : `<p class="small">${t.guestLunchNoneMonth.replace('{month}', label)}</p>`}
+        </div>`;
+        })()}
         `}
       `)}
 
@@ -4017,6 +4131,20 @@ async function renderAdmin(vp){
     });
 
     /* --- 来客用ランチ --- */
+    const guestPrev = vp.querySelector('#adm-guest-prev');
+    if(guestPrev) guestPrev.onclick = ()=>{
+      let {y,m} = state.guestMonth; m--; if(m<0){m=11;y--;}
+      state.guestMonth = {y,m}; drawAdmin();
+    };
+    const guestNext = vp.querySelector('#adm-guest-next');
+    if(guestNext) guestNext.onclick = ()=>{
+      let {y,m} = state.guestMonth; m++; if(m>11){m=0;y++;}
+      state.guestMonth = {y,m}; drawAdmin();
+    };
+    const guestThis = vp.querySelector('#adm-guest-thismonth');
+    if(guestThis) guestThis.onclick = ()=>{
+      state.guestMonth = {y:today.getFullYear(), m:today.getMonth()}; drawAdmin();
+    };
     const guestAddBtn = vp.querySelector('#adm-guest-add');
     if(guestAddBtn) guestAddBtn.onclick = async ()=>{
       const d = document.getElementById('adm-guest-date').value;
@@ -4039,6 +4167,8 @@ async function renderAdmin(vp){
         };
       }
       await setGuestLunches(list);
+      // 追加した日付の月を表示して、登録結果がすぐ見えるようにする
+      { const ad = parseISO(d); state.guestMonth = {y:ad.getFullYear(), m:ad.getMonth()}; }
       state.guestMsg = {text:t.guestLunchAdded, ok:true};
       await reload();
       setTimeout(()=>{ state.guestMsg=null; drawAdmin(); }, 6000);
@@ -4064,6 +4194,20 @@ async function renderAdmin(vp){
         drawAdmin();
       };
     });
+    const eePrev = vp.querySelector('#adm-extraeat-prev');
+    if(eePrev) eePrev.onclick = ()=>{
+      let {y,m} = state.extraEatMonth; m--; if(m<0){m=11;y--;}
+      state.extraEatMonth = {y,m}; drawAdmin();
+    };
+    const eeNext = vp.querySelector('#adm-extraeat-next');
+    if(eeNext) eeNext.onclick = ()=>{
+      let {y,m} = state.extraEatMonth; m++; if(m>11){m=0;y++;}
+      state.extraEatMonth = {y,m}; drawAdmin();
+    };
+    const eeThis = vp.querySelector('#adm-extraeat-thismonth');
+    if(eeThis) eeThis.onclick = ()=>{
+      state.extraEatMonth = {y:today.getFullYear(), m:today.getMonth()}; drawAdmin();
+    };
     const extraAddBtn = vp.querySelector('#adm-extraeat-add');
     if(extraAddBtn) extraAddBtn.onclick = async ()=>{
       const d = document.getElementById('adm-extraeat-date').value;
@@ -4102,6 +4246,8 @@ async function renderAdmin(vp){
       const ok = await setEmp(id, rec);
       if(!ok){ extraAddBtn.disabled = false; return showErr(t.saveFailed); }
       state.extraEatDate = '';
+      // 追加した日付の月を一覧に表示して、登録結果がすぐ見えるようにする
+      { const ad = parseISO(d); state.extraEatMonth = {y:ad.getFullYear(), m:ad.getMonth()}; }
       state.extraEatMsg = {text: cd
         ? t.swapAdded.replace('{eat}', d).replace('{ew}', dowLabel(d,'ja')).replace('{cancel}', cd).replace('{cw}', dowLabel(cd,'ja'))
         : t.extraEatAdded, ok:true};
@@ -4432,4 +4578,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
