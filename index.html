@@ -472,6 +472,23 @@ textarea.csvbox{
   .weekfc-table td.closed{font-size:10.5px;}
 }
 
+/* 月ごとの合計（1行の細い帯） */
+.monthbar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);
+  border:1px solid var(--accent-line);border-left:4px solid var(--accent-mid);
+  border-radius:var(--radius);
+  padding:8px 10px 8px 14px;margin:-4px 0 16px;
+}
+.monthbar .navbtn{flex-shrink:0;}
+.monthbar-label{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.monthbar-title{font-size:13px;font-weight:800;color:var(--accent-deeper);letter-spacing:0.02em;}
+.monthbar-sub{font-size:11px;color:var(--ink-soft);line-height:1.4;}
+.monthbar-link{border:none;background:none;padding:0;font:inherit;color:var(--accent-deep);text-decoration:underline;cursor:pointer;}
+.monthbar-num{display:flex;align-items:baseline;gap:3px;flex-shrink:0;}
+.monthbar-num .n{font-family:'Shippori Mincho',serif;font-weight:800;font-size:28px;line-height:1;color:var(--accent-deeper);}
+.monthbar-num .u{font-size:12px;font-weight:700;color:var(--accent-deep);}
+
 /* 管理者メニューの区分けラベル（厨房担当者向け／システム管理者向け） */
 .section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 16px;}
 .section-divider::before, .section-divider::after{content:"";flex:1;height:1px;background:var(--line);}
@@ -1233,6 +1250,7 @@ let state = {
   adminSearchMode:'date',
   boardDate: todayISO(),
   forecastWeekOffset: 0,
+  monthTotalOffset: 0,   // 月合計の表示月（0=今月, -1=先月 ...）
   adminOpen:{closed:false, paused:false, conn:false, pw:false},
   closedBulkText:'', closedBulkPending:null, closedBulkMsg:null,
   adminDateSearch: todayISO(),
@@ -1361,6 +1379,36 @@ async function kvSetManyChunked(items, chunkSize){
     const chunk = items.slice(i, i+chunkSize);
     await kvRequest('kvSetMany', {payload: chunk});
   }
+}
+
+// ---- 臨時ランチの過去分（先月以前）の保管 ----
+// 社員レコード（emp:）は管理画面を開くたびに全員分を読み込むため、過去の臨時ランチを
+// そこに残し続けると読み込みがどんどん重くなる。先月以前の分は月ごとの保管キー
+// （extraEatArchive:2026-09 など）へ移し、その月を表示するときだけ読み込む。
+// 中身は [従業員番号, 日付, お食事タイプ] の配列（URLが長くならないよう短い形で保存）。
+const EXTRA_EAT_ARCHIVE_PREFIX = 'extraEatArchive:';
+// 読めなかった（通信失敗）ときは null、まだ1件もない月は [] を返す
+async function getExtraEatArchive(ym){
+  const r = await kvRequest('kvGet', {key: EXTRA_EAT_ARCHIVE_PREFIX + ym});
+  if(!r) return null;
+  if(!r.found) return [];
+  try{
+    const a = JSON.parse(r.value);
+    return Array.isArray(a) ? a : [];
+  }catch(e){ return []; }
+}
+async function setExtraEatArchive(ym, list){
+  const r = await kvRequest('kvSet', {key: EXTRA_EAT_ARCHIVE_PREFIX + ym, value: JSON.stringify(list)});
+  return !!(r && r.ok);
+}
+// 保管分を 従業員番号 -> Map(日付 -> お食事タイプ) に足し込む
+function mergeExtraEatArchiveInto(map, list){
+  (list || []).forEach(x=>{
+    if(!Array.isArray(x) || !x[1]) return;
+    const id = String(x[0]);
+    if(!map.has(id)) map.set(id, new Map());
+    if(!map.get(id).has(x[1])) map.get(id).set(x[1], x[2] || 'set');
+  });
 }
 
 async function ensureEmployeeMasterSeeded(){
@@ -3279,13 +3327,43 @@ async function renderAdmin(vp){
   //
   // 「閲覧用PINの管理」欄だけは、社員が増えるほど全件スキャンが重くなるため、
   // ログイン直後には読み込まず、実際にそのカードを開いたときだけ読み込む。
-  // 月をまたいだ臨時ランチ登録（先月以前の分）は不要になるので自動的に削除する
-  async function purgeOldExtraEatDates(recs){
+  // 月をまたいだ臨時ランチ登録（先月以前の分）は、社員レコードから月ごとの保管キーへ移す。
+  // 消すのではなく移すだけなので、過去の月の集計・月次CSVでは引き続き使える。
+  // 保管キーへの書き込みが確認できたときだけ社員レコードから外す（途中で失敗してもデータは消えない）。
+  // 戻り値：今回書き込んだ月の保管内容（そのままキャッシュに入れて再取得を省く）
+  async function archiveOldExtraEatDates(recs){
     const curYm = currentMonthValue(); // 例: '2026-08'
+    const moveByYm = {};   // '2026-07' -> [[id, date, type], ...]
+    recs.forEach(rec=>{
+      (rec.extraEatDates || []).forEach(e=>{
+        const ym = String(e.date).slice(0,7);
+        if(ym >= curYm) return;
+        (moveByYm[ym] = moveByYm[ym] || []).push([String(rec.employeeId), e.date, e.mealType || 'set']);
+      });
+    });
+    const yms = Object.keys(moveByYm);
+    if(!yms.length) return {};
+
+    const written = {};
+    for(const ym of yms){
+      const existing = await getExtraEatArchive(ym);
+      if(existing === null) return {};   // 読めなかったら今回は移さない（次回また試す）
+      const seen = new Set(existing.map(x=> x[0] + '|' + x[1]));
+      const merged = existing.slice();
+      moveByYm[ym].forEach(x=>{
+        const k = x[0] + '|' + x[1];
+        if(!seen.has(k)){ seen.add(k); merged.push(x); }
+      });
+      merged.sort((a,b)=> String(a[1]).localeCompare(String(b[1])) || String(a[0]).localeCompare(String(b[0])));
+      const ok = await setExtraEatArchive(ym, merged);
+      if(!ok) return written;   // 保管できなかった月の分は社員レコードに残したままにする
+      written[ym] = merged;
+    }
+
     const toSave = [];
     recs.forEach(rec=>{
       if(!rec.extraEatDates || !rec.extraEatDates.length) return;
-      const kept = rec.extraEatDates.filter(e=> String(e.date).slice(0,7) >= curYm);
+      const kept = rec.extraEatDates.filter(e=> !written[String(e.date).slice(0,7)]);
       if(kept.length !== rec.extraEatDates.length){
         rec.extraEatDates = kept;
         toSave.push(rec);
@@ -3295,6 +3373,26 @@ async function renderAdmin(vp){
       const items = toSave.map(rec=>({key:'emp:'+rec.employeeId, value: JSON.stringify(rec)}));
       await kvSetManyChunked(items);
     }
+    return written;
+  }
+
+  // 過去の月の臨時ランチは、その月を表示したときに1回だけ読み込んで覚えておく
+  const eeArchiveLoading = new Set();
+  const eeArchiveFailed = new Set();
+  function ensureExtraEatArchive(ym){
+    if(!ym || ym >= currentMonthValue()) return 'none';         // 今月以降は社員レコードに入っている
+    if(cache.eeArchive[ym]) return 'ready';
+    if(eeArchiveFailed.has(ym)) return 'failed';
+    if(!eeArchiveLoading.has(ym)){
+      eeArchiveLoading.add(ym);
+      getExtraEatArchive(ym).then(list=>{
+        eeArchiveLoading.delete(ym);
+        if(list === null) eeArchiveFailed.add(ym);
+        else cache.eeArchive[ym] = list;
+        drawAdmin();
+      });
+    }
+    return 'loading';
   }
   async function loadAll(){
     const boot = await kvRequest('adminBootstrap', {}) || {};
@@ -3309,7 +3407,7 @@ async function renderAdmin(vp){
     let guestLunches = [];
     try{ guestLunches = boot.guestLunches ? JSON.parse(boot.guestLunches) : []; }catch(e){ guestLunches = []; }
 
-    await purgeOldExtraEatDates(recs);   // 先月以前の臨時ランチ登録をここで整理する
+    const archivedNow = await archiveOldExtraEatDates(recs);   // 先月以前の臨時ランチ登録を保管キーへ移す
 
     records = recs;
     state.adminAllRecords = recs;
@@ -3321,7 +3419,9 @@ async function renderAdmin(vp){
     settingsCache.closedDays = closedDays;
     settingsCache.guestLunches = guestLunches;
     const prevPinMap = cache ? cache.pinMap : null;  // 開いたことがあれば引き継ぐ
-    cache = {master:master, specialDays:specialDays, closedDays:closedDays, guestLunches:guestLunches, pinMap:prevPinMap};
+    // 過去の臨時ランチ：再読み込みのときは読み直す（今回移した月の分だけは手元にあるので入れておく）
+    cache = {master:master, specialDays:specialDays, closedDays:closedDays, guestLunches:guestLunches, pinMap:prevPinMap,
+             eeArchive: Object.assign({}, archivedNow)};
     if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
   }
   // PIN一覧はここでだけ読み込む（カードを開いたとき・書き込み後の再読み込み時のみ）
@@ -3331,6 +3431,7 @@ async function renderAdmin(vp){
   // 書き込みのあとは最新の状態を読み直す（PINは、すでに開いていた場合だけ一緒に更新）
   async function reload(){
     const pinWasLoaded = !!(cache && cache.pinMap);
+    eeArchiveFailed.clear();
     await loadAll();
     if(pinWasLoaded) await loadPinMap();
     drawAdmin();
@@ -3398,6 +3499,22 @@ async function renderAdmin(vp){
       const m = extraEatMapFromRecord(rec);
       if(m.size) extraEatByEmpAdmin.set(String(rec.employeeId), m);
     });
+    // 画面に出ている過去の月だけ、保管分の臨時ランチを読み込んで足す
+    const ymOf = d=> String(d).slice(0,7);
+    const _tDt = parseISO(todayISO());
+    const _mDt = new Date(_tDt.getFullYear(), _tDt.getMonth() + (state.monthTotalOffset||0), 1);
+    const monthTotalYm = `${_mDt.getFullYear()}-${pad(_mDt.getMonth()+1)}`;
+    const extraListYm = `${state.extraEatMonth.y}-${pad(state.extraEatMonth.m+1)}`;
+    const _wkMon = parseISO(todayISO()); _wkMon.setDate(_wkMon.getDate() - ((_wkMon.getDay()+6)%7) + 7*(1+(state.forecastWeekOffset||0)));
+    const _wkFri = new Date(_wkMon); _wkFri.setDate(_wkFri.getDate()+4);
+    const neededYms = new Set([
+      monthTotalYm, extraListYm, ymOf(state.boardDate || todayISO()),
+      ymOf(iso(_wkMon.getFullYear(), _wkMon.getMonth(), _wkMon.getDate())),
+      ymOf(iso(_wkFri.getFullYear(), _wkFri.getMonth(), _wkFri.getDate())),
+    ]);
+    const archiveStatus = {};
+    neededYms.forEach(ym=>{ archiveStatus[ym] = ensureExtraEatArchive(ym); });
+    Object.keys(cache.eeArchive).forEach(ym=> mergeExtraEatArchiveInto(extraEatByEmpAdmin, cache.eeArchive[ym]));
 
     const tISO = todayISO();
 
@@ -3450,6 +3567,34 @@ async function renderAdmin(vp){
       }
       return acc;
     }, {set:0, okazu:0, extra:0});
+
+    // ---- 月ごとの合計（表示中の月の給食日を1日ずつ集計） ----
+    const monthOffset = state.monthTotalOffset || 0;
+    const tDt = parseISO(tISO);
+    const mDt = new Date(tDt.getFullYear(), tDt.getMonth() + monthOffset, 1);
+    const mY = mDt.getFullYear(), mM = mDt.getMonth();
+    const mDaysInMonth = new Date(mY, mM+1, 0).getDate();
+    const monthTotals = {set:0, extra:0, days:0, pastDays:0};
+    for(let d=1; d<=mDaysInMonth; d++){
+      const ds = iso(mY, mM, d);
+      const wd = parseISO(ds).getDay();
+      if(wd===0 || wd===6) continue;
+      const s = computeWeekdayStats(ds);
+      if(s.closed || s.noMaster) continue;
+      monthTotals.set += s.setCount; monthTotals.extra += s.extraCount; monthTotals.days++;
+      if(ds <= tISO) monthTotals.pastDays++;
+    }
+    const monthAll = monthTotals.set + monthTotals.extra;
+    const monthTitle = (mY===tDt.getFullYear() ? '' : `${mY}年`) + `${mM+1}月の合計`;
+    const monthFirst = iso(mY, mM, 1), monthLast = iso(mY, mM, mDaysInMonth);
+    const monthArchiveState = archiveStatus[monthTotalYm];
+    let monthNote = '';
+    if(master.length===0)                    monthNote = '従業員マスタ未登録';
+    else if(monthArchiveState === 'loading') monthNote = '臨時ランチを読み込み中…';
+    else if(monthArchiveState === 'failed')  monthNote = '臨時ランチを読み込めませんでした（再読み込みしてください）';
+    else if(monthLast <= tISO)               monthNote = '実績';
+    else if(monthFirst > tISO)               monthNote = '見込み';
+    else                                     monthNote = `${tISO.slice(5).replace('-','/')}まで実績・以降は見込み`;
 
 
     const bISO = state.boardDate || tISO;          // 上部の表示対象日（前後に移動できる）
@@ -3625,6 +3770,16 @@ async function renderAdmin(vp){
         </table>
       </div>
 
+      <div class="monthbar">
+        <button type="button" class="navbtn" data-month-shift="-1" aria-label="前の月">‹</button>
+        <div class="monthbar-label">
+          <span class="monthbar-title">📅 ${monthTitle}</span>
+          <span class="monthbar-sub">${monthNote}${monthOffset ? ` ・ <button type="button" class="monthbar-link" id="month-reset">今月へ</button>` : ''}</span>
+        </div>
+        <div class="monthbar-num"><span class="n">${master.length ? monthAll : '-'}</span><span class="u">食</span></div>
+        <button type="button" class="navbtn" data-month-shift="1" aria-label="次の月">›</button>
+      </div>
+
       <div class="section-divider"><span class="section-divider-label">🍚 ${t.kitchenSectionLabel}</span></div>
 
       ${qcard('search', t.searchTitle, `
@@ -3750,6 +3905,14 @@ async function renderAdmin(vp){
               all.push({employeeId:String(rec.employeeId), name:rec.name, date:e.date});
             });
           });
+          // 先月以前の分は保管キーから（読み込み済みの月だけ）
+          const arcList = cache.eeArchive[extraListYm] || [];
+          arcList.forEach(x=>{
+            const id = String(x[0]);
+            const emp = masterById.get(id);
+            const rec = records.find(r=> String(r.employeeId)===id);
+            all.push({employeeId:id, name: emp ? emp.name : (rec ? rec.name : ''), date:x[1]});
+          });
           all.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
           // 表示中の月の分だけを出す（前月以前・翌月以降は ‹ › で切り替え）
           const {y, m} = state.extraEatMonth;
@@ -3775,7 +3938,9 @@ async function renderAdmin(vp){
                   locked ? `<span class="statuspill off">${t.extraEatLockedLabel}</span>`
                          : `<button class="btn btn-ghost" style="padding:3px 10px;font-size:12px" data-remove-extraeat-all="${escapeHtml(x.employeeId)}|${x.date}">${t.delete}</button>`
                 }</div>`;
-              }).join('') : `<p class="small">${t.extraEatAllNoneMonth.replace('{month}', label)}</p>`}
+              }).join('') : archiveStatus[extraListYm]==='loading' ? `<p class="small">読み込み中…</p>`
+                          : archiveStatus[extraListYm]==='failed' ? `<p class="small" style="color:var(--danger)">過去の臨時ランチを読み込めませんでした。右上の「再読み込み」を押してください。</p>`
+                          : `<p class="small">${t.extraEatAllNoneMonth.replace('{month}', label)}</p>`}
             </div>
           </div>`;
         })()}
@@ -3961,6 +4126,15 @@ async function renderAdmin(vp){
     const weekReset = vp.querySelector('#week-reset');
     if(weekReset) weekReset.onclick = ()=>{ state.forecastWeekOffset = 0; drawAdmin(); };
 
+    vp.querySelectorAll('[data-month-shift]').forEach(b=>{
+      b.onclick = ()=>{
+        state.monthTotalOffset = (state.monthTotalOffset||0) + Number(b.dataset.monthShift);
+        drawAdmin();
+      };
+    });
+    const monthReset = vp.querySelector('#month-reset');
+    if(monthReset) monthReset.onclick = ()=>{ state.monthTotalOffset = 0; drawAdmin(); };
+
     vp.querySelectorAll('[data-search-mode]').forEach(b=>{
       b.onclick = ()=>{ state.adminSearchMode = b.dataset.searchMode; drawAdmin(); };
     });
@@ -4076,7 +4250,19 @@ async function renderAdmin(vp){
     if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
     const _el_adm_csv_export = vp.querySelector('#adm-csv-export');
     if(_el_adm_csv_export) _el_adm_csv_export.onclick = async ()=>{
-      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth);
+      // 先月以前の月は、保管してある臨時ランチも読み込んで金額に入れる
+      let archiveList = [];
+      if(state.csvMonth && state.csvMonth < currentMonthValue()){
+        archiveList = cache.eeArchive[state.csvMonth] || await getExtraEatArchive(state.csvMonth);
+        if(archiveList === null){
+          state.csvInfo = '';
+          state.csvWarning = '臨時ランチの記録を読み込めなかったため、CSVを出力しませんでした。少し待ってからもう一度押してください。';
+          drawAdmin();
+          return;
+        }
+        cache.eeArchive[state.csvMonth] = archiveList;
+      }
+      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth, archiveList);
       if(result){
         state.csvInfo = result.count
           ? t.csvExportDone.replace('{a}', result.payrollCount).replace('{b}', result.detailCount)
@@ -4430,7 +4616,7 @@ function renderMasterDiff(pending){
 }
 
 /* ---- Monthly payroll-deduction CSV export ---- */
-async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm){
+async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm, extraEatArchiveList){
   const [yStr, mStr] = yyyyMm.split('-');
   const y = parseInt(yStr,10);
   const m0 = parseInt(mStr,10) - 1; // 0-indexed month of the DATA (e.g. June => 5)
@@ -4456,6 +4642,16 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
     purchaseByEmp[rec.employeeId] = purchaseTotal(purchasesInMonth(rec, y, m0));
     extraEatByEmp[rec.employeeId] = extraEatMapFromRecord(rec);
   });
+  // 先月以前の臨時ランチは保管キー側にあるので足す
+  if(extraEatArchiveList && extraEatArchiveList.length){
+    const arcMap = new Map();
+    mergeExtraEatArchiveInto(arcMap, extraEatArchiveList);
+    arcMap.forEach((m, id)=>{
+      const base = extraEatByEmp[id] || new Map();
+      m.forEach((type, d)=>{ if(!base.has(d)) base.set(d, type); });
+      extraEatByEmp[id] = base;
+    });
+  }
 
   // base employee list: prefer the uploaded roster (includes people who never cancel);
   // fall back to whoever has cancellation records if no roster has been configured.
