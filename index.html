@@ -960,7 +960,7 @@ const T = {
     csvExportBtn:"CSVをダウンロード",
     csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（「利用あり（¥300）」で計算しています）。設定画面の従業員マスタでお食事タイプ（利用あり／利用なし）を登録してください。",
-    csvSplitHelp:"従業員番号8000以降（8000を含む）の人は、給与システム用のCSVには入れず、「食品利用明細」として別ファイルでダウンロードします。明細には社員No・氏名・お食事タイプ・食べた日数・食べなかった日数・合計金額と、その月の給食日ごとの○（食べた日）／×（キャンセル）／-（対象外）が並びます。ボタンを1回押すと、対象者がいる分だけファイルが順にダウンロードされます。",
+    csvSplitHelp:"従業員番号8000以降（8000を含む）の人は、給与システム用のCSVには入れず、「食品利用明細」として別ファイルでダウンロードします。明細には社員No・氏名・お食事タイプ・食べた日数・食べなかった日数のすぐ後ろに、その月の給食日ごとの○（食べた日）／×（キャンセル）／-（対象外）が並び、最後にランチ代・割引商品購入代・合計金額が入ります。ボタンを1回押すと、対象者がいる分だけファイルが順にダウンロードされます。",
     csvExportDone:"ダウンロードしました。給与システム用：{a}名／利用明細（8000番以降）：{b}名",
     csvExportNoOne:"対象月に出力できる社員がいませんでした。",
 
@@ -4696,7 +4696,8 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
       const dt = parseISO(d);
       return `${dt.getMonth()+1}/${dt.getDate()}(${WD_CHARS[dt.getDay()]})`;
     });
-    const header = ['社員No','氏名','お食事タイプ','給食日数','食べた日数','食べなかった日数','ランチ代','商品購入代','合計金額', ...dayCols];
+    // ランチを食べたかどうかを最優先で見られるよう、日ごとの○×を前に、金額は最後にまとめる
+    const header = ['社員No','氏名','お食事タイプ','給食日数','食べた日数','食べなかった日数', ...dayCols, 'ランチ代','割引商品購入代','合計金額'];
     const rows = detailIds.map(id=>{
       const e = perEmployee[id];
       const calc = e.calc || {};
@@ -4707,13 +4708,13 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
         return s==='eat' ? '○' : s==='cancel' ? '×' : '-';
       });
       return [id, e.name, mealTypeLabel(e.mealType), servingDays.length, eatDays, servingDays.length - eatDays,
-              e.lunch, e.purchase, e.amount, ...marks];
+              ...marks, e.lunch, e.purchase, e.amount];
     });
     // 合計行（人数分をまとめて確認できるように）
     const totalAmount = detailIds.reduce((s,id)=> s + Number(perEmployee[id].amount||0), 0);
     const totalLunch  = detailIds.reduce((s,id)=> s + Number(perEmployee[id].lunch||0), 0);
     const totalBuy    = detailIds.reduce((s,id)=> s + Number(perEmployee[id].purchase||0), 0);
-    const totalRow = ['','合計','','','','', totalLunch, totalBuy, totalAmount, ...servingDays.map(()=>'')];
+    const totalRow = ['','合計','','','','', ...servingDays.map(()=>''), totalLunch, totalBuy, totalAmount];
 
     const lines = [header, ...rows, totalRow].map(r=>r.map(csvCell).join(','));
     lines.push('');
@@ -4774,3 +4775,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
