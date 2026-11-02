@@ -410,7 +410,7 @@ textarea.csvbox{
 .board-detail.cancel{margin-bottom:0;}
 .status-msg{font-size:12.5px;color:var(--ink-soft);min-height:16px;margin-top:6px;}
 
-/* 発注参考用：翌週サマリー */
+/* 来週の見込み／月の合計（同じ見た目にそろえている） */
 .weekfc{
   background:var(--accent-soft);
   border:1px solid var(--accent-line);
@@ -448,7 +448,14 @@ textarea.csvbox{
 .weekfc-tot .n{
   display:block;font-family:'Shippori Mincho',serif;font-weight:800;font-size:24px;color:var(--accent-deeper);line-height:1;
 }
-.weekfc-tot .l{display:block;font-size:11px;margin-top:4px;color:var(--ink-soft);font-weight:700;}
+.weekfc-tot .l{display:block;font-size:12px;margin-top:5px;color:var(--ink);font-weight:700;}
+.weekfc-tot .n small{font-family:inherit;font-size:12px;font-weight:700;margin-left:2px;color:var(--accent-deep);}
+.weekfc-tot.total{background:#fff;border:2px solid var(--accent-mid);}
+.weekfc-totals{margin-bottom:0;}
+.weekfc-note{
+  font-size:11.5px;font-weight:700;color:var(--accent-deeper);
+  background:#fff;border:1px solid var(--accent-line);border-radius:999px;padding:3px 10px;
+}
 .weekfc-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;}
 .weekfc-table{table-layout:fixed;}
 .weekfc-table th, .weekfc-table td{
@@ -459,9 +466,9 @@ textarea.csvbox{
 }
 .weekfc-table th:first-child, .weekfc-table td.rowlbl{width:52px;}
 .weekfc-table th{
-  background:transparent;color:var(--ink-soft);font-weight:700;font-size:11.5px;line-height:1.5;padding-top:9px;
+  background:transparent;color:var(--ink);font-weight:800;font-size:12.5px;line-height:1.5;padding-top:9px;
 }
-.weekfc-table th .small{font-size:10px;font-weight:600;color:var(--ink-soft);opacity:0.8;}
+.weekfc-table th .small{font-size:12px;font-weight:800;color:var(--accent-deeper);opacity:1;}
 .weekfc-table td.rowlbl{text-align:left;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);padding-left:10px;white-space:nowrap;}
 .weekfc-table td.closed{font-family:inherit;color:var(--ink-soft);font-size:11px;font-weight:600;}
 .weekfc-table tr.total td{background:var(--accent-soft);color:var(--accent-deeper);border-top:2px solid var(--accent-line);}
@@ -3573,7 +3580,6 @@ async function renderAdmin(vp){
       const d = new Date(targetMondayDt); d.setDate(d.getDate()+i);
       return iso(d.getFullYear(), d.getMonth(), d.getDate());
     });
-    const weekLabel = weekOffset===0 ? '来週' : weekOffset===-1 ? '今週' : (weekOffset>0 ? `${weekOffset+1}週間後` : `${-weekOffset}週間前`);
     const weekStats = weekDates.map(d=>({date:d, ...computeWeekdayStats(d)}));
     const weekTotals = weekStats.reduce((acc,s)=>{
       if(!s.closed && !s.noMaster){
@@ -3769,7 +3775,7 @@ async function renderAdmin(vp){
             <button type="button" class="navbtn" data-week-shift="-1">‹</button>
             <button type="button" class="navbtn" data-week-shift="1">›</button>
           </div>
-          <div class="weekfc-head">📦 発注参考：${weekLabel}（${weekDates[0].slice(5).replace('-','/')}〜${weekDates[4].slice(5).replace('-','/')}）の見込み</div>
+          <div class="weekfc-head">📦 来週の見込み</div>
           ${state.forecastWeekOffset ? `<button type="button" class="backtoday" id="week-reset">来週へ戻る</button>` : ''}
         </div>
         <table class="weekfc-table">
@@ -3785,14 +3791,21 @@ async function renderAdmin(vp){
         </table>
       </div>
 
-      <div class="monthbar">
-        <button type="button" class="navbtn" data-month-shift="-1" aria-label="前の月">‹</button>
-        <div class="monthbar-label">
-          <span class="monthbar-title">📅 ${monthTitle}</span>
-          <span class="monthbar-sub">${monthNote}${monthOffset ? ` ・ <button type="button" class="monthbar-link" id="month-reset">今月へ</button>` : ''}</span>
+      <div class="weekfc">
+        <div class="weekfc-head-row">
+          <div class="weekfc-nav">
+            <button type="button" class="navbtn" data-month-shift="-1" aria-label="前の月">‹</button>
+            <button type="button" class="navbtn" data-month-shift="1" aria-label="次の月">›</button>
+          </div>
+          <div class="weekfc-head">📅 ${monthTitle}</div>
+          ${monthNote ? `<span class="weekfc-note">${monthNote}</span>` : ''}
+          ${monthOffset ? `<button type="button" class="backtoday" id="month-reset">今月へ戻る</button>` : ''}
         </div>
-        <div class="monthbar-num"><span class="n">${master.length ? monthAll : '-'}</span><span class="u">食</span></div>
-        <button type="button" class="navbtn" data-month-shift="1" aria-label="次の月">›</button>
+        <div class="weekfc-totals">
+          <div class="weekfc-tot"><span class="n">${master.length ? monthTotals.set : '-'}<small>食</small></span><span class="l">通常</span></div>
+          <div class="weekfc-tot"><span class="n">${master.length ? monthTotals.extra : '-'}<small>食</small></span><span class="l">臨時</span></div>
+          <div class="weekfc-tot total"><span class="n">${master.length ? monthAll : '-'}<small>食</small></span><span class="l">合計</span></div>
+        </div>
       </div>
 
       <div class="section-divider"><span class="section-divider-label">⚙ ${t.adminSectionLabel}</span></div>
@@ -4811,4 +4824,3 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
-
