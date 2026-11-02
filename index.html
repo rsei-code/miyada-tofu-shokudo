@@ -278,6 +278,10 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus{
 .btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
 .btn:disabled{opacity:0.45;cursor:not-allowed;}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+/* 月次CSVの3つのボタン：横幅を広げ、2行目に中身（かっこ書き）を出す */
+.csvbtns .btn{flex:1 1 200px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 16px;line-height:1.3;}
+.csvbtns .csvbtn-main{font-size:15px;font-weight:700;}
+.csvbtns .csvbtn-sub{font-size:12px;font-weight:500;opacity:0.9;}
 
 .checkline{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;font-size:14px;font-weight:600;}
 .checkline input{width:17px;height:17px;accent-color:var(--accent-deep);}
@@ -489,7 +493,7 @@ textarea.csvbox{
 .monthbar-num .n{font-family:'Shippori Mincho',serif;font-weight:800;font-size:28px;line-height:1;color:var(--accent-deeper);}
 .monthbar-num .u{font-size:12px;font-weight:700;color:var(--accent-deep);}
 
-/* 管理者メニューの区分けラベル（厨房担当者向け／システム管理者向け） */
+/* 管理者メニューの見出しラベル（システム管理者向けメニュー） */
 .section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 16px;}
 .section-divider::before, .section-divider::after{content:"";flex:1;height:1px;background:var(--line);}
 .section-divider-label{
@@ -957,12 +961,17 @@ const T = {
     passwordChanged:"パスワードを変更しました。次回ログインから新しいパスワードが必要です。", passwordTooShort:"4文字以上のパスワードを入力してください。",
 
     csvExportTitle:"月次CSV出力", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
-    csvExportBtn:"CSVをダウンロード",
-    csvExportHelp:"社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
+    csvExportBtnPayroll:"①給与計算用", csvExportBtnDetail:"②業務委託＋派遣用", csvExportBtnPurchase:"③合計金額把握用",
+    csvExportSubPayroll:"（ランチ＋割引商品の購入）", csvExportSubDetail:"（ランチのみ）", csvExportSubPurchase:"（割引商品の購入のみ）",
+    csvExportHelp:"①給与計算用は、社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（「利用あり（¥300）」で計算しています）。設定画面の従業員マスタでお食事タイプ（利用あり／利用なし）を登録してください。",
-    csvSplitHelp:"従業員番号8000以降（8000を含む）の人は、給与システム用のCSVには入れず、「食品利用明細」として別ファイルでダウンロードします。明細には社員No・氏名・お食事タイプ・食べた日数・食べなかった日数のすぐ後ろに、その月の給食日ごとの○（食べた日）／×（キャンセル）／-（対象外）が並び、最後にランチ代・割引商品購入代・合計金額が入ります。ボタンを1回押すと、対象者がいる分だけファイルが順にダウンロードされます。",
-    csvExportDone:"ダウンロードしました。給与システム用：{a}名／利用明細（8000番以降）：{b}名",
-    csvExportNoOne:"対象月に出力できる社員がいませんでした。",
+    csvSplitHelp:"ボタンは3つあり、押したボタンのファイルだけをダウンロードします。①給与計算用：従業員番号7999までの人の給与システム用CSV（上の説明のとおり）。②業務委託＋派遣用：従業員番号8000以降の人のランチの明細（給食日数・食べた日数・食べなかった日数・合計金額〈1食300円×食べた日数〉と、給食日ごとの○＝食べた日／×＝キャンセル／-＝対象外）と、その合計。③合計金額把握用：割引商品の購入に限った集計で、全社員の購入代とその合計に加えて、8000番以降の人の分を別枠でも出します。",
+    csvExportDonePayroll:"①給与計算用CSVをダウンロードしました（{n}名）。",
+    csvExportDoneDetail:"②業務委託＋派遣用CSVをダウンロードしました（{n}名）。",
+    csvExportDonePurchase:"③合計金額把握用CSVをダウンロードしました（割引商品を購入した人：{n}名）。",
+    csvExportNoOnePayroll:"①給与計算用CSVに入る社員（7999番まで）がいませんでした。",
+    csvExportNoOneDetail:"②業務委託＋派遣用CSVに入る社員（8000番以降）がいませんでした。",
+    csvExportNoOnePurchase:"対象月に割引商品の購入がなかったため、③合計金額把握用CSVは出力しませんでした。",
 
     employeeMasterTitle:"従業員マスタ",
     masterBulkTitle:"名簿の書き換え（貼り付け）",
@@ -1031,7 +1040,7 @@ const T = {
 
     guestLunchTitle:"来客用ランチ",
     extraLunchTitle:"臨時ランチ登録", extraLunchGuestTab:"来客", extraLunchEmployeeTab:"社員",
-    kitchenSectionLabel:"社食スタッフ向けメニュー", adminSectionLabel:"システム管理者向けメニュー",
+    adminSectionLabel:"システム管理者向けメニュー",
     guestLunchHelp:"来客などで急にランチの数が増える場合、日付ごとに人数を登録できます。ここで登録した人数は「本日の状況」に加算されますが、社員ではないため給与や部門への請求には一切関係しません（厨房が作る数を把握するためだけの人数カウンターです）。",
     guestLunchDate:"日付", guestLunchNote:"メモ（任意）", guestLunchNotePh:"例）○○様ご来社",
     guestLunchCount:"人数",
@@ -3284,8 +3293,13 @@ async function migrateEmployeeId(oldId, newId){
   }
 }
 
+/* 管理者メニューの項目番号（画面を描くたびに①から振り直す） */
+const QCARD_NUMS = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+let qcardNo = 0;
 /* 目立たせたくないカードは折りたたんで表示する */
 function qcard(key, title, body){
+  const no = QCARD_NUMS[qcardNo++] || '';
+  title = no + title;
   const open = !!(state.adminOpen && state.adminOpen[key]);
   return `<div class="card cardq">
       <div class="cardq-head" data-toggle="${key}">
@@ -3703,6 +3717,7 @@ async function renderAdmin(vp){
     const pausedList = master.filter(e=>e.pauseStart && (!e.pauseEnd || e.pauseEnd > tISO))
       .sort((a,b)=> String(a.pauseStart).localeCompare(String(b.pauseStart)));
 
+    qcardNo = 0; // メニュー番号は上から①、②…と振る
     vp.innerHTML = `
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
         <button class="btn btn-ghost" id="admin-refresh">${t.refresh}</button>
@@ -3780,7 +3795,7 @@ async function renderAdmin(vp){
         <button type="button" class="navbtn" data-month-shift="1" aria-label="次の月">›</button>
       </div>
 
-      <div class="section-divider"><span class="section-divider-label">🍚 ${t.kitchenSectionLabel}</span></div>
+      <div class="section-divider"><span class="section-divider-label">⚙ ${t.adminSectionLabel}</span></div>
 
       ${qcard('search', t.searchTitle, `
         <div class="modeswitch" style="margin-bottom:14px;">
@@ -4022,8 +4037,6 @@ async function renderAdmin(vp){
         ${state.closedBulkPending ? renderClosedBulkPreview(state.closedBulkPending) : ''}
       `)}
 
-      <div class="section-divider"><span class="section-divider-label">⚙ ${t.adminSectionLabel}</span></div>
-
       ${qcard('master', t.employeeMasterTitle, masterCardBody(master, t))}
 
       ${pausedList.length ? qcard('paused', t.pausedListTitle.replace('{n}', pausedList.length), `
@@ -4066,8 +4079,10 @@ async function renderAdmin(vp){
           <label>${t.csvExportMonthLabel}</label>
           <input type="month" id="adm-csv-month" value="${state.csvMonth}">
         </div>
-        <div class="btnrow">
-          <button class="btn btn-primary" id="adm-csv-export">${t.csvExportBtn}</button>
+        <div class="btnrow csvbtns">
+          <button class="btn btn-primary" data-csv-export="payroll"><span class="csvbtn-main">${t.csvExportBtnPayroll}</span><span class="csvbtn-sub">${t.csvExportSubPayroll}</span></button>
+          <button class="btn btn-primary" data-csv-export="detail"><span class="csvbtn-main">${t.csvExportBtnDetail}</span><span class="csvbtn-sub">${t.csvExportSubDetail}</span></button>
+          <button class="btn btn-primary" data-csv-export="purchase"><span class="csvbtn-main">${t.csvExportBtnPurchase}</span><span class="csvbtn-sub">${t.csvExportSubPurchase}</span></button>
         </div>
         ${state.csvInfo ? `<p class="small" style="margin-top:8px;">${escapeHtml(state.csvInfo)}</p>` : ''}
         ${state.csvWarning ? `<p class="small" style="color:var(--danger);margin-top:8px;">${state.csvWarning}</p>` : ''}
@@ -4248,8 +4263,8 @@ async function renderAdmin(vp){
 
     const _el_adm_csv_month = vp.querySelector('#adm-csv-month');
     if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
-    const _el_adm_csv_export = vp.querySelector('#adm-csv-export');
-    if(_el_adm_csv_export) _el_adm_csv_export.onclick = async ()=>{
+    vp.querySelectorAll('[data-csv-export]').forEach(btn=> btn.onclick = async ()=>{
+      const which = btn.dataset.csvExport; // 'payroll'＝①給与計算用／'detail'＝②業務委託＋派遣用／'purchase'＝③合計金額把握用
       // 先月以前の月は、保管してある臨時ランチも読み込んで金額に入れる
       let archiveList = [];
       if(state.csvMonth && state.csvMonth < currentMonthValue()){
@@ -4262,17 +4277,20 @@ async function renderAdmin(vp){
         }
         cache.eeArchive[state.csvMonth] = archiveList;
       }
-      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth, archiveList);
+      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth, archiveList, which);
       if(result){
-        state.csvInfo = result.count
-          ? t.csvExportDone.replace('{a}', result.payrollCount).replace('{b}', result.detailCount)
-          : t.csvExportNoOne;
+        const msg = {
+          payroll:  [result.payrollCount,  t.csvExportDonePayroll,  t.csvExportNoOnePayroll],
+          detail:   [result.detailCount,   t.csvExportDoneDetail,   t.csvExportNoOneDetail],
+          purchase: [result.purchaseCount, t.csvExportDonePurchase, t.csvExportNoOnePurchase],
+        }[which];
+        state.csvInfo = msg[0] ? msg[1].replace('{n}', msg[0]) : msg[2];
         state.csvWarning = result.missingMealType > 0
           ? t.csvMealTypeWarning.replace('{n}', result.missingMealType) : '';
         drawAdmin();
         setTimeout(()=>{ state.csvInfo=''; state.csvWarning=''; drawAdmin(); }, 10000);
       }
-    };
+    });
 
     const testUrlBtn = vp.querySelector('#adm-test-url');
     if(testUrlBtn) testUrlBtn.onclick = async ()=>{
@@ -4616,7 +4634,8 @@ function renderMasterDiff(pending){
 }
 
 /* ---- Monthly payroll-deduction CSV export ---- */
-async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm, extraEatArchiveList){
+// which: 'payroll' = ①給与計算用（7999番まで）／'detail' = ②業務委託＋派遣用（8000番以降のランチ）／'purchase' = ③合計金額把握用（割引商品の購入）
+async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm, extraEatArchiveList, which){
   const [yStr, mStr] = yyyyMm.split('-');
   const y = parseInt(yStr,10);
   const m0 = parseInt(mStr,10) - 1; // 0-indexed month of the DATA (e.g. June => 5)
@@ -4677,7 +4696,7 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   const detailIds  = ids.filter(id=> isDetailCsvId(id));
 
   // ---- ① 給与システム用（7999まで）----
-  if(payrollIds.length){
+  if(which==='payroll' && payrollIds.length){
     const EMPTY_TAIL = ',,,,,,,,,,,'; // matches the 11 trailing empty columns in the reference file
     const header = ['社員No','給与処理年','給与処理回','支給グループ','弁当・食品購入代'].join(',') + EMPTY_TAIL;
     const rows = payrollIds.map(id=>{
@@ -4688,17 +4707,16 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   }
 
   // ---- ② 利用明細（8000以降）----
-  if(detailIds.length){
-    // 2つ目のダウンロードがブラウザにまとめてブロックされないよう、少し間を空ける
-    if(payrollIds.length) await new Promise(r=>setTimeout(r, 700));
-    const mealTypeLabel = mt => mt==='none' ? '利用なし' : `利用あり(${PRICE_SET}円)`;
+  if(which==='detail' && detailIds.length){
+    const lines = [];
+    const pushRow = r=> lines.push(r.map(csvCell).join(','));
     const dayCols = servingDays.map(d=>{
       const dt = parseISO(d);
       return `${dt.getMonth()+1}/${dt.getDate()}(${WD_CHARS[dt.getDay()]})`;
     });
-    // ランチを食べたかどうかを最優先で見られるよう、日ごとの○×を前に、金額は最後にまとめる
-    const header = ['社員No','氏名','お食事タイプ','給食日数','食べた日数','食べなかった日数', ...dayCols, 'ランチ代','割引商品購入代','合計金額'];
-    const rows = detailIds.map(id=>{
+    pushRow([`業務委託＋派遣（${DETAIL_CSV_ID_FROM}番以降）ランチ ${dataMonthNum}月分（単価：1食${PRICE_SET}円）`]);
+    pushRow(['社員No','氏名','給食日数','食べた日数','食べなかった日数','合計金額', ...dayCols]);
+    detailIds.forEach(id=>{
       const e = perEmployee[id];
       const calc = e.calc || {};
       const status = calc.dayStatus || new Map();
@@ -4707,22 +4725,40 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
         const s = status.get(d);
         return s==='eat' ? '○' : s==='cancel' ? '×' : '-';
       });
-      return [id, e.name, mealTypeLabel(e.mealType), servingDays.length, eatDays, servingDays.length - eatDays,
-              ...marks, e.lunch, e.purchase, e.amount];
+      pushRow([id, e.name, servingDays.length, eatDays, servingDays.length - eatDays, e.lunch, ...marks]);
     });
-    // 合計行（人数分をまとめて確認できるように）
-    const totalAmount = detailIds.reduce((s,id)=> s + Number(perEmployee[id].amount||0), 0);
-    const totalLunch  = detailIds.reduce((s,id)=> s + Number(perEmployee[id].lunch||0), 0);
-    const totalBuy    = detailIds.reduce((s,id)=> s + Number(perEmployee[id].purchase||0), 0);
-    const totalRow = ['','合計','','','','', ...servingDays.map(()=>''), totalLunch, totalBuy, totalAmount];
-
-    const lines = [header, ...rows, totalRow].map(r=>r.map(csvCell).join(','));
+    const totalLunch = detailIds.reduce((s,id)=> s + Number(perEmployee[id].lunch||0), 0);
+    pushRow(['','合計','','','', totalLunch]);
     lines.push('');
-    lines.push(csvCell('※ ○=食べた日／×=キャンセルした日／-=対象外（停止期間・利用しない曜日・入社前・利用なし）'));
-    downloadCsv(lines.join('\r\n') + '\r\n', `食品利用明細_${DETAIL_CSV_ID_FROM}番以降_${dataMonthNum}月.csv`);
+    pushRow([`※ ○=食べた日／×=キャンセルした日／-=対象外（停止期間・利用しない曜日・入社前・利用なし）。合計金額＝食べた日数×${PRICE_SET}円`]);
+    downloadCsv(lines.join('\r\n') + '\r\n', `業務委託・派遣用_${dataMonthNum}月.csv`);
   }
 
-  return { count: ids.length, payrollCount: payrollIds.length, detailCount: detailIds.length, missingMealType };
+  // ---- ③ 合計金額把握用（割引商品の購入だけ。全社員と、8000番以降の別枠を左右に並べる）----
+  const buyerIds = ids.filter(id=> Number(perEmployee[id].purchase||0) > 0);
+  if(which==='purchase' && buyerIds.length){
+    const lines = [];
+    const pushRow = r=> lines.push(r.map(csvCell).join(','));
+    const buyerDetailIds = buyerIds.filter(id=> isDetailCsvId(id));
+    const sumOf = list=> list.reduce((s,id)=> s + Number(perEmployee[id].purchase||0), 0);
+    const totalAll = sumOf(buyerIds);
+    const totalDetail = sumOf(buyerDetailIds);
+    const rowOf = id=> [id, perEmployee[id].name, perEmployee[id].purchase];
+    const leftRows  = buyerIds.map(rowOf);
+    const rightRows = buyerDetailIds.length ? buyerDetailIds.map(rowOf) : [['','（購入なし）','']];
+    const joinRow = (l, r)=> pushRow([...(l||['','','']), '', ...(r||['','',''])]);
+
+    pushRow([`割引商品の購入 ${dataMonthNum}月分`]);
+    joinRow(['全社員','',''], [`うち${DETAIL_CSV_ID_FROM}番以降（業務委託＋派遣）`,'','']);
+    joinRow(['社員No','氏名','割引商品購入代'], ['社員No','氏名','割引商品購入代']);
+    for(let k=0; k<Math.max(leftRows.length, rightRows.length); k++) joinRow(leftRows[k], rightRows[k]);
+    joinRow(['','全社員の合計', totalAll], ['',`${DETAIL_CSV_ID_FROM}番以降の合計`, totalDetail]);
+    lines.push('');
+    pushRow(['','（参考）7999番までの合計', totalAll - totalDetail]);
+    downloadCsv(lines.join('\r\n') + '\r\n', `合計金額把握用_割引商品_${dataMonthNum}月.csv`);
+  }
+
+  return { count: ids.length, payrollCount: payrollIds.length, detailCount: detailIds.length, purchaseCount: buyerIds.length, missingMealType };
 }
 
 // 従業員番号8000以降かどうか（数字として読めない番号は、これまでどおり給与システム用に入れる）
