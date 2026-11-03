@@ -278,8 +278,10 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus{
 .btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
 .btn:disabled{opacity:0.45;cursor:not-allowed;}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
-/* 月次CSVの3つのボタン：横幅を広げ、2行目に中身（かっこ書き）を出す */
-.csvbtns .btn{flex:1 1 200px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 16px;line-height:1.3;}
+/* 月次CSVの4つのボタン：縦横2つずつ並べ、2行目に中身（かっこ書き）を出す */
+.csvbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.csvbtns .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:14px 16px;line-height:1.3;}
+@media (max-width:420px){.csvbtns{grid-template-columns:1fr;}}
 .csvbtns .csvbtn-main{font-size:15px;font-weight:700;}
 .csvbtns .csvbtn-sub{font-size:12px;font-weight:500;opacity:0.9;}
 
@@ -967,18 +969,22 @@ const T = {
     adminPasswordChangeTitle:"管理者パスワードの変更", newAdminPasswordPh:"新しいパスワード（4文字以上）",
     passwordChanged:"パスワードを変更しました。次回ログインから新しいパスワードが必要です。", passwordTooShort:"4文字以上のパスワードを入力してください。",
 
-    csvExportTitle:"月次CSV出力", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
-    csvExportBtnPayroll:"①給与計算用", csvExportBtnDetail:"②業務委託＋派遣用", csvExportBtnPurchase:"③合計金額把握用",
-    csvExportSubPayroll:"（ランチ＋割引商品の購入）", csvExportSubDetail:"（ランチのみ）", csvExportSubPurchase:"（割引商品の購入のみ）",
+    csvExportTitle:"月次集計・請求書", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
+    csvExportBtnPayroll:"①給与計算用", csvExportBtnDetail:"②業務委託＋派遣用", csvExportBtnPurchase:"③合計金額把握用", csvExportBtnInvoice:"④請求書（PDF）",
+    csvExportSubPayroll:"（ランチ＋割引商品の購入）", csvExportSubDetail:"（派遣会社送付時使用）", csvExportSubPurchase:"（割引商品の購入のみ）", csvExportSubInvoice:"（業務委託・派遣社員向け）",
     csvExportHelp:"①給与計算用は、社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（「利用あり（¥300）」で計算しています）。設定画面の従業員マスタでお食事タイプ（利用あり／利用なし）を登録してください。",
-    csvSplitHelp:"ボタンは3つあり、押したボタンのファイルだけをダウンロードします。①給与計算用：従業員番号7999までの人の給与システム用CSV（上の説明のとおり）。②業務委託＋派遣用：従業員番号8000以降の人のランチの明細（給食日数・食べた日数・食べなかった日数・合計金額〈1食300円×食べた日数〉と、給食日ごとの○＝食べた日／×＝キャンセル／-＝対象外）と、その合計。③合計金額把握用：割引商品の購入に限った集計で、全社員の購入代とその合計に加えて、8000番以降の人の分を別枠でも出します。",
+    csvSplitHelp:"ボタンは4つあり、押したボタンのファイルだけをダウンロードします。①給与計算用：従業員番号7999までの人の給与システム用CSV（上の説明のとおり）。②業務委託＋派遣用：従業員番号8000以降の人のランチの明細（給食日数・食べた日数・食べなかった日数・合計金額〈1食300円×食べた日数〉と、給食日ごとの○＝食べた日／×＝キャンセル／-＝対象外）と、その合計。③合計金額把握用：割引商品の購入に限った集計で、全社員の購入代とその合計に加えて、8000番以降の人の分を別枠でも出します。④請求書（PDF）：8000番以降で対象月に割引商品を購入した人ごとに、購入日・単価・数量・金額の内訳と合計金額を載せた請求書を作ります（1人1ページで、1つのPDFにまとめて出力します）。",
     csvExportDonePayroll:"①給与計算用CSVをダウンロードしました（{n}名）。",
     csvExportDoneDetail:"②業務委託＋派遣用CSVをダウンロードしました（{n}名）。",
     csvExportDonePurchase:"③合計金額把握用CSVをダウンロードしました（割引商品を購入した人：{n}名）。",
     csvExportNoOnePayroll:"①給与計算用CSVに入る社員（7999番まで）がいませんでした。",
     csvExportNoOneDetail:"②業務委託＋派遣用CSVに入る社員（8000番以降）がいませんでした。",
     csvExportNoOnePurchase:"対象月に割引商品の購入がなかったため、③合計金額把握用CSVは出力しませんでした。",
+    csvExportDoneInvoice:"④請求書（PDF）をダウンロードしました（{n}名分）。",
+    csvExportNoOneInvoice:"対象月に8000番以降の人の割引商品の購入がなかったため、④請求書は作成しませんでした。",
+    csvExportInvoiceWorking:"④請求書（PDF）を作成しています。少しお待ちください…",
+    csvExportInvoiceFailed:"請求書（PDF）を作成できませんでした。通信状態を確認して、もう一度押してください。",
 
     employeeMasterTitle:"従業員マスタ",
     masterBulkTitle:"名簿の書き換え（貼り付け）",
@@ -3231,10 +3237,10 @@ function masterHelpHtml(){
       <p class="warn">※ 途中で曜日を変えると、その月のCSVをまだ出していない場合は、その月ぜんぶが新しい曜日で計算されます。月の初めに切り替えるのが安全です。</p>
 
       <h4>退職する人</h4>
-      <p><span class="warn">行を消すのは、その月の月次CSVを出したあとにしてください。</span>先に消すと名簿から消えるため、その月に食べた分がCSVに出てこなくなります。</p>
+      <p><span class="warn">行を消すのは、その月の「月次集計・請求書」でCSV・請求書を出したあとにしてください。</span>先に消すと名簿から消えるため、その月に食べた分や購入した分がCSV・請求書に出てこなくなります。</p>
       <ol>
         <li>停止開始日に「最初に食べない日」を入れる（9月30日が最終出勤なら <code>2026-10-01</code>）</li>
-        <li>その月の月次CSVを出力する</li>
+        <li>「月次集計・請求書」から、その月のCSVを出力する（8000番以降で割引商品を買った人は、④請求書も出す）</li>
         <li>そのあとで、この欄からその行を消す</li>
       </ol>
 
@@ -4096,6 +4102,7 @@ async function renderAdmin(vp){
           <button class="btn btn-primary" data-csv-export="payroll"><span class="csvbtn-main">${t.csvExportBtnPayroll}</span><span class="csvbtn-sub">${t.csvExportSubPayroll}</span></button>
           <button class="btn btn-primary" data-csv-export="detail"><span class="csvbtn-main">${t.csvExportBtnDetail}</span><span class="csvbtn-sub">${t.csvExportSubDetail}</span></button>
           <button class="btn btn-primary" data-csv-export="purchase"><span class="csvbtn-main">${t.csvExportBtnPurchase}</span><span class="csvbtn-sub">${t.csvExportSubPurchase}</span></button>
+          <button class="btn btn-primary" data-csv-export="invoice" ${state.invoiceBusy?'disabled':''}><span class="csvbtn-main">${t.csvExportBtnInvoice}</span><span class="csvbtn-sub">${t.csvExportSubInvoice}</span></button>
         </div>
         ${state.csvInfo ? `<p class="small" style="margin-top:8px;">${escapeHtml(state.csvInfo)}</p>` : ''}
         ${state.csvWarning ? `<p class="small" style="color:var(--danger);margin-top:8px;">${state.csvWarning}</p>` : ''}
@@ -4277,7 +4284,31 @@ async function renderAdmin(vp){
     const _el_adm_csv_month = vp.querySelector('#adm-csv-month');
     if(_el_adm_csv_month) _el_adm_csv_month.onchange = e=>{ state.csvMonth = e.target.value; };
     vp.querySelectorAll('[data-csv-export]').forEach(btn=> btn.onclick = async ()=>{
-      const which = btn.dataset.csvExport; // 'payroll'＝①給与計算用／'detail'＝②業務委託＋派遣用／'purchase'＝③合計金額把握用
+      const which = btn.dataset.csvExport; // 'payroll'＝①給与計算用／'detail'＝②業務委託＋派遣用／'purchase'＝③合計金額把握用／'invoice'＝④請求書（PDF）
+      // ④請求書は割引商品の購入だけを使うので、ランチの計算（臨時ランチの読み込み）は不要
+      if(which==='invoice'){
+        if(state.invoiceBusy) return;
+        state.invoiceBusy = true;
+        state.csvWarning = '';
+        state.csvInfo = t.csvExportInvoiceWorking;
+        drawAdmin();
+        let n = null;
+        try{
+          n = await exportPurchaseInvoicesPdf(records, master, state.csvMonth);
+        }catch(err){
+          console.error(err);
+        }
+        state.invoiceBusy = false;
+        if(n === null){
+          state.csvInfo = '';
+          state.csvWarning = t.csvExportInvoiceFailed;
+        }else{
+          state.csvInfo = n ? t.csvExportDoneInvoice.replace('{n}', n) : t.csvExportNoOneInvoice;
+        }
+        drawAdmin();
+        setTimeout(()=>{ state.csvInfo=''; state.csvWarning=''; drawAdmin(); }, 10000);
+        return;
+      }
       // 先月以前の月は、保管してある臨時ランチも読み込んで金額に入れる
       let archiveList = [];
       if(state.csvMonth && state.csvMonth < currentMonthValue()){
@@ -4772,6 +4803,210 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   }
 
   return { count: ids.length, payrollCount: payrollIds.length, detailCount: detailIds.length, purchaseCount: buyerIds.length, missingMealType };
+}
+
+/* ---- ④ 請求書（PDF）：8000番以降の人の割引商品の購入 ---- */
+// 請求元（請求書の右上に出す）
+const INVOICE_ISSUER = {
+  zip: '〒399-4301',
+  address: '長野県上伊那郡宮田村6689-1',
+  name: '株式会社マスダ',
+  shop: '宮田とうふ工房',
+  contact: 'TEL：(0265)84-1102　FAX：(0265)85-2411',
+};
+// PDF作成用のライブラリは、ボタンを押したときだけ読み込む（普段の画面を重くしないため）
+const PDF_LIBS = [
+  'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+  'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
+];
+function loadScriptOnce(src){
+  return new Promise((resolve, reject)=>{
+    if(document.querySelector(`script[data-lib="${src}"]`)){ resolve(); return; }
+    const sc = document.createElement('script');
+    sc.src = src; sc.async = true; sc.dataset.lib = src;
+    sc.onload = ()=> resolve();
+    sc.onerror = ()=>{ sc.remove(); reject(new Error('load failed: ' + src)); };
+    document.head.appendChild(sc);
+  });
+}
+async function ensurePdfLibs(){
+  if(window.html2canvas && window.jspdf && window.jspdf.jsPDF) return;
+  for(const src of PDF_LIBS) await loadScriptOnce(src);
+  if(!(window.html2canvas && window.jspdf && window.jspdf.jsPDF)) throw new Error('PDF libs unavailable');
+}
+function yen(n){ return '¥' + Number(n||0).toLocaleString('ja-JP'); }
+function jpDate(isoStr){
+  const dt = parseISO(isoStr);
+  return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;
+}
+
+// 1人分の請求書（A4縦 794×1123px 相当）のHTML
+function invoicePageHtml(inv){
+  const rows = inv.lines.map(l=>`
+      <tr>
+        <td class="c">${escapeHtml(l.dateText)}</td>
+        <td>割引商品（単価${escapeHtml(yen(l.price))}）</td>
+        <td class="r">${escapeHtml(yen(l.price))}</td>
+        <td class="r">${l.qty}</td>
+        <td class="r">${escapeHtml(yen(l.amount))}</td>
+      </tr>`).join('');
+  return `
+    <div class="inv-title">請　求　書</div>
+    <div class="inv-meta">
+      <div>請求番号：${escapeHtml(inv.number)}</div>
+      <div>発行日：${escapeHtml(inv.issueDateText)}</div>
+    </div>
+    <div class="inv-parties">
+      <div class="inv-to">
+        <div class="inv-to-name">${escapeHtml(inv.name)}　様</div>
+        <div class="inv-to-id">管理番号：${escapeHtml(inv.id)}</div>
+        <p class="inv-lead">下記のとおりご請求申し上げます。</p>
+        <div class="inv-subject">件名：割引商品購入代（${escapeHtml(inv.periodText)}分）</div>
+      </div>
+      <div class="inv-from">
+        <div>${escapeHtml(INVOICE_ISSUER.zip)}</div>
+        <div>${escapeHtml(INVOICE_ISSUER.address)}</div>
+        <div class="inv-from-name">${escapeHtml(INVOICE_ISSUER.name)}<span class="inv-from-shop">${escapeHtml(INVOICE_ISSUER.shop)}</span></div>
+        <div>${escapeHtml(INVOICE_ISSUER.contact)}</div>
+      </div>
+    </div>
+    <div class="inv-amount">
+      <span class="inv-amount-label">ご請求金額</span>
+      <span class="inv-amount-value">${escapeHtml(yen(inv.total))}</span>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th style="width:20%">購入日</th><th>品目</th><th style="width:15%">単価</th><th style="width:11%">数量</th><th style="width:17%">金額</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="3"></td><td class="r tl">合計</td><td class="r tl">${escapeHtml(yen(inv.total))}</td></tr></tfoot>
+    </table>
+    <div class="inv-note">
+      <div class="inv-note-label">備考</div>
+      <div>対象期間：${escapeHtml(inv.periodRangeText)}　／　購入件数：${inv.purchaseCount}件（${inv.pieces}点）</div>
+    </div>
+    ${inv.pageCount > 1 ? `<div class="inv-page">${inv.pageNo} / ${inv.pageCount}</div>` : ''}
+  `;
+}
+const INVOICE_CSS = `
+  .inv-sheet{position:relative;box-sizing:border-box;width:794px;height:1123px;padding:72px 68px;background:#fff;color:#222;
+    font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;font-size:14px;line-height:1.6;}
+  .inv-sheet *{box-sizing:border-box;}
+  .inv-title{text-align:center;font-size:30px;font-weight:700;letter-spacing:0.3em;padding-bottom:10px;border-bottom:3px double #333;margin-bottom:18px;}
+  .inv-meta{text-align:right;font-size:13px;margin-bottom:22px;}
+  .inv-parties{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:28px;}
+  .inv-to{flex:1;}
+  .inv-to-name{font-size:22px;font-weight:700;border-bottom:1px solid #333;padding-bottom:4px;display:inline-block;min-width:260px;}
+  .inv-to-id{font-size:12px;color:#555;margin-top:4px;}
+  .inv-lead{margin:18px 0 4px;}
+  .inv-subject{font-size:13px;}
+  .inv-from{text-align:left;font-size:13px;min-width:240px;padding-top:4px;}
+  .inv-from-name{font-size:16px;font-weight:700;margin:2px 0;white-space:nowrap;}
+  .inv-from-shop{font-size:14px;font-weight:700;margin-left:12px;}
+  .inv-amount{display:flex;align-items:center;border:2px solid #333;margin-bottom:28px;width:420px;}
+  .inv-amount-label{background:#eee;padding:10px 18px;font-weight:700;border-right:1px solid #333;}
+  .inv-amount-value{flex:1;text-align:right;padding:10px 18px;font-size:24px;font-weight:700;}
+  .inv-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .inv-table th{background:#eee;border:1px solid #555;padding:7px 8px;font-weight:700;text-align:center;color:#222;text-transform:none;letter-spacing:0;font-size:13px;}
+  .inv-table td{border:1px solid #555;padding:7px 8px;}
+  .inv-table tr:hover td{background:transparent;}
+  .inv-table .c{text-align:center;}
+  .inv-table .r{text-align:right;}
+  .inv-table tfoot td{border:none;}
+  .inv-table tfoot td.tl{border:1px solid #555;font-weight:700;background:#f6f6f6;}
+  .inv-note{margin-top:28px;border:1px solid #555;padding:10px 14px;font-size:13px;min-height:80px;}
+  .inv-note-label{font-weight:700;margin-bottom:4px;}
+  .inv-page{position:absolute;bottom:36px;left:0;right:0;text-align:center;font-size:11px;color:#777;}
+`;
+// 1ページに載せる明細行の上限（超えたら同じ人の2ページ目に続ける）
+const INVOICE_ROWS_PER_PAGE = 22;
+
+// 戻り値：請求書を作った人数（0＝対象者なし）。作成に失敗したら null
+async function exportPurchaseInvoicesPdf(records, master, yyyyMm){
+  if(!yyyyMm) return 0;
+  const [yStr, mStr] = yyyyMm.split('-');
+  const y = parseInt(yStr,10);
+  const m0 = parseInt(mStr,10) - 1;
+  const monthNum = m0 + 1;
+  const lastDay = new Date(y, m0+1, 0).getDate();
+
+  // 名簿にいる人を対象にする（名簿が無いときは記録のある人）。氏名は名簿を優先
+  const nameById = {};
+  (master||[]).forEach(e=>{ nameById[String(e.id)] = e.name; });
+  const allowed = (master && master.length) ? new Set(master.map(e=>String(e.id))) : null;
+
+  const invoices = [];
+  (records||[]).forEach(rec=>{
+    const id = String(rec.employeeId);
+    if(!isDetailCsvId(id)) return;
+    if(allowed && !allowed.has(id)) return;
+    const list = purchasesInMonth(rec, y, m0);
+    const total = purchaseTotal(list);
+    if(!(total > 0)) return;
+    // 明細：購入日ごと・単価ごとに1行
+    const lines = [];
+    list.forEach(p=>{
+      const dt = parseISO(p.date);
+      const dateText = `${dt.getMonth()+1}/${dt.getDate()}（${WD_CHARS[dt.getDay()]}）`;
+      const byPrice = new Map();
+      (p.items||[]).forEach(it=>{
+        const price = Number(it.price), qty = Number(it.qty||0);
+        if(qty > 0) byPrice.set(price, (byPrice.get(price)||0) + qty);
+      });
+      Array.from(byPrice.entries()).sort((a,b)=>a[0]-b[0]).forEach(([price, qty])=>{
+        lines.push({dateText, price, qty, amount: price*qty});
+      });
+    });
+    invoices.push({
+      id, name: nameById[id] || rec.name || '', total, lines,
+      purchaseCount: list.length,
+      pieces: lines.reduce((n,l)=>n+l.qty, 0),
+    });
+  });
+  if(!invoices.length) return 0;
+  invoices.sort((a,b)=> a.id.localeCompare(b.id,'ja',{numeric:true}));
+
+  try{ await ensurePdfLibs(); }catch(e){ console.error(e); return null; }
+  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+
+  const issueDateText = jpDate(todayISO());
+  const periodText = `${y}年${monthNum}月`;
+  const periodRangeText = `${y}年${monthNum}月1日〜${y}年${monthNum}月${lastDay}日`;
+
+  // 画面の外に一時的な作業場所を作って描画する
+  const host = document.createElement('div');
+  host.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;z-index:-1;pointer-events:none;';
+  host.innerHTML = `<style>${INVOICE_CSS}</style>`;
+  document.body.appendChild(host);
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({orientation:'portrait', unit:'mm', format:'a4', compress:true});
+  let firstPage = true;
+  try{
+    for(const inv of invoices){
+      // 明細が多い人は複数ページに分ける（合計・備考は各ページに同じものを出す）
+      const chunks = [];
+      for(let k=0; k<inv.lines.length; k+=INVOICE_ROWS_PER_PAGE) chunks.push(inv.lines.slice(k, k+INVOICE_ROWS_PER_PAGE));
+      for(let c=0; c<chunks.length; c++){
+        const sheet = document.createElement('div');
+        sheet.className = 'inv-sheet';
+        sheet.innerHTML = invoicePageHtml({
+          ...inv, lines: chunks[c],
+          number: `${y}${pad(monthNum)}-${inv.id}`,
+          issueDateText, periodText, periodRangeText,
+          pageNo: c+1, pageCount: chunks.length,
+        });
+        host.appendChild(sheet);
+        const canvas = await window.html2canvas(sheet, {scale:2, backgroundColor:'#ffffff', logging:false, useCORS:true});
+        host.removeChild(sheet);
+        if(!firstPage) pdf.addPage('a4', 'portrait');
+        firstPage = false;
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+      }
+    }
+  } finally {
+    host.remove();
+  }
+  pdf.save(`請求書_割引商品_${monthNum}月分.pdf`);
+  return invoices.length;
 }
 
 // 従業員番号8000以降かどうか（数字として読めない番号は、これまでどおり給与システム用に入れる）
