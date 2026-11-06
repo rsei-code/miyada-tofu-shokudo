@@ -972,9 +972,7 @@ const T = {
     csvExportTitle:"月次集計・請求書", csvExportMonthLabel:"対象月（キャンセルが発生した月）",
     csvExportBtnPayroll:"①給与計算用", csvExportBtnDetail:"②業務委託＋派遣用", csvExportBtnPurchase:"③合計金額把握用", csvExportBtnInvoice:"④請求書（PDF）",
     csvExportSubPayroll:"（ランチ＋割引商品の購入）", csvExportSubDetail:"（派遣会社送付時使用）", csvExportSubPurchase:"（割引商品の購入のみ）", csvExportSubInvoice:"（業務委託・派遣社員向け）",
-    csvExportHelp:"①給与計算用は、社員No・給与処理年・給与処理回・支給グループ・弁当・食品購入代の5列でCSVを出力します。金額は「食べた日ベース」で計算します（平日から休業日・キャンセル日・停止期間・利用しない曜日を差し引いた日数 × 単価）。ランチの単価は全員¥300です（お食事タイプが「利用なし」の人は¥0。臨時ランチを登録した日だけ¥300を計上します）。社員が登録した割引商品の購入額（対象月分）も同じ列に合算します。",
     csvMealTypeWarning:"お食事タイプが未設定の社員が{n}名いました（「利用あり（¥300）」で計算しています）。設定画面の従業員マスタでお食事タイプ（利用あり／利用なし）を登録してください。",
-    csvSplitHelp:"ボタンは4つあり、押したボタンのファイルだけをダウンロードします。①給与計算用：従業員番号7999までの人の給与システム用CSV（上の説明のとおり）。②業務委託＋派遣用：従業員番号8000以降の人のランチの明細（給食日数・食べた日数・食べなかった日数・合計金額〈1食300円×食べた日数〉と、給食日ごとの○＝食べた日／×＝キャンセル／-＝対象外）と、その合計。③合計金額把握用：割引商品の購入に限った集計で、全社員の購入代とその合計に加えて、8000番以降の人の分を別枠でも出します。④請求書（PDF）：8000番以降で対象月に割引商品を購入した人ごとに、購入日・単価・数量・金額の内訳と合計金額を載せた請求書を作ります（1人1ページで、1つのPDFにまとめて出力します）。",
     csvExportDonePayroll:"①給与計算用CSVをダウンロードしました（{n}名）。",
     csvExportDoneDetail:"②業務委託＋派遣用CSVをダウンロードしました（{n}名）。",
     csvExportDonePurchase:"③合計金額把握用CSVをダウンロードしました（割引商品を購入した人：{n}名）。",
@@ -1037,7 +1035,7 @@ const T = {
     employeeMasterWeekdayInDate:"{line}行目：利用曜日は7列目（入社日のうしろ）に書いてください。例）612,山田 太郎,利用あり,,,,火水",
     diffTitle:"保存前の確認",
     diffAdd:"追加（{n}件）", diffDel:"削除（{n}件）", diffChange:"変更（{n}件）", diffSame:"変更はありません。そのまま保存できます。",
-    diffDelWarn:"削除される社員がいます。名簿から消えると、その社員はキャンセル登録ができなくなり、CSVにも出力されません。",
+    diffDelWarn:"削除される社員がいます。保存すると、その社員はキャンセル登録などができなくなり、今日から後の集計にも入らなくなります。昨日までの分は、週・月の集計やCSV・請求書にこれまでどおり残ります。",
 
     specialDaysTitle:"セット料金指定日登録",
     specialDaysHelp:"おかずとごはんが分けられないメニューの日を登録してください。この日は「おかず」を選んでいる人もセット料金（¥300）としてCSVに計上されます。",
@@ -1466,6 +1464,28 @@ async function getMasterEmp(id){
   }
   return null;
 }
+// ---- マスタから削除した人の控え（retired:社員番号）----
+// マスタから消した人も、削除した日の前日までは週・月の集計やCSV・請求書に残すため、
+// 削除した時点のマスタの内容と削除日（retiredDate）を控えておく。
+async function getRetiredEmployees(){
+  try{
+    const r = await kvRequest('kvGetByPrefix', {prefix:'retired:'});
+    const out = [];
+    ((r && r.items) || []).forEach(item=>{ try{ out.push(JSON.parse(item.value)); }catch(e){} });
+    return out;
+  }catch(e){ return []; }
+}
+async function saveRetiredEmployees(list, retiredDate){
+  if(!list || !list.length) return;
+  const items = list.map(e=>({key:'retired:'+e.id, value: JSON.stringify(Object.assign({}, e, {retiredDate}))}));
+  await kvSetManyChunked(items);
+}
+// 集計用の名簿：今のマスタ＋マスタから削除した人（同じ社員番号がマスタにいればマスタを優先）
+function masterWithRetired(master, retired){
+  const ids = new Set((master||[]).map(e=>String(e.id)));
+  return (master||[]).concat((retired||[]).filter(r=> !ids.has(String(r.id))));
+}
+
 // 従業員マスタを保存し直す（まとめて少ない通信回数で送る）
 async function setEmployeeMaster(list){
   const existing = await getEmployeeMaster();
@@ -1779,6 +1799,11 @@ function pauseLabel(emp, lang){
 function isBeforeHireDate(emp, dateStr){
   return !!(emp && emp.hireDate && dateStr < emp.hireDate);
 }
+// 従業員マスタから削除した人（退職者など）は、削除した日から後は集計しない。
+// 削除する前の日の分は、削除前と同じ設定のまま集計に残す。
+function isRetiredOn(emp, dateStr){
+  return !!(emp && emp.retiredDate && dateStr >= emp.retiredDate);
+}
 
 /* ============================================================
    利用曜日（従業員マスタ）
@@ -1936,7 +1961,7 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
     let eatDays=0, amount=0;
     servingDays.forEach(d=>{
       // 入社前は臨時ランチも対象外
-      const extraType = isBeforeHireDate(emp, d) ? null : (extraEatMap && extraEatMap.get(d));
+      const extraType = (isBeforeHireDate(emp, d) || isRetiredOn(emp, d)) ? null : (extraEatMap && extraEatMap.get(d));
       if(!extraType){ dayStatus.set(d,'off'); offDates.push(d); return; }
       eatDays++; dayStatus.set(d,'eat'); eatDates.push(d);
       amount += PRICE_SET;
@@ -1947,6 +1972,7 @@ function calcForEmployee(emp, cancelledSet, servingDays, specialSet, extraEatMap
   let eatDays=0, amount=0, pausedDays=0, cancelledDays=0, beforeHireDays=0, weekdayOffDays=0;
   servingDays.forEach(d=>{
     if(isBeforeHireDate(emp, d)){ beforeHireDays++; dayStatus.set(d,'off'); offDates.push(d); return; }
+    if(isRetiredOn(emp, d)){ dayStatus.set(d,'off'); offDates.push(d); return; }   // マスタから削除した日以降
     if(isPausedOn(emp, d)){ pausedDays++; dayStatus.set(d,'off'); offDates.push(d); return; }
     // もともと利用しない曜日。その日だけ臨時ランチの登録があれば、食べた日として数える
     if(isWeekdayOff(emp, d)){
@@ -3434,6 +3460,7 @@ async function renderAdmin(vp){
     let guestLunches = [];
     try{ guestLunches = boot.guestLunches ? JSON.parse(boot.guestLunches) : []; }catch(e){ guestLunches = []; }
 
+    const retired = await getRetiredEmployees();   // マスタから削除した人の控え
     const archivedNow = await archiveOldExtraEatDates(recs);   // 先月以前の臨時ランチ登録を保管キーへ移す
 
     records = recs;
@@ -3447,7 +3474,7 @@ async function renderAdmin(vp){
     settingsCache.guestLunches = guestLunches;
     const prevPinMap = cache ? cache.pinMap : null;  // 開いたことがあれば引き継ぐ
     // 過去の臨時ランチ：再読み込みのときは読み直す（今回移した月の分だけは手元にあるので入れておく）
-    cache = {master:master, specialDays:specialDays, closedDays:closedDays, guestLunches:guestLunches, pinMap:prevPinMap,
+    cache = {master:master, retired:retired, specialDays:specialDays, closedDays:closedDays, guestLunches:guestLunches, pinMap:prevPinMap,
              eeArchive: Object.assign({}, archivedNow)};
     if(!state.employeeMasterText) state.employeeMasterText = masterToText(master);
   }
@@ -3520,6 +3547,8 @@ async function renderAdmin(vp){
     const pinMap = cache.pinMap || {};   // 未読込のあいだは空扱い（PINカードは「読み込み中」表示にするため実害なし）
     const closedSet = new Set(closedDays);
     const masterById = new Map(master.map(e=>[String(e.id), e]));
+    // 週・月の集計とCSV・請求書は、マスタから削除した人も削除日の前日まで含める
+    const aggMaster = masterWithRetired(master, cache.retired);
     // 従業員番号 -> 臨時ランチのMap（日付->セット/おかず）
     const extraEatByEmpAdmin = new Map();
     records.forEach(rec=>{
@@ -3555,8 +3584,8 @@ async function renderAdmin(vp){
       const cancelList = occurrencesForDate(dateStr);
       const cancelledIds = new Set(cancelList.map(x=>String(x.employeeId)));
       let setCount=0, okazuCount=0, extraCount=0;
-      master.forEach(e=>{
-        if(isBeforeHireDate(e, dateStr)) return;
+      aggMaster.forEach(e=>{
+        if(isBeforeHireDate(e, dateStr) || isRetiredOn(e, dateStr)) return;
         if(e.mealType === 'none'){
           const m = extraEatByEmpAdmin.get(String(e.id));
           const extraType = m && m.get(dateStr);
@@ -3638,7 +3667,8 @@ async function renderAdmin(vp){
     const cancelNamesToday = [];
 
     if(masterAvailable){
-      master.forEach(e=>{
+      aggMaster.forEach(e=>{
+        if(isRetiredOn(e, bISO)) return;   // マスタから削除済み
         if(isBeforeHireDate(e, bISO)){ notHiredYetTotal++; return; }   // 入社日がまだ来ていない
         if(e.mealType === 'none'){
           // 普段は対象外だが、その日だけ臨時ランチの登録があればカウントする
@@ -4092,8 +4122,6 @@ async function renderAdmin(vp){
       `)}
 
       ${qcard('csv', t.csvExportTitle, `
-        <p class="footnote">${t.csvExportHelp}</p>
-        <p class="footnote">${t.csvSplitHelp}</p>
         <div class="field">
           <label>${t.csvExportMonthLabel}</label>
           <input type="month" id="adm-csv-month" value="${state.csvMonth}">
@@ -4294,7 +4322,7 @@ async function renderAdmin(vp){
         drawAdmin();
         let n = null;
         try{
-          n = await exportPurchaseInvoicesPdf(records, master, state.csvMonth);
+          n = await exportPurchaseInvoicesPdf(records, aggMaster, state.csvMonth);
         }catch(err){
           console.error(err);
         }
@@ -4321,7 +4349,7 @@ async function renderAdmin(vp){
         }
         cache.eeArchive[state.csvMonth] = archiveList;
       }
-      const result = await exportMonthlyCsv(records, master, specialDays, closedDays, state.csvMonth, archiveList, which);
+      const result = await exportMonthlyCsv(records, aggMaster, specialDays, closedDays, state.csvMonth, archiveList, which);
       if(result){
         const msg = {
           payroll:  [result.payrollCount,  t.csvExportDonePayroll,  t.csvExportNoOnePayroll],
@@ -4574,6 +4602,8 @@ async function renderAdmin(vp){
       const pending = state.masterPending;
       // 社員番号だけを書き換えた行は、キャンセル記録・購入記録・閲覧PINも新しい番号へ移す
       for(const r of (pending.diff.renamed||[])) await migrateEmployeeId(r.from, r.to);
+      // 削除する人は、削除日の前日までの集計が変わらないよう控えを残す（社員番号の変更は除く）
+      await saveRetiredEmployees(pending.diff.removed || [], todayISO());
       await setEmployeeMaster(pending.list);
       state.masterPending = null;
       state.employeeMasterText = masterToText(pending.list);
@@ -4698,11 +4728,14 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   // cancelled-day set per employee id, built from records (only source of cancellation data)
   const cancelledByEmp = {};
   const purchaseByEmp = {}; // 割引商品の購入額（その月分）
+  const purchaseListByEmp = {}; // 割引商品の購入記録（その月分。③の明細用）
   const extraEatByEmp = {}; // 臨時ランチ（普段「利用なし」の人が、その日だけ食べる登録）
   records.forEach(rec=>{
     const sets = cancelledSetsForMonth(rec, y, m0);
     cancelledByEmp[rec.employeeId] = {name:rec.name, cancelled:sets.all};
-    purchaseByEmp[rec.employeeId] = purchaseTotal(purchasesInMonth(rec, y, m0));
+    const monthPurchases = purchasesInMonth(rec, y, m0);
+    purchaseByEmp[rec.employeeId] = purchaseTotal(monthPurchases);
+    purchaseListByEmp[rec.employeeId] = monthPurchases;
     extraEatByEmp[rec.employeeId] = extraEatMapFromRecord(rec);
   });
   // 先月以前の臨時ランチは保管キー側にあるので足す
@@ -4718,8 +4751,11 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
 
   // base employee list: prefer the uploaded roster (includes people who never cancel);
   // fall back to whoever has cancellation records if no roster has been configured.
+  // マスタから削除した人は、対象月の初日より前に削除していれば出さない（毎月0円の行が残らないように）
+  const monthStartISO = `${y}-${pad(m0+1)}-01`;
   const baseList = master.length
-    ? master.map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd, hireDate:e.hireDate, weekdays:e.weekdays}))
+    ? master.filter(e=> !e.retiredDate || e.retiredDate > monthStartISO)
+        .map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd, hireDate:e.hireDate, weekdays:e.weekdays, retiredDate:e.retiredDate}))
     : Object.keys(cancelledByEmp).map(id=>({id, name:cancelledByEmp[id].name, mealType:undefined}));
 
   const perEmployee = {}; // id -> {name, amount}
@@ -4778,27 +4814,42 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
     downloadCsv(lines.join('\r\n') + '\r\n', `業務委託・派遣用_${dataMonthNum}月.csv`);
   }
 
-  // ---- ③ 合計金額把握用（割引商品の購入だけ。全社員と、8000番以降の別枠を左右に並べる）----
+  // ---- ③ 合計金額把握用（割引商品の購入だけ。スプレッドシートの購入ログと同じ形で、購入1回ごとに1行）----
   const buyerIds = ids.filter(id=> Number(perEmployee[id].purchase||0) > 0);
   if(which==='purchase' && buyerIds.length){
     const lines = [];
     const pushRow = r=> lines.push(r.map(csvCell).join(','));
-    const buyerDetailIds = buyerIds.filter(id=> isDetailCsvId(id));
-    const sumOf = list=> list.reduce((s,id)=> s + Number(perEmployee[id].purchase||0), 0);
-    const totalAll = sumOf(buyerIds);
-    const totalDetail = sumOf(buyerDetailIds);
-    const rowOf = id=> [id, perEmployee[id].name, perEmployee[id].purchase];
-    const leftRows  = buyerIds.map(rowOf);
-    const rightRows = buyerDetailIds.length ? buyerDetailIds.map(rowOf) : [['','（購入なし）','']];
-    const joinRow = (l, r)=> pushRow([...(l||['','','']), '', ...(r||['','',''])]);
+    const rows = [];
+    buyerIds.forEach(id=>{
+      (purchaseListByEmp[id] || []).forEach(p=>{
+        const qtyByPrice = new Map();
+        (p.items||[]).forEach(it=>{
+          const price = Number(it.price), qty = Number(it.qty||0);
+          if(qty > 0) qtyByPrice.set(price, (qtyByPrice.get(price)||0) + qty);
+        });
+        rows.push({
+          // 送信日時（例：2026-08-19 17:25:12）。古い記録で無い場合は購入日だけ
+          stamp: String(p.submittedAt || p.date || ''),
+          id, name: p.name || perEmployee[id].name || '',
+          total: Number(p.total||0),
+          text: purchaseItemsText(p),
+          qtyByPrice,
+        });
+      });
+    });
+    // 送信日時の古い順（同じ時刻なら社員番号順）
+    rows.sort((a,b)=> a.stamp.localeCompare(b.stamp) || a.id.localeCompare(b.id,'ja',{numeric:true}));
 
-    pushRow([`割引商品の購入 ${dataMonthNum}月分`]);
-    joinRow(['全社員','',''], [`うち${DETAIL_CSV_ID_FROM}番以降（業務委託＋派遣）`,'','']);
-    joinRow(['社員No','氏名','割引商品購入代'], ['社員No','氏名','割引商品購入代']);
-    for(let k=0; k<Math.max(leftRows.length, rightRows.length); k++) joinRow(leftRows[k], rightRows[k]);
-    joinRow(['','全社員の合計', totalAll], ['',`${DETAIL_CSV_ID_FROM}番以降の合計`, totalDetail]);
+    pushRow(['送信日時','社員番号','名前','合計金額','内訳', ...PRICE_OPTIONS.map(pr=>`¥${pr}`)]);
+    rows.forEach(r=>{
+      pushRow([r.stamp, r.id, r.name, r.total, r.text, ...PRICE_OPTIONS.map(pr=> r.qtyByPrice.get(pr)||0)]);
+    });
+    const totalAll = rows.reduce((s,r)=> s + r.total, 0);
+    const totalDetail = rows.filter(r=> isDetailCsvId(r.id)).reduce((s,r)=> s + r.total, 0);
     lines.push('');
-    pushRow(['','（参考）7999番までの合計', totalAll - totalDetail]);
+    pushRow(['','','全社員の合計', totalAll]);
+    pushRow(['','',`うち${DETAIL_CSV_ID_FROM}番以降（業務委託＋派遣）の合計`, totalDetail]);
+    pushRow(['','','うち7999番までの合計', totalAll - totalDetail]);
     downloadCsv(lines.join('\r\n') + '\r\n', `合計金額把握用_割引商品_${dataMonthNum}月.csv`);
   }
 
@@ -5023,6 +5074,8 @@ function csvCell(v){
 function downloadCsv(csvBody, filename){
   let blob;
   if(window.Encoding){
+    // 半角の「¥」（U+00A5）はShift-JISに無く「?」に化けるので、全角の「￥」に置き換えてから変換する
+    csvBody = String(csvBody).replace(/\u00A5/g, '\uFFE5');
     const unicodeArray = Encoding.stringToCode(csvBody);
     const sjisArray = Encoding.convert(unicodeArray, {to:'SJIS', from:'UNICODE'});
     blob = new Blob([new Uint8Array(sjisArray)], {type:'text/csv'});
