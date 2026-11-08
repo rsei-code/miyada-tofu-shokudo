@@ -131,18 +131,27 @@ body{
 .stafflink:hover{color:var(--ink-soft);text-decoration:underline;}
 
 .card.mine-card{
-  background:transparent;
-  border:1px dashed var(--accent-line);
-  box-shadow:none;
-  margin-top:32px;
-  padding:16px 22px;
+  background:var(--accent-soft);
+  border:2px solid var(--accent-mid);
+  box-shadow:var(--shadow);
+  margin-top:28px;
+  padding:16px 20px;
 }
 .mine-toggle{
   display:flex;align-items:center;justify-content:space-between;cursor:pointer;
   user-select:none;
 }
-.mine-toggle .chev{color:var(--ink-soft);font-size:14px;}
-.mine-toggle h2{font-size:14px;font-weight:600;color:var(--ink-soft);font-family:'Noto Sans JP',sans-serif;}
+.mine-toggle{gap:14px;}
+.mine-toggle:focus-visible{outline:3px solid var(--accent-mid);outline-offset:4px;border-radius:8px;}
+.mine-ico{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--accent-line);
+  display:flex;align-items:center;justify-content:center;font-size:22px;}
+.mine-head-txt{flex:1 1 auto;min-width:0;}
+.mine-toggle h2{font-size:17px;font-weight:800;color:var(--accent-deeper);font-family:'Noto Sans JP',sans-serif;letter-spacing:.02em;}
+.mine-head-txt p{margin:3px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+.mine-open{flex:0 0 auto;background:var(--accent-deep);color:#fff;font-size:13px;font-weight:700;
+  padding:8px 16px;border-radius:999px;white-space:nowrap;}
+.mine-toggle:hover .mine-open{background:var(--accent-deeper);}
+@media (max-width:480px){.mine-ico{display:none;}.mine-toggle h2{font-size:15.5px;}.mine-open{padding:7px 12px;font-size:12px;}}
 
 .card{
   background:var(--surface);
@@ -778,6 +787,56 @@ textarea.csvbox{
 }
 .purtotal .l{font-size:13px;font-weight:700;color:var(--accent-deep);}
 .purtotal .v{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:800;color:var(--accent-deeper);}
+/* 従業員マスタの表入力 */
+.mt-modes{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#FDFBF5;margin-bottom:10px;}
+.mt-modes button{border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink-soft);padding:6px 14px;border-radius:999px;cursor:pointer;}
+.mt-modes button.on{background:var(--ink);color:#fff;}
+.mt-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.mt-tools input[type=search]{flex:1 1 180px;min-width:150px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;background:#fff;}
+.mt-tools label{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:4px;cursor:pointer;}
+.mt-tools .mt-count{font-size:12px;color:var(--ink-soft);margin-left:auto;}
+.mt-wrap{max-height:400px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff;}
+.mt{border-collapse:separate;border-spacing:0;width:100%;min-width:1000px;font-size:12.5px;}
+.mt th{position:sticky;top:0;z-index:2;background:#F6F1E4;color:var(--accent-deep);font-weight:800;text-align:left;
+  padding:7px 6px;border-bottom:1px solid var(--accent-line);white-space:nowrap;font-size:11.5px;line-height:1.35;}
+.mt th small{display:block;font-weight:500;color:var(--ink-soft);font-size:10.5px;}
+.mt td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle;background:#fff;}
+.mt tr:last-child td{border-bottom:none;}
+.mt .c-id{position:sticky;left:0;z-index:1;width:68px;min-width:68px;max-width:68px;}
+.mt .c-name{position:sticky;left:68px;z-index:1;width:124px;min-width:124px;max-width:124px;box-shadow:1px 0 0 var(--line);}
+.mt th.c-id,.mt th.c-name{z-index:3;background:#F6F1E4;}
+.mt input[type=text],.mt input[type=date],.mt select{
+  width:100%;border:1px solid transparent;border-radius:6px;padding:5px 5px;font-family:inherit;font-size:12.5px;
+  background:transparent;color:var(--ink);min-width:0;}
+.mt input[type=date]{width:124px;}
+.mt select{width:86px;}
+.mt input:hover,.mt select:hover{border-color:var(--line);}
+.mt input:focus,.mt select:focus{outline:none;border-color:var(--accent-mid);background:#fff;box-shadow:0 0 0 2px var(--accent-soft);}
+.mt input.empty-date{color:#BDB4A8;}
+.mt td.bad input{border-color:var(--danger);background:var(--danger-soft);}
+.mt .wd{display:flex;gap:2px;}
+.mt .wd button{width:22px;height:24px;border:1px solid var(--accent-line);border-radius:5px;background:var(--accent-soft);
+  color:var(--accent-deep);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;padding:0;}
+.mt .wd button.off{background:#fff;border-color:var(--line);color:#C9C1B5;text-decoration:line-through;}
+.mt .rowbtn{border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 6px;border-radius:6px;white-space:nowrap;}
+.mt .rowbtn:hover{background:var(--danger-soft);color:var(--danger);}
+.mt tr.st-new td.c-id{box-shadow:inset 4px 0 0 var(--good);}
+.mt tr.st-changed td.c-id{box-shadow:inset 4px 0 0 var(--accent-mid);}
+.mt tr.st-new td{background:#F7FAF0;}
+.mt tr.st-changed td{background:#FFFCEE;}
+.mt tr.st-del td{background:#FAF5F3;}
+.mt tr.st-del td.c-id{box-shadow:inset 4px 0 0 var(--danger);}
+.mt tr.st-del input,.mt tr.st-del select,.mt tr.st-del .wd{opacity:.45;text-decoration:line-through;pointer-events:none;}
+.mt tr.st-del .rowbtn:hover{background:var(--good-soft);color:var(--good);}
+.mt-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);margin:6px 2px 0;}
+.mt-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
+.mt .c-hist{min-width:96px;}
+.mt .histchip{display:inline-flex;align-items:center;gap:2px;background:#F2EDE0;border-radius:999px;padding:1px 3px 1px 8px;
+  font-size:11px;color:var(--accent-deep);margin:1px 2px 1px 0;white-space:nowrap;}
+.mt .histchip button{border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:12px;line-height:1;padding:2px 4px;border-radius:999px;}
+.mt .histchip button:hover{background:var(--danger-soft);color:var(--danger);}
+.mt .histnone{color:#CFC7BA;font-size:11px;}
+.mt-empty{padding:18px;text-align:center;color:var(--ink-soft);font-size:12.5px;}
 /* 従業員マスタの書き方ガイド（折りたたみ） */
 .helpbox{
   border:1px dashed var(--accent-line);background:#FDFBF4;
@@ -876,6 +935,7 @@ const T = {
     useWeekdayChip:"利用曜日 {wd}",
     mineWeekdayNote:"あなたは毎週 {wd} だけランチを利用する設定です。ほかの曜日はキャンセルの登録は不要で、金額にも入りません。変更したいときは社員食堂の担当者にご連絡ください。",
 
+    mineSub:"今月の利用日数・金額・キャンセルした日を確認できます", mineOpenBtn:"ひらく ▸", mineClose:"とじる ▾",
     mineTitle:"自分の記録を確認", mineDesc:"社員番号と氏名（フルネーム）を入力して検索してください。",
     mineIdPh:"社員番号（例：123）", mineNamePh:"氏名フルネーム（例：山田 太郎）",
     search:"検索", mineNotFound:"記録が見つかりません。まだキャンセルの登録がないか、社員番号をご確認ください。",
@@ -1029,6 +1089,7 @@ const T = {
     employeeMasterInvalid:"{line}行目の形式が正しくありません（社員番号,氏名,お食事タイプ,停止開始日,再開日）。",
     employeeMasterBadDate:"{line}行目の日付が読み取れません。2026-08-01 の形式で入力してください。",
     employeeMasterBadRange:"{line}行目の再開日が停止開始日より前になっています。",
+    employeeMasterResumeOnly:"{line}行目：再開日だけが入っていて、停止開始日が空です。このままでは何も反映されません。ランチを食べはじめる日は「ランチ開始日（入社日）」の列に入れてください。",
     employeeMasterDup:"{line}行目の社員番号 {id} が重複しています。",
     employeeMasterBadWeekday:"{line}行目の利用曜日が読み取れません。「火水」（火・水だけ利用）または「水以外」（水だけ利用しない）のように書いてください。",
     employeeMasterEmptyWeekday:"{line}行目の利用曜日が「利用する曜日なし」になっています。まったく利用しない人は、お食事タイプを「利用なし」にしてください。",
@@ -1142,6 +1203,7 @@ const T = {
     useWeekdayChip:"Lunch days: {wd}",
     mineWeekdayNote:"You are set up to have lunch only on {wd}. There is no need to cancel the other weekdays, and they are not charged. Please contact the cafeteria staff if this needs to change.",
 
+    mineSub:"See this month's lunch days, amount and cancellations", mineOpenBtn:"Open ▸", mineClose:"Close ▾",
     mineTitle:"Check my records", mineDesc:"Enter your employee ID and full name to search.",
     mineIdPh:"Employee ID (e.g. 123)", mineNamePh:"Full name (e.g. Taro Yamada)",
     search:"Search", mineNotFound:"No record found. You may not have any cancellations yet, or please check your employee ID.",
@@ -1279,6 +1341,7 @@ let state = {
   urlSavedMsg:'',
   csvMonth: currentMonthValue(),
   employeeMasterText:'', employeeMasterMsg:null,
+  masterEditMode:'table', masterRows:null, masterSearch:'', masterOnlyChanged:false, masterScrollTop:0, masterHistOverride:{},
   masterPending:null,      // 貼り付け内容を保存する前の確認用
   specialDaysMsg:null,
   closedDaysMsg:null,
@@ -1784,11 +1847,55 @@ function canPickDate(dateStr){
 }
 
 // 停止期間：停止開始日 〜 再開日の前日 まで（再開日は「食べ始める日」）
+// 過去の停止期間（emp.pauseHistory）も見る。停止と再開を何度くり返しても、
+// 過ぎた月の明細・自分の記録の金額が変わらないようにするため。
+function inPausePeriod(dateStr, start, end){
+  return !!start && dateStr >= start && (!end || dateStr < end);
+}
 function isPausedOn(emp, dateStr){
-  if(!emp || !emp.pauseStart) return false;
-  if(dateStr < emp.pauseStart) return false;
-  if(emp.pauseEnd && dateStr >= emp.pauseEnd) return false;
-  return true;
+  if(!emp) return false;
+  if(inPausePeriod(dateStr, emp.pauseStart, emp.pauseEnd)) return true;
+  return (emp.pauseHistory || []).some(p=> p && inPausePeriod(dateStr, p.start, p.end));
+}
+function prevDayISO(d){
+  const dt = parseISO(d); dt.setDate(dt.getDate()-1);
+  return iso(dt.getFullYear(), dt.getMonth(), dt.getDate());
+}
+// 過去の停止期間の表示（end は再開日なので、表示はその前日まで）
+function pauseHistText(p){
+  const md = d => { const [y,m,dd] = d.split('-').map(Number); return `${y}/${m}/${dd}`; };
+  if(!p.end) return `${md(p.start)}〜`;
+  const e = prevDayISO(p.end);
+  // 同じ年なら終わりの年は省く（例：2026/9/8〜9/15）
+  return `${md(p.start)}〜${e.slice(0,4)===p.start.slice(0,4) ? md(e).replace(/^\d+\//,'') : md(e)}`;
+}
+// その月にかかっている停止期間（過去の分＋今の分）
+function pausePeriodsInMonth(emp, y, m0){
+  if(!emp) return [];
+  const first = iso(y, m0, 1), last = iso(y, m0, new Date(y, m0+1, 0).getDate());
+  const list = (emp.pauseHistory || []).slice();
+  if(emp.pauseStart) list.push({start:emp.pauseStart, end:emp.pauseEnd||'', current:true});
+  return list.filter(p=> p.start <= last && (!p.end || p.end > first))
+             .sort((a,b)=> a.start.localeCompare(b.start));
+}
+// 名簿を保存するとき、書き換えられた停止期間のうち過ぎた日の分を「過去の停止」として残す。
+// override：表で「過去の停止」を手で消した人の分（社員番号 → 残す一覧）
+function applyPauseHistory(oldList, newList, renamed, override){
+  const today = todayISO();
+  const oldMap = new Map(oldList.map(e=>[String(e.id), e]));
+  const fromOf = new Map((renamed||[]).map(r=>[String(r.to), String(r.from)]));
+  newList.forEach(n=>{
+    const id = String(n.id);
+    const o = oldMap.get(id) || oldMap.get(fromOf.get(id));
+    const ov = override && Object.prototype.hasOwnProperty.call(override, id) ? override[id] : null;
+    const hist = (ov || (o && o.pauseHistory) || []).map(p=>({start:p.start, end:p.end}));
+    if(o && o.pauseStart && o.pauseStart < today && o.pauseStart !== (n.pauseStart||'')){
+      const end = (!o.pauseEnd || o.pauseEnd > today) ? today : o.pauseEnd;
+      if(end > o.pauseStart && !hist.some(h=>h.start===o.pauseStart && h.end===end)) hist.push({start:o.pauseStart, end});
+    }
+    hist.sort((a,b)=> a.start.localeCompare(b.start));
+    if(hist.length) n.pauseHistory = hist; else delete n.pauseHistory;
+  });
 }
 function pauseLabel(emp, lang){
   if(!emp || !emp.pauseStart) return '';
@@ -2628,9 +2735,13 @@ function renderMineSection(vp){
   const t = T[state.lang];
   vp.innerHTML = `
     <div class="card mine-card">
-      <div class="mine-toggle" id="mine-toggle-header">
-        <h2 style="margin:0">${t.mineTitle}</h2>
-        <span class="chev">${state.mineOpen ? '▾' : '▸'}</span>
+      <div class="mine-toggle" id="mine-toggle-header" role="button" tabindex="0" aria-expanded="${state.mineOpen?'true':'false'}">
+        <span class="mine-ico" aria-hidden="true">📋</span>
+        <div class="mine-head-txt">
+          <h2 style="margin:0">${t.mineTitle}</h2>
+          <p>${t.mineSub}</p>
+        </div>
+        <span class="mine-open">${state.mineOpen ? t.mineClose : t.mineOpenBtn}</span>
       </div>
       <div id="mine-body" style="${state.mineOpen?'':'display:none'}">
         <p class="small" style="margin-top:10px">${t.mineDesc}</p>
@@ -2649,6 +2760,9 @@ function renderMineSection(vp){
       </div>
     </div>
   `;
+  vp.querySelector('#mine-toggle-header').onkeydown = e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.currentTarget.click(); }
+  };
   vp.querySelector('#mine-toggle-header').onclick = ()=>{
     state.mineOpen = !state.mineOpen;
     if(state.mineOpen && !state.mineId && state.empId) state.mineId = state.empId;
@@ -2929,7 +3043,13 @@ function paintMineResult(){
   box.innerHTML = `
     <div class="card">
       <h2 style="margin-bottom:6px;"><span class="small">No.${escapeHtml(state.mineId.trim())}</span> ${escapeHtml(displayName)}
-        ${master && master.pauseStart ? `<span class="pausechip">${pauseLabel(master, state.lang)}</span>` : ''}
+        ${(()=>{
+          const [my, mm] = String(state.mineMonth || currentMonthValue()).split('-').map(Number);
+          return pausePeriodsInMonth(master, my, mm-1).map(p=>{
+            const endTxt = p.end ? prevDayISO(p.end) : (state.lang==='en' ? 'ongoing' : '未定');
+            return `<span class="pausechip">${state.lang==='en' ? 'Paused ' : '停止 '}${p.start}〜${endTxt}</span>`;
+          }).join('');
+        })()}
         ${master && empWeekdays(master) ? `<span class="wdchip">${t.useWeekdayChip.replace('{wd}', weekdaysText(master, state.lang))}</span>` : ''}
       </h2>
 
@@ -3126,9 +3246,135 @@ function masterToText(list){
       return cols.join(',');
     }).join('\n');
 }
+/* ---------- 従業員マスタの表入力 ----------
+   表の各行は state.masterRows に持ち、保存前の確認ではテキストに直して
+   これまでと同じ parseMasterText / diffMaster を通す（読み取り・保存の処理は共通）。 */
+let mtKeySeq = 0;
+function mtNewRow(){
+  return {key:'r'+(++mtKeySeq), id:'', name:'', type:'利用あり', ps:'', pe:'', hire:'', wd:null, del:false};
+}
+function textToRows(text){
+  const rows = [];
+  String(text||'').split('\n').forEach(line=>{
+    if(!line.trim()) return;
+    const p = line.split(line.includes('\t') ? '\t' : ',').map(x=>x.trim());
+    const r = mtNewRow();
+    r.id = p[0]||''; r.name = p[1]||'';
+    const ty = p[2]||'';
+    r.type = /利用あり|^あり$|セット|おかず|^set$|^okazu$/i.test(ty) ? '利用あり' : (/利用なし|^none$/i.test(ty) ? '利用なし' : '');
+    r.ps = normDate(p[3]||'') || ''; r.pe = normDate(p[4]||'') || ''; r.hire = normDate(p[5]||'') || '';
+    const w = parseWeekdaySpec(p[6]||'');
+    r.wd = w.weekdays || null;
+    rows.push(r);
+  });
+  return rows;
+}
+// 表 → テキスト。lineRows[n] は n+1 行目がどの行か（エラー表示で行を特定するため）
+function rowsToText(rows){
+  const lines = [], lineRows = [];
+  rows.forEach(r=>{
+    if(r.del) return;
+    if(!String(r.id).trim() && !String(r.name).trim() && !r.ps && !r.pe && !r.hire) return;   // まったく空の行は無視
+    const wdText = r.wd ? r.wd.map(i=>WD_CHARS[i]).join('') : '';
+    const cols = [String(r.id).trim(), String(r.name).trim().replace(/[,\t]/g,' '), r.type, r.ps, r.pe, r.hire, wdText];
+    while(cols.length > 3 && !cols[cols.length-1]) cols.pop();
+    lines.push(cols.join(','));
+    lineRows.push(r);
+  });
+  return {text: lines.join('\n'), lineRows};
+}
+function mtTypeKey(v){ return v==='利用あり' ? 'set' : (v==='利用なし' ? 'none' : ''); }
+function mtSavedTypeKey(v){ return (v==='set'||v==='okazu') ? 'set' : (v==='none' ? 'none' : ''); }
+// 保存済みの名簿と比べた状態：new / changed / same / del
+function mtRowStatus(r, masterById){
+  if(r.del) return 'del';
+  const o = masterById.get(String(r.id).trim());
+  if(!o) return (String(r.id).trim() || String(r.name).trim()) ? 'new' : 'same';
+  const ow = empWeekdays(o), nw = (r.wd && r.wd.length && r.wd.length < 5) ? r.wd : null;
+  const same = String(o.name||'')===String(r.name).trim()
+    && mtSavedTypeKey(o.mealType)===mtTypeKey(r.type)
+    && (o.pauseStart||'')===r.ps && (o.pauseEnd||'')===r.pe && (o.hireDate||'')===r.hire
+    && String(ow||'')===String(nw||'')
+    && JSON.stringify(mtHist(r, masterById))===JSON.stringify(o.pauseHistory||[]);
+  return same ? 'same' : 'changed';
+}
+// その行の「過去の停止」（表で消した分があればそちらを使う）
+function mtHist(r, masterById){
+  const id = String(r.id).trim();
+  const ov = state.masterHistOverride || {};
+  if(Object.prototype.hasOwnProperty.call(ov, id)) return ov[id];
+  const o = masterById.get(id);
+  return (o && o.pauseHistory) || [];
+}
+function mtRowHtml(r, masterById){
+  const st = mtRowStatus(r, masterById);
+  const k = r.key;
+  const dateCell = (field, val, extraBad) => `<td class="${extraBad?'bad':''}"><input type="date" data-k="${k}" data-f="${field}" value="${escapeHtml(val)}" class="${val?'':'empty-date'}"${extraBad?` title="${escapeHtml(extraBad)}"`:''}></td>`;
+  const resumeOnly = (r.pe && !r.ps) ? '再開日だけでは反映されません。食べはじめる日は「ランチ開始日」へ' : '';
+  const rangeBad = (r.ps && r.pe && r.pe < r.ps) ? '再開日が停止開始日より前です' : '';
+  const wd = [1,2,3,4,5].map(i=>{
+    const on = !r.wd || r.wd.includes(i);
+    return `<button type="button" class="${on?'':'off'}" data-k="${k}" data-wd="${i}" title="${WD_CHARS[i]}曜に${on?'食べる（押すと食べない）':'食べない（押すと食べる）'}">${WD_CHARS[i]}</button>`;
+  }).join('');
+  return `<tr class="st-${st}" data-k="${k}">
+    <td class="c-id"><input type="text" data-k="${k}" data-f="id" value="${escapeHtml(r.id)}" inputmode="numeric" placeholder="番号"></td>
+    <td class="c-name"><input type="text" data-k="${k}" data-f="name" value="${escapeHtml(r.name)}" placeholder="氏名"></td>
+    <td><select data-k="${k}" data-f="type">
+      <option value="利用あり"${r.type==='利用あり'?' selected':''}>利用あり</option>
+      <option value="利用なし"${r.type==='利用なし'?' selected':''}>利用なし</option>
+      ${r.type===''?'<option value="" selected>未設定</option>':''}
+    </select></td>
+    ${dateCell('hire', r.hire, '')}
+    ${dateCell('ps', r.ps, '')}
+    ${dateCell('pe', r.pe, resumeOnly || rangeBad)}
+    <td><div class="wd">${wd}</div></td>
+    <td class="c-hist">${mtHist(r, masterById).map((p,i)=>`<span class="histchip">${pauseHistText(p)}<button type="button" data-k="${k}" data-hdel="${i}" title="この過去の停止を消す（まちがって残った場合だけ）">×</button></span>`).join('') || '<span class="histnone">—</span>'}</td>
+    <td><button type="button" class="rowbtn" data-k="${k}" data-act="${r.del?'undo':'del'}">${r.del?'戻す':'削除'}</button></td>
+  </tr>`;
+}
+function mtRowMatches(r, q){
+  if(!q) return true;
+  const n = normName(q);
+  return String(r.id).includes(q.trim()) || normName(r.name).includes(n);
+}
+function mtTableHtml(rows, masterById){
+  const q = state.masterSearch || '';
+  const onlyChanged = !!state.masterOnlyChanged;
+  const visible = rows.filter(r=> mtRowMatches(r, q) && (!onlyChanged || mtRowStatus(r, masterById) !== 'same'));
+  return `<table class="mt">
+    <thead><tr>
+      <th class="c-id">社員番号</th>
+      <th class="c-name">氏名</th>
+      <th>ランチ</th>
+      <th>ランチ開始日<small>入社日・はじめて食べる日</small></th>
+      <th>停止開始日<small>最初に食べない日</small></th>
+      <th>再開日<small>また食べはじめる日</small></th>
+      <th>食べる曜日<small>押して切り替え</small></th>
+      <th>過去の停止<small>保存時に自動で残ります</small></th>
+      <th></th>
+    </tr></thead>
+    <tbody id="mt-body">${visible.map(r=>mtRowHtml(r, masterById)).join('')}</tbody>
+  </table>${visible.length ? '' : `<div class="mt-empty">${q||onlyChanged ? '該当する行はありません。' : 'まだ誰も登録されていません。「＋ 新規登録」から入れてください。'}</div>`}`;
+}
+function mtCountText(rows, masterById){
+  let n=0, add=0, chg=0, del=0;
+  rows.forEach(r=>{
+    const st = mtRowStatus(r, masterById);
+    if(st==='del'){ del++; return; }
+    if(!String(r.id).trim() && !String(r.name).trim()) return;
+    n++;
+    if(st==='new') add++; else if(st==='changed') chg++;
+  });
+  const parts = [];
+  if(add) parts.push(`追加 ${add}`);
+  if(chg) parts.push(`変更 ${chg}`);
+  if(del) parts.push(`削除 ${del}`);
+  return `${n}人` + (parts.length ? `（未保存：${parts.join('、')}）` : '');
+}
 function masterEntryDesc(e){
-  const h = e.hireDate ? `／入社日 ${e.hireDate}` : '';
-  const p = e.pauseStart ? `／停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}` : '';
+  const h = e.hireDate ? `／ランチ開始日 ${e.hireDate}` : '';
+  const p = (e.pauseStart ? `／停止 ${e.pauseStart}〜${e.pauseEnd||'未定'}` : '')
+          + ((e.pauseHistory||[]).length ? `／過去の停止 ${e.pauseHistory.map(pauseHistText).join('・')}` : '');
   const w = empWeekdays(e) ? `／利用曜日 ${weekdaysText(e,'ja')}` : '';
   return `${e.id} ${e.name}（${mealTypeJa(e.mealType)}${w}${h}${p}）`;
 }
@@ -3145,10 +3391,12 @@ function diffMaster(oldList, newList){
     const oW = weekdaysDescJa(o), nW = weekdaysDescJa(n);
     if(oW !== nW) parts.push(`利用曜日 ${oW} → ${nW}`);
     const oH = o.hireDate || 'なし', nH = n.hireDate || 'なし';
-    if(oH !== nH) parts.push(`入社日 ${oH} → ${nH}`);
+    if(oH !== nH) parts.push(`ランチ開始日 ${oH} → ${nH}`);
     const oP = o.pauseStart ? `${o.pauseStart}〜${o.pauseEnd||'未定'}` : 'なし';
     const nP = n.pauseStart ? `${n.pauseStart}〜${n.pauseEnd||'未定'}` : 'なし';
     if(oP !== nP) parts.push(`停止期間 ${oP} → ${nP}`);
+    const hs = e => (e.pauseHistory||[]).map(pauseHistText).join('・') || 'なし';
+    if(hs(o) !== hs(n)) parts.push(`過去の停止 ${hs(o)} → ${hs(n)}`);
     if(parts.length) changed.push({id, name:n.name, parts});
   });
   oldMap.forEach((o, id)=>{ if(!newMap.has(id)) removed.push(o); });
@@ -3219,12 +3467,9 @@ function renderClosedBulkPreview(pv){
 /* 貼り付け欄の書き方ガイド。入社・停止・退職・氏名など、迷いやすいところをまとめてある。 */
 function masterHelpHtml(){
   return `
-    <p class="footnote" style="margin-top:0;">1行が1人です。列の順番は
-      <code style="background:#F2EDE0;border-radius:4px;padding:1px 5px;">社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日,利用曜日</code>。
-      はじめの3つは必ず入れ、うしろの4つは必要な人だけ入れます（空欄でかまいません）。</p>
-
     <details class="helpbox">
       <summary>書き方とよくある操作（入社・停止・退職・氏名）</summary>
+      <p style="margin-top:8px;">下の例はテキストの書き方で載せています。表で編集するときは、同じ名前の列に入れてください（「入社日」＝表の「ランチ開始日」）。</p>
 
       <h4>基本の書き方</h4>
       <ul>
@@ -3236,7 +3481,8 @@ function masterHelpHtml(){
       </ul>
 
       <h4>新しく食べはじめる人（入社・利用開始）</h4>
-      <p>行を1行追加します。<b>入社日＝はじめて食べる日</b>です。その日より前は、金額計算にも「本日の状況」の人数にも入りません。</p>
+      <p>行を1行追加します。<b>入社日（表では「ランチ開始日」）＝はじめて食べる日</b>です。その日より前は、金額計算にも「本日の状況」の人数にも入りません。</p>
+      <p><b>前から在籍していて、途中からランチを始める人</b>も同じく、この列に「はじめて食べる日」を入れます（「再開日」ではありません）。</p>
       <p>例）9月15日入社でランチを利用する　→　<code>612,山田 太郎,利用あり,,,2026-09-15</code></p>
       <p>もとから在籍している人（中途入社でない人）は、入社日は空欄のままでよいです。</p>
 
@@ -3248,7 +3494,8 @@ function masterHelpHtml(){
       <h4>また食べはじめる人（復職）</h4>
       <p><b>再開日＝また食べはじめる日</b>です（その日から計上されます）。停止開始日は消さずに残してください。過ぎた月の金額を正しく出すために使っています。</p>
       <p>例）11月4日から復帰　→　<code>612,山田 太郎,利用あり,2026-09-20,2026-11-04,2026-09-15</code></p>
-      <p>停止期間は1人につき1組だけ持てます。次の停止を入れるときは前の期間を上書きすることになり、過ぎた月の見込み額の表示も変わります（すでに出力したCSVは変わりません）。</p>
+      <p><b>停止と再開は何度くり返しても大丈夫です。</b>次に停止するときは、停止開始日・再開日を新しい日付に書き換えてください。前の停止期間のうち過ぎた日の分は、保存したときに自動で「過去の停止」として残ります。過ぎた月の明細・CSV・自分の記録の金額は変わりません。</p>
+      <p>残った「過去の停止」は表の右の列で確認できます。まちがって残ったもの（日付の打ちまちがいを直したときなど）だけ、×で消してください。</p>
 
       <h4>決まった曜日だけ食べる人（毎週の設定）</h4>
       <p>7列目の<b>利用曜日</b>に、<b>食べる曜日</b>を書きます。書かなければ、これまでどおり月〜金すべて食べる扱いです。</p>
@@ -3297,16 +3544,41 @@ function masterHelpHtml(){
   `;
 }
 
-/* 従業員マスタ：登録・変更・削除はすべてこの貼り付け欄から行う */
+/* 従業員マスタ：登録・変更・削除はこの欄（表／テキスト）から行う */
 function masterCardBody(master, t){
+  const mode = state.masterEditMode || 'table';
+  const masterById = new Map(master.map(e=>[String(e.id), e]));
+  if(mode==='table' && !state.masterRows) state.masterRows = textToRows(state.employeeMasterText);
+  const editor = mode==='table' ? `
+      <div class="mt-tools">
+        <input type="search" id="mt-search" placeholder="社員番号・氏名で絞り込み" value="${escapeHtml(state.masterSearch||'')}">
+        <label><input type="checkbox" id="mt-only-changed"${state.masterOnlyChanged?' checked':''}> 未保存の行だけ</label>
+        <button class="btn btn-ghost" id="mt-add" type="button" style="padding:7px 12px;">＋ 新規登録</button>
+        <span class="mt-count" id="mt-count">${mtCountText(state.masterRows, masterById)}</span>
+      </div>
+      <div class="mt-wrap" id="mt-wrap">${mtTableHtml(state.masterRows, masterById)}</div>
+      <div class="mt-legend">
+        <span><i style="background:var(--good)"></i>追加</span>
+        <span><i style="background:var(--accent-mid)"></i>変更</span>
+        <span><i style="background:var(--danger)"></i>削除（保存すると消えます）</span>
+        <span>表の中は上下・左右にスクロールできます</span>
+      </div>`
+    : `
+      <p class="footnote" style="margin-top:0;">1行が1人です。列の順番は
+        <code style="background:#F2EDE0;border-radius:4px;padding:1px 5px;">社員番号,氏名,お食事タイプ,停止開始日,再開日,入社日,利用曜日</code>。
+        Excelからコピーした表（タブ区切り）をそのまま貼り付けても読み取ります。</p>
+      <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:220px;">${escapeHtml(state.employeeMasterText)}</textarea>`;
   return `
     <p class="small">${t.employeeMasterCount.replace('{n}', master.length)}</p>
 
     <div class="subsec">
-      <p class="sublabel">${t.masterBulkTitle}</p>
-      <p class="footnote" style="margin-top:0;">${t.masterBulkOnlyNote}</p>
+      <div class="mt-modes" role="tablist">
+        <button type="button" id="mt-mode-table" class="${mode==='table'?'on':''}">表で編集</button>
+        <button type="button" id="mt-mode-text" class="${mode==='text'?'on':''}">テキストで貼り付け</button>
+      </div>
+      <p class="footnote" style="margin-top:0;">ここで書き換えた内容は、「内容を確認する」→「この内容で保存する」を押すまで保存されません。確認画面で追加・変更・削除の一覧を見てから保存できます。</p>
+      ${editor}
       ${masterHelpHtml()}
-      <textarea class="csvbox" id="adm-master-text" placeholder="${t.employeeMasterPh}" style="display:block;min-height:220px;">${escapeHtml(state.employeeMasterText)}</textarea>
       <div class="btnrow">
         <button class="btn btn-primary" id="adm-master-check">${t.employeeMasterCheck}</button>
         <button class="btn btn-ghost" id="adm-master-reset">${t.masterReloadText}</button>
@@ -4572,7 +4844,116 @@ async function renderAdmin(vp){
       };
     });
 
-    /* --- 従業員マスタ：貼り付けによる書き換え（登録・変更・削除はここだけ） --- */
+    /* --- 従業員マスタ：表／テキストによる書き換え（登録・変更・削除はここだけ） --- */
+    const masterById2 = new Map(master.map(e=>[String(e.id), e]));
+    const mtSyncText = ()=>{
+      state.employeeMasterText = rowsToText(state.masterRows).text;
+      if(state.masterPending){
+        state.masterPending = null;
+        const box = vp.querySelector('.diffbox'); if(box) box.remove();
+      }
+      const c = vp.querySelector('#mt-count'); if(c) c.textContent = mtCountText(state.masterRows, masterById2);
+    };
+    const mtFind = k => (state.masterRows||[]).find(r=>r.key===k);
+    const mtRedrawRow = (k)=>{
+      const tr = vp.querySelector(`#mt-body tr[data-k="${k}"]`);
+      const r = mtFind(k);
+      if(!tr || !r) return;
+      const tmp = document.createElement('tbody');
+      tmp.innerHTML = mtRowHtml(r, masterById2);
+      tr.replaceWith(tmp.firstElementChild);
+    };
+    const mtMarkRow = (r)=>{
+      const tr = vp.querySelector(`#mt-body tr[data-k="${r.key}"]`); if(!tr) return;
+      tr.className = 'st-' + mtRowStatus(r, masterById2);
+      const pe = tr.querySelector('input[data-f="pe"]'); if(!pe) return;
+      const msg = (r.pe && !r.ps) ? '再開日だけでは反映されません。食べはじめる日は「ランチ開始日」へ'
+                : (r.ps && r.pe && r.pe < r.ps) ? '再開日が停止開始日より前です' : '';
+      pe.parentElement.classList.toggle('bad', !!msg);
+      if(msg) pe.title = msg; else pe.removeAttribute('title');
+    };
+    const mtRedrawTable = ()=>{
+      const wrap = vp.querySelector('#mt-wrap'); if(!wrap) return;
+      const top = wrap.scrollTop;
+      wrap.innerHTML = mtTableHtml(state.masterRows, masterById2);
+      wrap.scrollTop = top;
+    };
+    const mtWrap = vp.querySelector('#mt-wrap');
+    if(mtWrap){
+      // 前回のスクロール位置に戻す（確認ボタンなどで画面を描き直したとき）
+      if(state.masterScrollTop) mtWrap.scrollTop = state.masterScrollTop;
+      mtWrap.addEventListener('scroll', ()=>{ state.masterScrollTop = mtWrap.scrollTop; });
+      const onField = (e, finalize)=>{
+        const el = e.target; const f = el.dataset && el.dataset.f; if(!f) return;
+        const r = mtFind(el.dataset.k); if(!r) return;
+        r[f] = el.value;
+        mtSyncText();
+        // 色分け（追加・変更）や日付の警告はその場で付け替える（行を作り直すとTabで移った先のフォーカスが外れるため）
+        if(el.type==='date') el.classList.toggle('empty-date', !el.value);
+        if(finalize) mtMarkRow(r);
+      };
+      mtWrap.addEventListener('input', e=>onField(e, false));
+      mtWrap.addEventListener('change', e=>onField(e, true));
+      mtWrap.addEventListener('click', e=>{
+        const b = e.target.closest('button'); if(!b) return;
+        const r = mtFind(b.dataset.k); if(!r) return;
+        if(b.dataset.hdel !== undefined){
+          const cur = mtHist(r, masterById2).slice();
+          const p = cur[Number(b.dataset.hdel)];
+          if(!p || !confirm(`過去の停止「${pauseHistText(p)}」を消しますか？\n消すと、その期間も食べた日として計算されます（保存するまでは反映されません）。`)) return;
+          cur.splice(Number(b.dataset.hdel), 1);
+          state.masterHistOverride = Object.assign({}, state.masterHistOverride, {[String(r.id).trim()]: cur});
+        } else if(b.dataset.wd){
+          const i = Number(b.dataset.wd);
+          let cur = r.wd ? r.wd.slice() : [1,2,3,4,5];
+          cur = cur.includes(i) ? cur.filter(x=>x!==i) : cur.concat(i).sort((a,b)=>a-b);
+          if(!cur.length){ alert('食べる曜日を1つも選ばない場合は、「ランチ」を「利用なし」にしてください。'); return; }
+          r.wd = cur.length >= 5 ? null : cur;
+        } else if(b.dataset.act==='del'){
+          // まだ保存していない新しい行は、その場で消す
+          if(!masterById2.has(String(r.id).trim())) state.masterRows = state.masterRows.filter(x=>x!==r);
+          else r.del = true;
+        } else if(b.dataset.act==='undo'){
+          r.del = false;
+        }
+        mtSyncText();
+        if(state.masterRows.includes(r)) mtRedrawRow(r.key); else mtRedrawTable();
+      });
+    }
+    const mtSearch = vp.querySelector('#mt-search');
+    bindLiveSearch(mtSearch, v=>{ state.masterSearch = v; mtRedrawTable(); });
+    const mtOnly = vp.querySelector('#mt-only-changed');
+    if(mtOnly) mtOnly.onchange = ()=>{ state.masterOnlyChanged = mtOnly.checked; mtRedrawTable(); };
+    const mtAdd = vp.querySelector('#mt-add');
+    if(mtAdd) mtAdd.onclick = ()=>{
+      const r = mtNewRow();
+      state.masterRows.unshift(r);
+      state.masterSearch = ''; state.masterOnlyChanged = false;
+      if(mtSearch) mtSearch.value = '';
+      if(mtOnly) mtOnly.checked = false;
+      mtSyncText();
+      mtRedrawTable();
+      const w = vp.querySelector('#mt-wrap'); if(w) w.scrollTop = 0;
+      const first = vp.querySelector(`#mt-body tr[data-k="${r.key}"] input[data-f="id"]`);
+      if(first) first.focus();
+    };
+    const mtModeTable = vp.querySelector('#mt-mode-table');
+    if(mtModeTable) mtModeTable.onclick = ()=>{
+      if((state.masterEditMode||'table')==='table') return;
+      // テキストに読めない行があれば、表に切り替える前に知らせる
+      const parsed = parseMasterText(state.employeeMasterText);
+      if(parsed.error){ state.employeeMasterMsg = {text:parsed.error, ok:false}; drawAdmin(); return; }
+      state.masterRows = textToRows(state.employeeMasterText);
+      state.masterEditMode = 'table'; state.employeeMasterMsg = null;
+      drawAdmin();
+    };
+    const mtModeText = vp.querySelector('#mt-mode-text');
+    if(mtModeText) mtModeText.onclick = ()=>{
+      if(state.masterEditMode==='text') return;
+      if(state.masterRows) state.employeeMasterText = rowsToText(state.masterRows).text;
+      state.masterEditMode = 'text'; state.masterRows = null; state.employeeMasterMsg = null;
+      drawAdmin();
+    };
     const masterTextBox = vp.querySelector('#adm-master-text');
     if(masterTextBox) masterTextBox.oninput = e=>{
       state.employeeMasterText = e.target.value;
@@ -4581,18 +4962,33 @@ async function renderAdmin(vp){
     const masterResetBtn = vp.querySelector('#adm-master-reset');
     if(masterResetBtn) masterResetBtn.onclick = ()=>{
       state.employeeMasterText = masterToText(master);
+      state.masterRows = null; state.masterScrollTop = 0; state.masterHistOverride = {};
       state.masterPending = null; state.employeeMasterMsg = null;
       drawAdmin();
     };
     const masterCheckBtn = vp.querySelector('#adm-master-check');
     if(masterCheckBtn) masterCheckBtn.onclick = ()=>{
+      let lineRows = null;
+      if((state.masterEditMode||'table')==='table' && state.masterRows){
+        const conv = rowsToText(state.masterRows);
+        state.employeeMasterText = conv.text; lineRows = conv.lineRows;
+      }
       const parsed = parseMasterText(state.employeeMasterText);
       if(parsed.error){
         state.masterPending = null;
-        state.employeeMasterMsg = {text:parsed.error, ok:false};
+        let msg = parsed.error;
+        // 表で編集しているときは「◯行目」ではなく、どの人の行かで知らせる
+        if(lineRows) msg = msg.replace(/(\d+)行目/, (m0, n)=>{
+          const r = lineRows[Number(n)-1];
+          return r ? `「${r.id||'番号なし'} ${r.name||'氏名なし'}」の行` : m0;
+        });
+        state.employeeMasterMsg = {text:msg, ok:false};
         drawAdmin(); return;
       }
       state.employeeMasterMsg = null;
+      // 停止期間を書き換えた人は、過ぎた日の分を「過去の停止」として残す（過ぎた月の金額が変わらないように）
+      const firstDiff = diffMaster(master, parsed.list);
+      applyPauseHistory(master, parsed.list, firstDiff.renamed, state.masterHistOverride);
       state.masterPending = { list: parsed.list, diff: diffMaster(master, parsed.list) };
       drawAdmin();
     };
@@ -4607,6 +5003,7 @@ async function renderAdmin(vp){
       await setEmployeeMaster(pending.list);
       state.masterPending = null;
       state.employeeMasterText = masterToText(pending.list);
+      state.masterRows = null; state.masterHistOverride = {};
       state.employeeMasterMsg = {text:t.employeeMasterSaved.replace('{n}', pending.list.length), ok:true};
       await reload();
       setTimeout(()=>{ state.employeeMasterMsg=null; drawAdmin(); },4000);
@@ -4638,7 +5035,8 @@ function parseMasterText(text){
     const line = lines[i].trim();
     if(!line) continue;
     const lineNo = i+1;
-    const parts = line.split(',').map(p=>p.trim());
+    // Excelからコピーした行（タブ区切り）もそのまま読めるようにする
+    const parts = line.split(line.includes('\t') ? '\t' : ',').map(p=>p.trim());
     if(parts.length < 2 || !parts[0] || !parts[1]){
       return {error: t.employeeMasterInvalid.replace('{line}', lineNo)};
     }
@@ -4662,6 +5060,10 @@ function parseMasterText(text){
     const wd = parseWeekdaySpec(parts[6]||'');
     if(wd.error === 'bad') return {error: t.employeeMasterBadWeekday.replace('{line}', lineNo)};
     if(wd.error === 'empty') return {error: t.employeeMasterEmptyWeekday.replace('{line}', lineNo)};
+    // 再開日だけでは停止期間にならず、何も起きない。「食べはじめる日」のつもりで入れる間違いが多いので止める
+    if(pauseEnd && !pauseStart){
+      return {error: t.employeeMasterResumeOnly.replace('{line}', lineNo)};
+    }
     if(pauseStart && pauseEnd && pauseEnd < pauseStart){
       return {error: t.employeeMasterBadRange.replace('{line}', lineNo)};
     }
@@ -4755,7 +5157,7 @@ async function exportMonthlyCsv(records, master, specialList, closedList, yyyyMm
   const monthStartISO = `${y}-${pad(m0+1)}-01`;
   const baseList = master.length
     ? master.filter(e=> !e.retiredDate || e.retiredDate > monthStartISO)
-        .map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd, hireDate:e.hireDate, weekdays:e.weekdays, retiredDate:e.retiredDate}))
+        .map(e=>({id:e.id, name:e.name, mealType:e.mealType, pauseStart:e.pauseStart, pauseEnd:e.pauseEnd, pauseHistory:e.pauseHistory, hireDate:e.hireDate, weekdays:e.weekdays, retiredDate:e.retiredDate}))
     : Object.keys(cancelledByEmp).map(id=>({id, name:cancelledByEmp[id].name, mealType:undefined}));
 
   const perEmployee = {}; // id -> {name, amount}
@@ -5112,3 +5514,4 @@ function escapeHtml(s){
 </script>
 </body>
 </html>
+
